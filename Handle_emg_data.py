@@ -9,7 +9,7 @@ class CSV_handler:
         self.working_dir = str(Path.cwd())
 
     # Makes dataframe from the csv files in the working directory
-    def make_df(self, filename)
+    def make_df(self, filename):
         filepath = self.working_dir + str(filename)
         df = pd.read_csv(filepath)
         return df
