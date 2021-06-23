@@ -1,4 +1,4 @@
-from Handle_emg_data.py import CSV_handler
+from Handle_emg_data import CSV_handler
 
 def test_df_extraction():
     handler = CSV_handler()
