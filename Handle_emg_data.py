@@ -40,9 +40,10 @@ class CSV_handler:
     def get_emg_str(emg_nr):
         return 'emg' + str(emg_nr)
 
-    def get_min_max_timestamp():
-
-
+    def get_min_max_timestamp(df:DataFrame):
+        min = df['timestamp'].argmin
+        max = df['timestamp'].argmax
+        return min, max
 
 
 
