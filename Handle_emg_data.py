@@ -14,14 +14,15 @@ class CSV_handler:
 
     # Extracts out the timestamp and the selected emg signal into a new dataframe 
     def get_time_emg_table(self, filename, emg_nr):
-
         tot_data_frame = self.make_df(filename)
-        emg_str = self.get_emg_str(emg_nr)
+        emg_str = 'emg' + str(emg_nr)
         filtered_df = tot_data_frame[["timestamp", emg_str]]
         return filtered_df
     
     def get_emg_str(emg_nr):
         return 'emg' + str(emg_nr)
+
+    
 
 
 
