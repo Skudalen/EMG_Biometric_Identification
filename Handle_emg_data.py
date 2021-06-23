@@ -23,19 +23,20 @@ class CSV_handler:
         return df
 
     # Extracts out the timestamp and the selected emg signal into a new dataframe and stores the data on the subject
-    def get_time_emg_table(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container):
+    def get_time_emg_table(self, filename:str, emg_nr:int):
         tot_data_frame = self.make_df(filename)
         emg_str = 'emg' + str(emg_nr)
         filtered_df = tot_data_frame[["timestamp", emg_str]]
-
+        return filtered_df
+    
+    def store_df(self, filename:str, emg_nr:int, which_arm:str, df:DataFrame, data_container:Data_container):
+        df = self.get_min_max_timestamp(filename, emg_nr)
         # Links the retrieved data with the subjects data_container
         subject_nr = data_container.subject_nr
         self.data_container_dict[subject_nr] = data_container
         # Places the data correctly:
         if which_arm is 'left':
-            data_container.data_dict['left'][emg_nr+1] = filtered_df
-
-        return filtered_df
+            data_container.data_dict['left'][emg_nr+1] = df
     
     def get_emg_str(emg_nr):
         return 'emg' + str(emg_nr)
