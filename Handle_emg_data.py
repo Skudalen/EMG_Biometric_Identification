@@ -16,18 +16,13 @@ class CSV_handler:
     def get_time_emg_table(self, filename, emg_nr):
 
         tot_data_frame = self.make_df(filename)
-        emg_str = "emg" + str(emg_nr)
+        emg_str = self.get_emg_str(emg_nr)
         filtered_df = tot_data_frame[["timestamp", emg_str]]
         return filtered_df
-
     
-handler = CSV_handler()
+    def get_emg_str(emg_nr):
+        return 'emg' + str(emg_nr)
 
-file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
-subject1_left_emg1 = handler.get_time_emg_table(file, 1)
-print(subject1_left_emg1.head)
-#df = handler.make_df(file)
-#print(df.head)
 
 
 
