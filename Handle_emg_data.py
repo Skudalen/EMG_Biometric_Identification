@@ -8,7 +8,7 @@ class Data_container:
     def __init__(self, subject_nr:int, subject_name:str):
         self.subject_nr = subject_nr
         self.subject_name = subject_name
-        self.data_dict = {'left': [], 'right': []}
+        self.data_dict = {'left': [None]*8, 'right': [None]*8}
     
 class CSV_handler:
 
@@ -28,8 +28,12 @@ class CSV_handler:
         emg_str = 'emg' + str(emg_nr)
         filtered_df = tot_data_frame[["timestamp", emg_str]]
 
+        # Links the retrieved data with the subjects data_container
         subject_nr = data_container.subject_nr
         self.data_container_dict[subject_nr] = data_container
+        # Places the data correctly:
+        if which_arm is 'left':
+            data_container.data_dict['left'][emg_nr+1] = filtered_df
 
         return filtered_df
     
