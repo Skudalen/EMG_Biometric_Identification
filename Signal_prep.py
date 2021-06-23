@@ -1,8 +1,11 @@
 import numpy as np 
 import matplotlib.pyplot as plt
+from pandas.core.frame import DataFrame
+from scipy.fft import fft
 
-from Handle_emg_data import CSV_handler, Data_container
+import Handle_emg_data as Handler
 
+SAMPLE_RATE = 200
 
 def load_user_emg_data():
 
@@ -93,4 +96,31 @@ def load_user_emg_data():
 
     return csv_handler.data_container_dict
 
+def prep_df_for_trans(df:DataFrame):
+    sample_rate = SAMPLE_RATE
+    min, duration = Handler.get_min_max_timestamp(df)
+    x = np.linspace(0, duration, sample_rate * duration, endpoint=False)
+    y = np.array(df.iloc(1))
+    return x, y
 
+def normalize_wave(y_values):
+    return None
+
+
+def transformed_df(df:DataFrame):
+    x, y = prep_df_for_trans(df)
+    y_values = fft(y)
+    return new_df
+
+def plot_df(df:DataFrame):
+    lines = df.plot.line(x='timestamp')
+    plt.show()
+
+
+handler = CSV_handler
+file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
+df = handler.get_time_emg_table(file, 1)
+#plot_df(df)
+trans_df = DataFrame(transformed_df(df))
+print(trans_df.info)
+plot_df(trans_df)
