@@ -29,7 +29,7 @@ class CSV_handler:
         filtered_df = tot_data_frame[["timestamp", emg_str]]
         return filtered_df
     
-    def store_df(self, filename:str, emg_nr:int, which_arm:str, df:DataFrame, data_container:Data_container):
+    def store_df(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container):
         df = self.get_min_max_timestamp(filename, emg_nr)
         # Links the retrieved data with the subjects data_container
         subject_nr = data_container.subject_nr
