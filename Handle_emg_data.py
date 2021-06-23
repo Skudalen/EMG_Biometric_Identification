@@ -1,20 +1,20 @@
 import pandas as pd
 from pathlib import Path
 
+from pandas.core.frame import DataFrame
+
 class Data_container:
       
-    def __init__(self):
-        self.subject_nr
-        self.subject_name
-        self.data_dict
+    def __init__(self, subject_nr:int, subject_name:str):
+        self.subject_nr = subject_nr
+        self.subject_name = subject_name
+        self.data_dict = {'left': [], 'right': []}
     
-    
-
 class CSV_handler:
 
     def __init__(self):
-        self.working_dir = str(Path.cwd())
-        self.data_container_dict = {i: []}
+        self.working_dir = str(Path.cwd()) 
+        self.data_container_dict = {} # Dict with keys equal subject numbers and values equal the relvant datacontainer 
 
     # Makes dataframe from the csv files in the working directory
     def make_df(self, filename):
@@ -22,13 +22,14 @@ class CSV_handler:
         df = pd.read_csv(filepath)
         return df
 
-    # Extracts out the timestamp and the selected emg signal into a new dataframe 
-    def get_time_emg_table(self, filename: str, subject_nr: int, which_arm: str, emg_nr: int):
+    # Extracts out the timestamp and the selected emg signal into a new dataframe and stores the data on the subject
+    def get_time_emg_table(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container):
         tot_data_frame = self.make_df(filename)
         emg_str = 'emg' + str(emg_nr)
         filtered_df = tot_data_frame[["timestamp", emg_str]]
 
-        #self.data_dict[subject_nr] = [which_arm, emg1]
+        subject_nr = data_container.subject_nr
+        self.data_container_dict[subject_nr] = data_container
 
         return filtered_df
     
