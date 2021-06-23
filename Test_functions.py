@@ -1,5 +1,6 @@
 from Handle_emg_data import CSV_handler
 import matplotlib.pyplot as plt
+import Signal_prep
 
 def test_df_extraction(emg_nr):
     handler = CSV_handler()
@@ -10,12 +11,6 @@ def test_df_extraction(emg_nr):
 
     return subject1_left_emg1, emg_nr
 
-
-
-# running
-handler = CSV_handler
-df, emg_nr = test_df_extraction(1)
-print(emg_nr)
-emg_str = handler.get_emg_str(emg_nr)
-lines = df.plot.line(x='timestamp', y=emg_str)
-plt.show()
+test_dict = Signal_prep.load_user_emg_data()
+subject2_container = test_dict[2]
+print(subject2_container.data_dict['left'][1])

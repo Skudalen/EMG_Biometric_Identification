@@ -85,11 +85,11 @@ def load_user_emg_data():
         # left variant proccessed here
         for round in range(4):
             for emg_nr in range(8):
-                csv_handler.store_df(left_list[subject_nr][round], emg_nr, 'left', subject_data_container_list[subject_nr])
+                csv_handler.store_df(left_list[subject_nr][round], emg_nr+1, 'left', subject_data_container_list[subject_nr])
         # right variant proccessed here
         for round in range(4):
             for emg_nr in range(8):
-                csv_handler.store_df(left_list[subject_nr][round], emg_nr, 'right', subject_data_container_list[subject_nr])
+                csv_handler.store_df(left_list[subject_nr][round], emg_nr+1, 'right', subject_data_container_list[subject_nr])
 
     return csv_handler.data_container_dict
 
