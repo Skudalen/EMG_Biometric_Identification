@@ -4,7 +4,7 @@ from pandas.core.frame import DataFrame
 from scipy.fft import fft, fftfreq
 import pywt
 from scipy.signal import wavelets
-import pyyawt
+#import pyyawt
 
 import Handle_emg_data as Handler
 
@@ -126,7 +126,6 @@ def denoise_signal_pywt(df:DataFrame):
     wavelet = pywt.Wavelet('db4')
     cA, cD = pywt.dwt(y_values, wavelet)
     x =  np.array(range(int(np.floor((y_values.size + wavelet.dec_len - 1) / 2))))
-    print(x)
     return x, cA, cD 
 
 # Filters signal accordning to Stein's Unbiased Risk Estimate(SURE)
@@ -135,7 +134,7 @@ def sure_threshold_filter(cA, cD):
     return cA_filtered, cD
 
 def soft_threshold_filter(cA, cD):
-    cA_filtered = pywt.threshold(cA, 0.9)
+    cA_filtered = pywt.threshold(cA, 0.25 * cA.max())
     return cA_filtered, cD
 
 # Plots DataFrame objects
@@ -148,12 +147,13 @@ def plot_trans(x_f, y_f):
     plt.plot(x_f, np.abs(y_f))
     plt.show()
 
+
 #'''
 handler = Handler.CSV_handler()
 file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
 df = handler.get_time_emg_table(file, 1)
-plot_df(df)
+#plot_df(df)
 x, cA, cD = denoise_signal_pywt(df)
-plot_trans(x, cA)
-cA_filtered, cD = np.ndarray(threshold_filter(cA, cD))
+#plot_trans(x, cA)
+cA_filtered, cD = soft_threshold_filter(cA, cD)
 plot_trans(x, cA_filtered)
