@@ -73,13 +73,13 @@ def load_user_emg_data():
     left_list = [subject1_left_files, subject2_left_files, subject3_left_files, subject4_left_files, subject5_left_files]
     right_list = [subject1_right_files, subject2_right_files, subject3_right_files, subject4_right_files, subject5_right_files]
 
-    csv_handler = CSV_handler
+    csv_handler = Handler.CSV_handler
 
-    subject1_data_container = Data_container(1, 'HaluskaMarek')
-    subject2_data_container = Data_container(1, 'HaluskaMaros')
-    subject3_data_container = Data_container(1, 'HaluskovaBeata')
-    subject4_data_container = Data_container(1, 'KelisekDavid')
-    subject5_data_container = Data_container(1, 'KelisekRichard')
+    subject1_data_container = Handler.Data_container(1, 'HaluskaMarek')
+    subject2_data_container = Handler.Data_container(1, 'HaluskaMaros')
+    subject3_data_container = Handler.Data_container(1, 'HaluskovaBeata')
+    subject4_data_container = Handler.Data_container(1, 'KelisekDavid')
+    subject5_data_container = Handler.Data_container(1, 'KelisekRichard')
     subject_data_container_list = [subject1_data_container, subject2_data_container, subject3_data_container, 
                                     subject4_data_container, subject5_data_container]
     
@@ -100,7 +100,8 @@ def load_user_emg_data():
 def prep_df_for_trans(df:DataFrame):
     sample_rate = SAMPLE_RATE
     min, duration = Handler.get_min_max_timestamp(df)
-    x = np.linspace(0, duration, sample_rate * duration, endpoint=False)
+    print(duration)
+    x = np.linspace(0, duration, SAMPLE_RATE * duration, endpoint=False)
     y = np.array(df.iloc(1))
     return x, y, duration
 
@@ -126,10 +127,10 @@ def plot_fft(x_f, y_f):
     plt.show()
 
 
-handler = Handler.CSV_handler
+handler = Handler.CSV_handler()
 file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
 df = handler.get_time_emg_table(file, 1)
 #plot_df(df)
 trans_df = DataFrame(transformed_df(df))
-print(trans_df.info)
-plot_df(trans_df)
+#print(trans_df.info)
+plot_fft(trans_df)

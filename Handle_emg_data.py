@@ -35,16 +35,15 @@ class CSV_handler:
         subject_nr = data_container.subject_nr
         self.data_container_dict[subject_nr] = data_container
         # Places the data correctly:
-        if which_arm is 'left':
+        if which_arm == 'left':
             data_container.data_dict['left'][emg_nr+1] = df
     
 def get_emg_str(emg_nr):
     return 'emg' + str(emg_nr)
 
 def get_min_max_timestamp(df:DataFrame):
-    min = df['timestamp'].argmin
-    max = df['timestamp'].argmax
+    min = df['timestamp'].min()
+    max = df['timestamp'].max()
     return min, max
-
 
 
