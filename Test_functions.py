@@ -1,6 +1,6 @@
 from Handle_emg_data import CSV_handler, get_min_max_timestamp
 import matplotlib.pyplot as plt
-#import Signal_prep
+import Signal_prep
 
 def test_df_extraction(emg_nr):
     handler = CSV_handler()
@@ -24,4 +24,11 @@ def test_min_max_func():
     print(min)
     print(max)
 
-test_min_max_func()
+def test_fft_prep():
+    handler = CSV_handler()
+    file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
+    df = handler.get_time_emg_table(file, 1)
+
+    x, y, d = Signal_prep.prep_df_for_trans(df)
+    print(x)
+    print(y)

@@ -101,7 +101,7 @@ def prep_df_for_trans(df:DataFrame):
     sample_rate = SAMPLE_RATE
     min, duration = Handler.get_min_max_timestamp(df)
     x = np.linspace(0, duration, SAMPLE_RATE * duration, endpoint=False)
-    y = np.array(df.iloc(1))
+    y = df.iloc[:,1].to_numpy()
     return x, y, duration
 
 def normalize_wave(y_values):
@@ -125,7 +125,7 @@ def plot_fft(x_f, y_f):
     plt.plot(x_f, np.abs(y_f))
     plt.show()
 
-
+#'''
 handler = Handler.CSV_handler()
 file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
 df = handler.get_time_emg_table(file, 1)
@@ -133,3 +133,4 @@ df = handler.get_time_emg_table(file, 1)
 trans_df = DataFrame(transformed_df(df))
 #print(trans_df.info)
 plot_fft(trans_df)
+#'''
