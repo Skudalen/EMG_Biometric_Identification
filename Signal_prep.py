@@ -152,8 +152,8 @@ def plot_df(df:DataFrame):
     plt.show()
 
 # Plots ndarrays after transformations 
-def plot_trans(N_trans, y_trans):
-    plt.plot(N_trans, np.abs(y_trans))
+def plot_arrays(N, y):
+    plt.plot(N, np.abs(y))
     plt.show()
 
 
@@ -161,9 +161,11 @@ def plot_trans(N_trans, y_trans):
 handler = Handler.CSV_handler()
 file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
 df = handler.get_time_emg_table(file, 1)
-N = df.size
-#plot_df(df)
+N = np.array(range(int(df.iloc[:,1].size + 1)))
+plot_df(df)
 x, cA, cD = wavelet_db4_denoising(df)
-#plot_trans(x, cA)
-cA_filtered, cD = soft_threshold_filter(cA, cD)
-plot_trans(x, cA_filtered)
+plot_arrays(x, cA)
+cA_filt, cD_filt = soft_threshold_filter(cA, cD)
+plot_arrays(x, cA_filt)
+y_new_values = inverse_wavelet(cA, cD)
+plot_arrays(N, y_new_values)
