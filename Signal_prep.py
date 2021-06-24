@@ -104,20 +104,21 @@ def prep_df_for_trans(df:DataFrame):
     return x, y
 
 def normalize_wave(y_values):
-    return None
+    y = np.int16((y_values / y_values.max()) * 32767)
+    return y
 
 
 def transformed_df(df:DataFrame):
     x, y = prep_df_for_trans(df)
     y_values = fft(y)
-    return new_df
+    return None
 
 def plot_df(df:DataFrame):
     lines = df.plot.line(x='timestamp')
     plt.show()
 
 
-handler = CSV_handler
+handler = Handler.CSV_handler
 file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
 df = handler.get_time_emg_table(file, 1)
 #plot_df(df)
