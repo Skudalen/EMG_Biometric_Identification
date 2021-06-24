@@ -130,12 +130,21 @@ def wavelet_db4_denoising(df:DataFrame):
 
 # Filters signal accordning to Stein's Unbiased Risk Estimate(SURE)
 def sure_threshold_filter(cA, cD):
-    cA_filtered = pyyawt.theselect(cA, 'rigrsure') 
-    return cA_filtered, cD
+    cA_filt = pyyawt.theselect(cA, 'rigrsure')
+    cD_filt = cD 
+    return cA_filt, cD_filt
 
+# soft filtering of wavelet trans with 0.25 lower percent 
 def soft_threshold_filter(cA, cD):
-    cA_filtered = pywt.threshold(cA, 0.25 * cA.max())
-    return cA_filtered, cD
+    cA_filt = pywt.threshold(cA, 0.25 * cA.max())
+    cD_filt = cD 
+    return cA_filt, cD_filt
+
+# Inverse dwt for brining denoise signal back to the time domain
+def inverse_wavelet(cA_filt, cD_filt):
+    wavelet = pywt.Wavelet('db4')
+    y_new_values = pywt.idwt(cA_filt, cD_filt, wavelet)
+    return y_new_values
 
 # Plots DataFrame objects
 def plot_df(df:DataFrame):
@@ -147,10 +156,6 @@ def plot_trans(N_trans, y_trans):
     plt.plot(N_trans, np.abs(y_trans))
     plt.show()
 
-def inverse_wavelet(cA_filtered, cD):
-    wavelet = pywt.Wavelet('db4')
-    cA, cD = pywt.idwt(cA_filtered, cD, wavelet)
-    return cA, cD
 
 #'''
 handler = Handler.CSV_handler()
