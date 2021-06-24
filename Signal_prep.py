@@ -100,7 +100,6 @@ def load_user_emg_data():
 def prep_df_for_trans(df:DataFrame):
     sample_rate = SAMPLE_RATE
     min, duration = Handler.get_min_max_timestamp(df)
-    print(duration)
     x = np.linspace(0, duration, SAMPLE_RATE * duration, endpoint=False)
     y = np.array(df.iloc(1))
     return x, y, duration

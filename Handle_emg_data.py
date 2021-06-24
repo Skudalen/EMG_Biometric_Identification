@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import numpy as np
 
 from pandas.core.frame import DataFrame
 
@@ -42,8 +43,8 @@ def get_emg_str(emg_nr):
     return 'emg' + str(emg_nr)
 
 def get_min_max_timestamp(df:DataFrame):
-    min = df['timestamp'].min()
-    max = df['timestamp'].max()
+    min = int(np.floor(df['timestamp'].min()))
+    max = int(np.ceil(df['timestamp'].max()))
     return min, max
 
 
