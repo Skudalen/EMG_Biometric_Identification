@@ -166,21 +166,3 @@ def plot_arrays(N, y):
     plt.plot(N, np.abs(y))
     plt.show()
 
-
-#'''
-handler = Handler.CSV_handler()
-file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
-df = handler.get_time_emg_table(file, 1)
-N = get_xory_from_df('x', df)
-#plot_df(df)
-print(len(N))
-print(len(get_xory_from_df('y', df)))
-x, cA, cD = wavelet_db4_denoising(df)
-#plot_arrays(x, cA)
-print(len(cA))
-cA_filt, cD_filt = soft_threshold_filter(cA, cD)
-#plot_arrays(x, cA_filt)
-print(len(cA_filt))
-y_new_values = inverse_wavelet(df, cA, cD)
-print(len(y_new_values))
-plot_arrays(N, y_new_values)
