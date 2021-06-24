@@ -1,6 +1,6 @@
-from Handle_emg_data import CSV_handler, get_min_max_timestamp
+from Handle_emg_data import *
 import matplotlib.pyplot as plt
-import Signal_prep
+from Signal_prep import *
 
 def test_df_extraction(emg_nr):
     handler = CSV_handler()
@@ -12,7 +12,7 @@ def test_df_extraction(emg_nr):
     return subject1_left_emg1, emg_nr
 
 def test_load_func():
-    test_dict = Signal_prep.load_user_emg_data()
+    test_dict = load_user_emg_data()
     subject2_container = test_dict[2]
     print(subject2_container.data_dict['left'][1])
 
@@ -29,24 +29,23 @@ def test_fft_prep():
     file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
     df = handler.get_time_emg_table(file, 1)
 
-    x, y, d = Signal_prep.prep_df_for_trans(df)
-    print(x)
-    print(y)
 
 def test_plot_wavelet_both_ways():
     handler = CSV_handler()
     file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
     df = handler.get_time_emg_table(file, 1)
-    N = handler.get_xory_from_df('x', df)
-    #plot_df(df)
+    N = get_xory_from_df('x', df)
+    plot_df(df)
     #print(len(N))
     #print(len(get_xory_from_df('y', df)))
-    x, cA, cD = handler.wavelet_db4_denoising(df)
-    #plot_arrays(x, cA)
+    x, cA, cD = wavelet_db4_denoising(df)
+    plot_arrays(x, cA)
     #print(len(cA))
     cA_filt, cD_filt = soft_threshold_filter(cA, cD)
-    #plot_arrays(x, cA_filt)
+    plot_arrays(x, cA_filt)
     #print(len(cA_filt))
-    y_new_values = handler.inverse_wavelet(df, cA, cD)
+    y_new_values = inverse_wavelet(df, cA, cD)
     #print(len(y_new_values))
-    handler.plot_arrays(N, y_new_values)
+    plot_arrays(N, y_new_values)
+
+test_plot_wavelet_both_ways()
