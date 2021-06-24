@@ -121,6 +121,10 @@ def plot_df(df:DataFrame):
     lines = df.plot.line(x='timestamp')
     plt.show()
 
+def plot_fft(x_f, y_f):
+    plt.plot(x_f, np.abs(y_f))
+    plt.show()
+
 
 handler = Handler.CSV_handler
 file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
