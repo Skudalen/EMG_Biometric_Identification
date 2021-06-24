@@ -4,7 +4,7 @@ from pandas.core.frame import DataFrame
 from scipy.fft import fft, fftfreq
 import pywt
 from scipy.signal import wavelets
-from pyyawt import theselect
+import pyyawt
 
 import Handle_emg_data as Handler
 
@@ -129,9 +129,13 @@ def denoise_signal_pywt(df:DataFrame):
     print(x)
     return x, cA, cD 
 
-# 
-def threshold_filter(cA, cD):
-    cA_filtered = theselect(cA, 'rigrsure') 
+# Filters signal accordning to Stein's Unbiased Risk Estimate(SURE)
+def sure_threshold_filter(cA, cD):
+    cA_filtered = pyyawt.theselect(cA, 'rigrsure') 
+    return cA_filtered, cD
+
+def soft_threshold_filter(cA, cD):
+    cA_filtered = pywt.threshold(cA, 0.9)
     return cA_filtered, cD
 
 # Plots DataFrame objects
