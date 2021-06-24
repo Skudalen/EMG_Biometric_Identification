@@ -44,7 +44,7 @@ def get_emg_str(emg_nr):
 
 def get_min_max_timestamp(df:DataFrame):
     min = int(np.floor(df['timestamp'].min()))
-    max = int(np.ceil(df['timestamp'].max()))
+    max = df['timestamp'].max()
     return min, max
 
 
