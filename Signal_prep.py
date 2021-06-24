@@ -1,7 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 from pandas.core.frame import DataFrame
-from scipy.fft import fft
+from scipy.fft import fft, fftfreq
 
 import Handle_emg_data as Handler
 
@@ -96,12 +96,13 @@ def load_user_emg_data():
 
     return csv_handler.data_container_dict
 
+# Takes in a df and outputs np arrays for x and y values
 def prep_df_for_trans(df:DataFrame):
     sample_rate = SAMPLE_RATE
     min, duration = Handler.get_min_max_timestamp(df)
     x = np.linspace(0, duration, sample_rate * duration, endpoint=False)
     y = np.array(df.iloc(1))
-    return x, y
+    return x, y, duration
 
 def normalize_wave(y_values):
     y = np.int16((y_values / y_values.max()) * 32767)
@@ -109,9 +110,12 @@ def normalize_wave(y_values):
 
 
 def transformed_df(df:DataFrame):
-    x, y = prep_df_for_trans(df)
-    y_values = fft(y)
-    return None
+    x_values, y_values, duration = prep_df_for_trans(df)
+    N = SAMPLE_RATE * duration
+    norm = normalize_wave(y_values)
+    x_f = fftfreq(N, 1 / SAMPLE_RATE)
+    y_f = fft(norm)
+    return x_f, y_f
 
 def plot_df(df:DataFrame):
     lines = df.plot.line(x='timestamp')
