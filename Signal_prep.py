@@ -147,8 +147,10 @@ def plot_trans(N_trans, y_trans):
     plt.plot(N_trans, np.abs(y_trans))
     plt.show()
 
-def inverse_wavelet(N, cA, cD):
-    return None
+def inverse_wavelet(cA_filtered, cD):
+    wavelet = pywt.Wavelet('db4')
+    cA, cD = pywt.idwt(cA_filtered, cD, wavelet)
+    return cA, cD
 
 #'''
 handler = Handler.CSV_handler()
