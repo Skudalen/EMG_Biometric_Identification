@@ -115,18 +115,18 @@ def fft_of_df(df:DataFrame):
     y_values, duration = prep_df(df)
     N = y_values.size
     norm = normalize_wave(y_values)
-    x_f = fftfreq(N, 1 / SAMPLE_RATE)
+    N_trans = fftfreq(N, 1 / SAMPLE_RATE)
     y_f = fft(norm)
-    return x_f, y_f, duration
+    return N_trans, y_f, duration
 
 # Removes noise with db4 wavelet function 
-def denoise_signal_pywt(df:DataFrame):
+def wavelet_db4_denoising(df:DataFrame):
     y_values, duration = prep_df(df)
     #y_values = normalize_wave(y_values)
     wavelet = pywt.Wavelet('db4')
     cA, cD = pywt.dwt(y_values, wavelet)
-    x =  np.array(range(int(np.floor((y_values.size + wavelet.dec_len - 1) / 2))))
-    return x, cA, cD 
+    N_trans =  np.array(range(int(np.floor((y_values.size + wavelet.dec_len - 1) / 2))))
+    return N_trans, cA, cD 
 
 # Filters signal accordning to Stein's Unbiased Risk Estimate(SURE)
 def sure_threshold_filter(cA, cD):
@@ -143,17 +143,20 @@ def plot_df(df:DataFrame):
     plt.show()
 
 # Plots ndarrays after transformations 
-def plot_trans(x_f, y_f):
-    plt.plot(x_f, np.abs(y_f))
+def plot_trans(N_trans, y_trans):
+    plt.plot(N_trans, np.abs(y_trans))
     plt.show()
 
+def inverse_wavelet(N, cA, cD):
+    return None
 
 #'''
 handler = Handler.CSV_handler()
 file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
 df = handler.get_time_emg_table(file, 1)
+N = df.size
 #plot_df(df)
-x, cA, cD = denoise_signal_pywt(df)
+x, cA, cD = wavelet_db4_denoising(df)
 #plot_trans(x, cA)
 cA_filtered, cD = soft_threshold_filter(cA, cD)
 plot_trans(x, cA_filtered)
