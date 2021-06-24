@@ -104,11 +104,12 @@ def prep_df(df:DataFrame):
     y = df.iloc[:,1].to_numpy()
     return y, duration
 
+# Normalizes a ndarray of a signal to the scale of int16(32767)
 def normalize_wave(y_values):
     y = np.int16((y_values / y_values.max()) * 32767)
     return y
 
-
+# Takes the FFT of a DataFrame object
 def fft_of_df(df:DataFrame):
     y_values, duration = prep_df(df)
     N = y_values.size
@@ -117,20 +118,25 @@ def fft_of_df(df:DataFrame):
     y_f = fft(norm)
     return x_f, y_f, duration
 
+# Removes noise with db4 wavelet function 
 def denoise_signal_pywt(df:DataFrame):
     y_values, duration = prep_df(df)
-    norm = normalize_wave(y_values)
+    #y_values = normalize_wave(y_values)
     wavelet = pywt.Wavelet('db4')
-    cA, cD = pywt.dwt(norm, wavelet)
+    cA, cD = pywt.dwt(y_values, wavelet)
     x =  np.array(range(int(np.floor((y_values.size + wavelet.dec_len - 1) / 2))))
     print(x)
     return x, cA 
 
+
+
+# Plots DataFrame objects
 def plot_df(df:DataFrame):
     lines = df.plot.line(x='timestamp')
     plt.show()
 
-def plot_transformed(x_f, y_f):
+# Plots ndarrays after transformations 
+def plot_trans(x_f, y_f):
     plt.plot(x_f, np.abs(y_f))
     plt.show()
 
@@ -141,5 +147,5 @@ df = handler.get_time_emg_table(file, 1)
 #plot_df(df)
 x_f, y_f = denoise_signal_pywt(df)
 #print(trans_df.info)
-plot_transformed(x_f, y_f)
+plot_trans(x_f, y_f)
 #'''
