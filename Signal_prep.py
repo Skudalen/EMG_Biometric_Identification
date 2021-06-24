@@ -4,6 +4,7 @@ from pandas.core.frame import DataFrame
 from scipy.fft import fft, fftfreq
 import pywt
 from scipy.signal import wavelets
+from pyyawt import theselect
 
 import Handle_emg_data as Handler
 
@@ -126,9 +127,12 @@ def denoise_signal_pywt(df:DataFrame):
     cA, cD = pywt.dwt(y_values, wavelet)
     x =  np.array(range(int(np.floor((y_values.size + wavelet.dec_len - 1) / 2))))
     print(x)
-    return x, cA 
+    return x, cA, cD 
 
-
+# 
+def threshold_filter(cA, cD):
+    cA_filtered = theselect(cA, 'rigrsure') 
+    return cA_filtered, cD
 
 # Plots DataFrame objects
 def plot_df(df:DataFrame):
@@ -144,8 +148,8 @@ def plot_trans(x_f, y_f):
 handler = Handler.CSV_handler()
 file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
 df = handler.get_time_emg_table(file, 1)
-#plot_df(df)
-x_f, y_f = denoise_signal_pywt(df)
-#print(trans_df.info)
-plot_trans(x_f, y_f)
-#'''
+plot_df(df)
+x, cA, cD = denoise_signal_pywt(df)
+plot_trans(x, cA)
+cA_filtered, cD = np.ndarray(threshold_filter(cA, cD))
+plot_trans(x, cA_filtered)
