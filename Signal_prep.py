@@ -10,6 +10,7 @@ import Handle_emg_data as Handler
 
 SAMPLE_RATE = 200
 
+# Loads the data from the csv files into a storing system in an CSV_handler object
 def load_user_emg_data():
 
     # CSV data from subject 1
@@ -99,7 +100,6 @@ def load_user_emg_data():
 
     return csv_handler.data_container_dict
 
-
 # Takes in a df and outputs np arrays for x and y values
 def get_xory_from_df(x_or_y, df:DataFrame):
     swither = {
@@ -137,7 +137,7 @@ def sure_threshold_filter(cA, cD):
     cD_filt = cD 
     return cA_filt, cD_filt
 
-# soft filtering of wavelet trans with 0.25 lower percent 
+# soft filtering of wavelet trans with the 40% lowest removed
 def soft_threshold_filter(cA, cD):
     cA_filt = pywt.threshold(cA, 0.4 * cA.max())
     cD_filt = cD 
