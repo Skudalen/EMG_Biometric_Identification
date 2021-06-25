@@ -153,7 +153,7 @@ class CSV_handler:
             for round in range(4):
                 for emg_nr in range(8):
                     filename = right_list[subject_nr][round]
-                    self.store_df_in_container(filename, emg_nr, 'left', data_container, round+1)
+                    self.store_df_in_container(filename, emg_nr, 'right', data_container, round+1)
             # Links the stored data in the data_container to the Handler
             self.link_container_to_handler(data_container)
         return self.data_container_dict

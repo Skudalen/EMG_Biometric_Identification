@@ -15,7 +15,8 @@ def test_load_func():
     handler = CSV_handler()
     test_dict = handler.load_hard_PP_emg_data()
     subject2_container = test_dict.get(2)
-    #print(subject2_container)
+    print(subject2_container)
+    print(subject2_container.subject_name)
     print(subject2_container.data_dict_round1.get('left')[1])
 
 def test_min_max_func():
