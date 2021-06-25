@@ -461,4 +461,10 @@ def get_min_max_timestamp(df:DataFrame):
     max = df['timestamp'].max()
     return min, max
 
+# Help: returns df_time_emg
+def make_df_from_xandy(x, y, emg_nr):
+    print(type(x))
+    print(type(y))
+    df = DataFrame([x, y], columns=['timestamp', get_emg_str(emg_nr)])
+    return df
 

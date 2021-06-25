@@ -79,7 +79,7 @@ def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, e
     cA_filt, cD_filt = soft_threshold_filter(cA, cD)
     y_values = inverse_wavelet(df, cA_filt, cD_filt)
 
-    df_new = pandas.DataFrame([N_trans, y_values])
+    df_new = Handler.make_df_from_xandy(N, y_values, emg_nr)
     return N, y_values, df_new
 
 

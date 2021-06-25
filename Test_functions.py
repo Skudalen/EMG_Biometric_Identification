@@ -1,3 +1,4 @@
+from numpy import load
 from Handle_emg_data import *
 import matplotlib.pyplot as plt
 from Signal_prep import *
@@ -58,4 +59,18 @@ def test_soft_load_func():
     print(subject2_container.subject_name)
     print(subject2_container.data_dict_round2.get('right')[3])  # Round2, right, emg_4
 
-test_soft_load_func()
+def test_total_denoising():
+    handler = Handler.CSV_handler('hard')
+    handler.load_hard_original_emg_data()
+
+    # Original df:
+    df = handler.get_df_from_data_dict(3, 'left', 3, 3)
+    print(df.head)
+    plot_df(df)
+
+    # Denoised df:
+    df_denoised = denoice_dataset(handler, 3, 'left', 3, 3)
+    print(df.head)
+    plot_df(df_denoised)
+
+test_total_denoising()
