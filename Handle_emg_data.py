@@ -9,7 +9,10 @@ class Data_container:
     def __init__(self, subject_nr:int, subject_name:str):
         self.subject_nr = subject_nr
         self.subject_name = subject_name
-        self.data_dict = {'left': [None]*8, 'right': [None]*8}
+        self.data_dict_round1 = {'left': [None]*8, 'right': [None]*8}
+        self.data_dict_round2 = {'left': [None]*8, 'right': [None]*8}
+        self.data_dict_round3 = {'left': [None]*8, 'right': [None]*8}
+        self.data_dict_round4 = {'left': [None]*8, 'right': [None]*8}
     
 class CSV_handler:
 
@@ -30,14 +33,34 @@ class CSV_handler:
         filtered_df = tot_data_frame[["timestamp", emg_str]]
         return filtered_df
     
-    def store_df(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container):
+    def store_df(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container, round:int):
         df = self.get_min_max_timestamp(filename, emg_nr)
         # Links the retrieved data with the subjects data_container
         subject_nr = data_container.subject_nr
         self.data_container_dict[subject_nr] = data_container
         # Places the data correctly:
-        if which_arm == 'left':
-            data_container.data_dict['left'][emg_nr+1] = df
+        if round == 0:
+            if which_arm == 'left':
+                data_container.data_dict_round1['left'][emg_nr+1] = df
+            else:
+                data_container.data_dict_round1['right'][emg_nr+1] = df
+        elif round == 1:
+            if which_arm == 'left':
+                data_container.data_dict_round2['left'][emg_nr+1] = df
+            else:
+                data_container.data_dict_round2['right'][emg_nr+1] = df
+        elif round == 2:
+            if which_arm == 'left':
+                data_container.data_dict_round3['left'][emg_nr+1] = df
+            else:
+                data_container.data_dict_round3['right'][emg_nr+1] = df
+        elif round == 3:
+            if which_arm == 'left':
+                data_container.data_dict_round4['left'][emg_nr+1] = df
+            else:
+                data_container.data_dict_round4['right'][emg_nr+1] = df
+        else:
+            raise IndexError('Not a valid index')
     
     # Loads the data from the csv files into a storing system in an CSV_handler object
     def load_hard_PP_emg_data(self):
