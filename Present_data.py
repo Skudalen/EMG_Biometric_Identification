@@ -58,7 +58,7 @@ def main():
     N_trans, cA, cD = wavelet_db4_denoising(data_frame)
     data_frame_freq = make_df_from_xandy(N_trans, cA, 1)
 
-    cA_filt, cD_filt = soft_threshold_filter(cA, cD, 0.4)
+    cA_filt, cD_filt = soft_threshold_filter(cA, cD, 0.6)
     data_frame_freq_filt = make_df_from_xandy(N_trans, cA_filt, 1)
 
     plot_compare_two_df(data_frame_freq, data_frame_freq_filt)
