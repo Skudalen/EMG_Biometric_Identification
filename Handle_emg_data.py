@@ -64,7 +64,7 @@ class CSV_handler:
         # Links the retrieved data with the subjects data_container
         subject_nr = data_container.subject_nr
         self.data_container_dict[subject_nr] = data_container
-        print(data_container.subject_name)
+        #print(data_container.subject_name)
     
     # Loads the data from the csv files into a storing system in an CSV_handler object
     def load_hard_PP_emg_data(self):
@@ -135,24 +135,27 @@ class CSV_handler:
 
 
         subject1_data_container = Data_container(1, 'HaluskaMarek')
-        #print(subject1_data_container.data_dict_round1)
-        subject2_data_container = Data_container(1, 'HaluskaMaros')
-        subject3_data_container = Data_container(1, 'HaluskovaBeata')
-        subject4_data_container = Data_container(1, 'KelisekDavid')
-        subject5_data_container = Data_container(1, 'KelisekRichard')
+        subject2_data_container = Data_container(2, 'HaluskaMaros')
+        subject3_data_container = Data_container(3, 'HaluskovaBeata')
+        subject4_data_container = Data_container(4, 'KelisekDavid')
+        subject5_data_container = Data_container(5, 'KelisekRichard')
         subject_data_container_list = [subject1_data_container, subject2_data_container, subject3_data_container, 
                                         subject4_data_container, subject5_data_container]
     
         for subject_nr in range(5):
+            data_container = subject_data_container_list[subject_nr]
             # left variant proccessed here
             for round in range(4):
                 for emg_nr in range(8):
-                    self.store_df(left_list[subject_nr][round], emg_nr, 'left', subject_data_container_list[subject_nr], round+1)
+                    filename = left_list[subject_nr][round]
+                    self.store_df_in_container(filename, emg_nr, 'left', data_container, round+1)
             # right variant proccessed here
             for round in range(4):
                 for emg_nr in range(8):
-                    self.store_df(right_list[subject_nr][round], emg_nr, 'right', subject_data_container_list[subject_nr], round+1)
-
+                    filename = right_list[subject_nr][round]
+                    self.store_df_in_container(filename, emg_nr, 'left', data_container, round+1)
+            # Links the stored data in the data_container to the Handler
+            self.link_container_to_handler(data_container)
         return self.data_container_dict
 
     def load_hard_original_emg_data(self):
