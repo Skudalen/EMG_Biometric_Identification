@@ -43,10 +43,12 @@ def wavelet_db4_denoising(df:DataFrame):
     return N_trans, cA, cD 
 
 # Filters signal accordning to Stein's Unbiased Risk Estimate(SURE)
+'''
 def sure_threshold_filter(cA, cD):
     cA_filt = pyyawt.theselect(cA, 'rigrsure')
     cD_filt = cD 
     return cA_filt, cD_filt
+'''
 
 # soft filtering of wavelet trans with the 40% lowest removed
 def soft_threshold_filter(cA, cD):

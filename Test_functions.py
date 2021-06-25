@@ -1,6 +1,6 @@
 from Handle_emg_data import *
 import matplotlib.pyplot as plt
-#from Signal_prep import *
+from Signal_prep import *
 
 def test_df_extraction(emg_nr):
     handler = CSV_handler()
