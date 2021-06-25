@@ -83,15 +83,3 @@ def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, e
     return df_new
 
 
-
-# MOVE TO Present_data.py
-# Plots DataFrame objects
-def plot_df(df:DataFrame):
-    lines = df.plot.line(x='timestamp')
-    plt.show()
-
-# Plots ndarrays after transformations 
-def plot_arrays(N, y):
-    plt.plot(N, np.abs(y))
-    plt.show()
-

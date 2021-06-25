@@ -50,7 +50,7 @@ def test_plot_wavelet_both_ways():
     #print(len(cA_filt))
     y_new_values = inverse_wavelet(df, cA_filt, cD_filt)
     #print(len(y_new_values))
-    plot_arrays(N, y_new_values)
+    #plot_arrays(N, y_new_values)
 
 def test_soft_load_func():
     handler = CSV_handler()
@@ -70,7 +70,7 @@ def test_total_denoising():
     
 
     # Denoised df:
-    df_denoised = denoice_dataset(handler, 3, 'left', 3, 3, 0.2)
+    df_denoised = denoice_dataset(handler, 3, 'left', 3, 3, 0.7)
     print(df_denoised.head)
 
     x = get_xory_from_df('x', df)
@@ -83,3 +83,4 @@ def test_total_denoising():
     plt.show()
 
 test_total_denoising()
+#test_plot_wavelet_both_ways()
