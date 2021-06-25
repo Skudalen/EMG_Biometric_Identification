@@ -21,10 +21,10 @@ class Data_container:
     
 class CSV_handler:
 
-    def __init__(self):
+    def __init__(self, data_type):
         self.working_dir = str(Path.cwd()) 
         self.data_container_dict = {} # Dict with keys equal subject numbers and values equal the relvant datacontainer
-        self.data_type = ''
+        self.data_type = data_type
 
     # Makes dataframe from the csv files in the working directory
     def make_df(self, filename):
@@ -442,6 +442,13 @@ class CSV_handler:
             self.link_container_to_handler(data_container)
         self.data_type = 'soft'
         return self.data_container_dict
+
+    def get_df_from_data_dict(self, subject_nr, which_arm, round, emg_nr):
+        data_type = self.data_type
+        container = self.data_container_dict.get(subject_nr)
+        df = container.dict_list[round - 1].get(which_arm)[emg_nr]
+        return df
+
 
 # Help: gets the str from emg nr
 def get_emg_str(emg_nr):

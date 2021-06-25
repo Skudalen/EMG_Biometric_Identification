@@ -70,11 +70,9 @@ def inverse_wavelet(df, cA_filt, cD_filt):
             old_len = len(get_xory_from_df('y', df))
     return y_new_values
 
-
+# Takes in handler and detailes to denoise. Returns arrays and df
 def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, emg_nr, round):
-    data_type = handler.data_type
-    container = handler.data_container_dict.get(subject_nr)
-    df = container.dict_list[round - 1].get(which_arm)[emg_nr]
+    
     print(df.head)
 
     N = get_xory_from_df('x', df)
@@ -82,7 +80,8 @@ def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, emg_nr, 
     cA_filt, cD_filt = soft_threshold_filter(cA, cD)
     y_values = inverse_wavelet(df, cA_filt, cD_filt)
 
-    return pandas.DataFrame([N_trans, y_values])
+    df_new = pandas.DataFrame([N_trans, y_values])
+    return N, y_values, df_new
 
 
 
