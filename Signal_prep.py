@@ -139,7 +139,7 @@ def sure_threshold_filter(cA, cD):
 
 # soft filtering of wavelet trans with 0.25 lower percent 
 def soft_threshold_filter(cA, cD):
-    cA_filt = pywt.threshold(cA, 0.25 * cA.max())
+    cA_filt = pywt.threshold(cA, 0.4 * cA.max())
     cD_filt = cD 
     return cA_filt, cD_filt
 

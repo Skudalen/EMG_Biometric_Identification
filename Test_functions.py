@@ -44,7 +44,7 @@ def test_plot_wavelet_both_ways():
     cA_filt, cD_filt = soft_threshold_filter(cA, cD)
     plot_arrays(x, cA_filt)
     #print(len(cA_filt))
-    y_new_values = inverse_wavelet(df, cA, cD)
+    y_new_values = inverse_wavelet(df, cA_filt, cD_filt)
     #print(len(y_new_values))
     plot_arrays(N, y_new_values)
 
