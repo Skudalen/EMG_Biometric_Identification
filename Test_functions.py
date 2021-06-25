@@ -1,6 +1,6 @@
 from Handle_emg_data import *
 import matplotlib.pyplot as plt
-from Signal_prep import *
+#from Signal_prep import *
 
 def test_df_extraction(emg_nr):
     handler = CSV_handler()
@@ -14,8 +14,9 @@ def test_df_extraction(emg_nr):
 def test_load_func():
     handler = CSV_handler()
     test_dict = handler.load_hard_PP_emg_data()
-    subject2_container = test_dict[2]
-    print(subject2_container.data_dict['left'][1])
+    subject2_container = test_dict.get(2)
+    print(subject2_container)
+    print(subject2_container.data_dict_round1.get('left')[1])
 
 def test_min_max_func():
     handler = CSV_handler()
@@ -29,7 +30,6 @@ def test_fft_prep():
     handler = CSV_handler()
     file = "/Exp20201205_2myo_hardTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
     df = handler.get_time_emg_table(file, 1)
-
 
 def test_plot_wavelet_both_ways():
     handler = CSV_handler()
@@ -49,4 +49,4 @@ def test_plot_wavelet_both_ways():
     #print(len(y_new_values))
     plot_arrays(N, y_new_values)
 
-test_plot_wavelet_both_ways()
+test_load_func()

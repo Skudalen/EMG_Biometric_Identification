@@ -33,34 +33,38 @@ class CSV_handler:
         filtered_df = tot_data_frame[["timestamp", emg_str]]
         return filtered_df
     
-    def store_df(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container, round:int):
-        df = self.get_min_max_timestamp(filename, emg_nr)
+    def store_df_in_container(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container, round:int):
+        df = self.get_time_emg_table(filename, emg_nr+1)
+
+        # Places the data correctly:
+        if round == 1:
+            if which_arm == 'left':
+                data_container.data_dict_round1['left'][emg_nr] = df    # Zero indexed emg_nr in the dict
+            else:
+                data_container.data_dict_round1['right'][emg_nr] = df
+        elif round == 2:
+            if which_arm == 'left':
+                data_container.data_dict_round2['left'][emg_nr] = df
+            else:
+                data_container.data_dict_round2['right'][emg_nr] = df
+        elif round == 3:
+            if which_arm == 'left':
+                data_container.data_dict_round3['left'][emg_nr] = df
+            else:
+                data_container.data_dict_round3['right'][emg_nr] = df
+        elif round == 4:
+            if which_arm == 'left':
+                data_container.data_dict_round4['left'][emg_nr] = df
+            else:
+                data_container.data_dict_round4['right'][emg_nr] = df
+        else:
+            raise IndexError('Not a valid index')
+    
+    def link_container_to_handler(self, data_container:Data_container):
         # Links the retrieved data with the subjects data_container
         subject_nr = data_container.subject_nr
         self.data_container_dict[subject_nr] = data_container
-        # Places the data correctly:
-        if round == 0:
-            if which_arm == 'left':
-                data_container.data_dict_round1['left'][emg_nr+1] = df
-            else:
-                data_container.data_dict_round1['right'][emg_nr+1] = df
-        elif round == 1:
-            if which_arm == 'left':
-                data_container.data_dict_round2['left'][emg_nr+1] = df
-            else:
-                data_container.data_dict_round2['right'][emg_nr+1] = df
-        elif round == 2:
-            if which_arm == 'left':
-                data_container.data_dict_round3['left'][emg_nr+1] = df
-            else:
-                data_container.data_dict_round3['right'][emg_nr+1] = df
-        elif round == 3:
-            if which_arm == 'left':
-                data_container.data_dict_round4['left'][emg_nr+1] = df
-            else:
-                data_container.data_dict_round4['right'][emg_nr+1] = df
-        else:
-            raise IndexError('Not a valid index')
+        print(data_container.subject_name)
     
     # Loads the data from the csv files into a storing system in an CSV_handler object
     def load_hard_PP_emg_data(self):
@@ -131,6 +135,7 @@ class CSV_handler:
 
 
         subject1_data_container = Data_container(1, 'HaluskaMarek')
+        #print(subject1_data_container.data_dict_round1)
         subject2_data_container = Data_container(1, 'HaluskaMaros')
         subject3_data_container = Data_container(1, 'HaluskovaBeata')
         subject4_data_container = Data_container(1, 'KelisekDavid')
@@ -142,11 +147,11 @@ class CSV_handler:
             # left variant proccessed here
             for round in range(4):
                 for emg_nr in range(8):
-                    self.store_df(left_list[subject_nr][round], emg_nr+1, 'left', subject_data_container_list[subject_nr])
+                    self.store_df(left_list[subject_nr][round], emg_nr, 'left', subject_data_container_list[subject_nr], round+1)
             # right variant proccessed here
             for round in range(4):
                 for emg_nr in range(8):
-                    self.store_df(right_list[subject_nr][round], emg_nr+1, 'right', subject_data_container_list[subject_nr])
+                    self.store_df(right_list[subject_nr][round], emg_nr, 'right', subject_data_container_list[subject_nr], round+1)
 
         return self.data_container_dict
 
