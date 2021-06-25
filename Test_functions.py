@@ -11,7 +11,7 @@ def test_df_extraction(emg_nr):
 
     return subject1_left_emg1, emg_nr
 
-def test_load_func():
+def test_hardPP_load_func():
     handler = CSV_handler()
     test_dict = handler.load_hard_PP_emg_data()
     subject2_container = test_dict.get(2)
@@ -50,4 +50,12 @@ def test_plot_wavelet_both_ways():
     #print(len(y_new_values))
     plot_arrays(N, y_new_values)
 
-test_load_func()
+def test_soft_load_func():
+    handler = CSV_handler()
+    test_dict = handler.load_soft_original_emg_data()
+    subject2_container = test_dict.get(4)   # Subject 4
+    print(subject2_container)
+    print(subject2_container.subject_name)
+    print(subject2_container.data_dict_round2.get('right')[3])  # Round2, right, emg_4
+
+test_soft_load_func()

@@ -163,64 +163,64 @@ class CSV_handler:
     def load_soft_PP_emg_data(self):
 
         # CSV data from subject 1
-        file1_subject1_left = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
-        file2_subject1_left = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1830/myoLeftEmg.csv"
-        file3_subject1_left = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1845/myoLeftEmg.csv"
-        file4_subject1_left = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1855/myoLeftEmg.csv"
+        file1_subject1_left = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1910/myoLeftEmg.csv"
+        file2_subject1_left = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1920/myoLeftEmg.csv"
+        file3_subject1_left = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1935/myoLeftEmg.csv"
+        file4_subject1_left = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1945/myoLeftEmg.csv"
         subject1_left_files = [file1_subject1_left, file2_subject1_left, file3_subject1_left, file4_subject1_left]
-        file1_subject1_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1810/myoRightEmg.csv"
-        file2_subject1_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1830/myoRightEmg.csv"
-        file3_subject1_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1845/myoRightEmg.csv"
-        file4_subject1_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1855/myoRightEmg.csv"
+        file1_subject1_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1910/myoRightEmg.csv"
+        file2_subject1_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1920/myoRightEmg.csv"
+        file3_subject1_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1935/myoRightEmg.csv"
+        file4_subject1_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMarek_20201207_1945/myoRightEmg.csv"
         subject1_right_files = [file1_subject1_rigth, file2_subject1_rigth, file3_subject1_rigth, file4_subject1_rigth]
 
         # CSV data from subject 2
-        file1_subject2_left = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2010/myoLeftEmg.csv"
-        file2_subject2_left = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2025/myoLeftEmg.csv"
-        file3_subject2_left = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2035/myoLeftEmg.csv"
-        file4_subject2_left = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2045/myoLeftEmg.csv"
+        file1_subject2_left = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2055/myoLeftEmg.csv"
+        file2_subject2_left = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2110/myoLeftEmg.csv"
+        file3_subject2_left = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2125/myoLeftEmg.csv"
+        file4_subject2_left = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2145/myoLeftEmg.csv"
         subject2_left_files = [file1_subject2_left, file2_subject2_left, file3_subject2_left, file4_subject2_left]
-        file1_subject2_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2010/myoRightEmg.csv"
-        file2_subject2_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2025/myoRightEmg.csv"
-        file3_subject2_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2035/myoRightEmg.csv"
-        file4_subject2_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2045/myoRightEmg.csv"
+        file1_subject2_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2055/myoRightEmg.csv"
+        file2_subject2_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2110/myoRightEmg.csv"
+        file3_subject2_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2125/myoRightEmg.csv"
+        file4_subject2_rigth = "/Exp20201205_2myo_softTypePP/HaluskaMaros_20201205_2145/myoRightEmg.csv"
         subject2_right_files = [file1_subject2_rigth, file2_subject2_rigth, file3_subject2_rigth, file4_subject2_rigth]
 
         # CSV data from subject 3
-        file1_subject3_left = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1700/myoLeftEmg.csv"
-        file2_subject3_left = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1715/myoLeftEmg.csv"
-        file3_subject3_left = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1725/myoLeftEmg.csv"
-        file4_subject3_left = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1735/myoLeftEmg.csv"
+        file1_subject3_left = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1745/myoLeftEmg.csv"
+        file2_subject3_left = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1755/myoLeftEmg.csv"
+        file3_subject3_left = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1810/myoLeftEmg.csv"
+        file4_subject3_left = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1825/myoLeftEmg.csv"
         subject3_left_files = [file1_subject3_left, file2_subject3_left, file3_subject3_left, file4_subject3_left]
-        file1_subject3_rigth = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1700/myoRightEmg.csv"
-        file2_subject3_rigth = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1715/myoRightEmg.csv"
-        file3_subject3_rigth = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1725/myoRightEmg.csv"
-        file4_subject3_rigth = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1735/myoRightEmg.csv"
+        file1_subject3_rigth = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1745/myoRightEmg.csv"
+        file2_subject3_rigth = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1755/myoRightEmg.csv"
+        file3_subject3_rigth = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1810/myoRightEmg.csv"
+        file4_subject3_rigth = "/Exp20201205_2myo_softTypePP/HaluskovaBeata_20201205_1825/myoRightEmg.csv"
         subject3_right_files = [file1_subject3_rigth, file2_subject3_rigth, file3_subject3_rigth, file4_subject3_rigth]
 
         # CSV data from subject 4
-        file1_subject4_left = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1900/myoLeftEmg.csv"
-        file2_subject4_left = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1915/myoLeftEmg.csv"
-        file3_subject4_left = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1925/myoLeftEmg.csv"
-        file4_subject4_left = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1935/myoLeftEmg.csv"
+        file1_subject4_left = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1945/myoLeftEmg.csv"
+        file2_subject4_left = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1955/myoLeftEmg.csv"
+        file3_subject4_left = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_2010/myoLeftEmg.csv"
+        file4_subject4_left = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_2025/myoLeftEmg.csv"
         subject4_left_files = [file1_subject4_left, file2_subject4_left, file3_subject4_left, file4_subject4_left]
-        file1_subject4_rigth = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1900/myoRightEmg.csv"
-        file2_subject4_rigth = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1915/myoRightEmg.csv"
-        file3_subject4_rigth = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1925/myoRightEmg.csv"
-        file4_subject4_rigth = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1935/myoRightEmg.csv"
+        file1_subject4_rigth = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1945/myoRightEmg.csv"
+        file2_subject4_rigth = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_1955/myoRightEmg.csv"
+        file3_subject4_rigth = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_2010/myoRightEmg.csv"
+        file4_subject4_rigth = "/Exp20201205_2myo_softTypePP/KelisekDavid_20201209_2025/myoRightEmg.csv"
         subject4_right_files = [file1_subject4_rigth, file2_subject4_rigth, file3_subject4_rigth, file4_subject4_rigth]
 
 
         # CSV data from subject 5
-        file1_subject5_left = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2030/myoLeftEmg.csv"
-        file2_subject5_left = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2040/myoLeftEmg.csv"
-        file3_subject5_left = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2050/myoLeftEmg.csv"
-        file4_subject5_left = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2100/myoLeftEmg.csv"
+        file1_subject5_left = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2110/myoLeftEmg.csv"
+        file2_subject5_left = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2120/myoLeftEmg.csv"
+        file3_subject5_left = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2130/myoLeftEmg.csv"
+        file4_subject5_left = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2140/myoLeftEmg.csv"
         subject5_left_files = [file1_subject5_left, file2_subject5_left, file3_subject5_left, file4_subject5_left]
-        file1_subject5_rigth = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2030/myoRightEmg.csv"
-        file2_subject5_rigth = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2040/myoRightEmg.csv"
-        file3_subject5_rigth = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2050/myoRightEmg.csv"
-        file4_subject5_rigth = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2100/myoRightEmg.csv"
+        file1_subject5_rigth = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2110/myoRightEmg.csv"
+        file2_subject5_rigth = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2120/myoRightEmg.csv"
+        file3_subject5_rigth = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2130/myoRightEmg.csv"
+        file4_subject5_rigth = "/Exp20201205_2myo_softTypePP/KelisekRichard_20201209_2140/myoRightEmg.csv"
         subject5_right_files = [file1_subject5_rigth, file2_subject5_rigth, file3_subject5_rigth, file4_subject5_rigth]
 
         left_list = [subject1_left_files, subject2_left_files, subject3_left_files, subject4_left_files, subject5_left_files]
@@ -346,64 +346,64 @@ class CSV_handler:
     def load_soft_original_emg_data(self):
 
         # CSV data from subject 1
-        file1_subject1_left = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1810/myoLeftEmg.csv"
-        file2_subject1_left = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1830/myoLeftEmg.csv"
-        file3_subject1_left = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1845/myoLeftEmg.csv"
-        file4_subject1_left = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1855/myoLeftEmg.csv"
+        file1_subject1_left = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1910/myoLeftEmg.csv"
+        file2_subject1_left = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1920/myoLeftEmg.csv"
+        file3_subject1_left = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1935/myoLeftEmg.csv"
+        file4_subject1_left = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1945/myoLeftEmg.csv"
         subject1_left_files = [file1_subject1_left, file2_subject1_left, file3_subject1_left, file4_subject1_left]
-        file1_subject1_rigth = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1810/myoRightEmg.csv"
-        file2_subject1_rigth = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1830/myoRightEmg.csv"
-        file3_subject1_rigth = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1845/myoRightEmg.csv"
-        file4_subject1_rigth = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1855/myoRightEmg.csv"
+        file1_subject1_rigth = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1910/myoRightEmg.csv"
+        file2_subject1_rigth = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1920/myoRightEmg.csv"
+        file3_subject1_rigth = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1935/myoRightEmg.csv"
+        file4_subject1_rigth = "/Exp20201205_2myo_softType/HaluskaMarek_20201207_1945/myoRightEmg.csv"
         subject1_right_files = [file1_subject1_rigth, file2_subject1_rigth, file3_subject1_rigth, file4_subject1_rigth]
 
         # CSV data from subject 2
-        file1_subject2_left = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2010/myoLeftEmg.csv"
-        file2_subject2_left = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2025/myoLeftEmg.csv"
-        file3_subject2_left = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2035/myoLeftEmg.csv"
-        file4_subject2_left = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2045/myoLeftEmg.csv"
+        file1_subject2_left = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2055/myoLeftEmg.csv"
+        file2_subject2_left = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2110/myoLeftEmg.csv"
+        file3_subject2_left = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2125/myoLeftEmg.csv"
+        file4_subject2_left = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2145/myoLeftEmg.csv"
         subject2_left_files = [file1_subject2_left, file2_subject2_left, file3_subject2_left, file4_subject2_left]
-        file1_subject2_rigth = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2010/myoRightEmg.csv"
-        file2_subject2_rigth = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2025/myoRightEmg.csv"
-        file3_subject2_rigth = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2035/myoRightEmg.csv"
-        file4_subject2_rigth = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2045/myoRightEmg.csv"
+        file1_subject2_rigth = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2055/myoRightEmg.csv"
+        file2_subject2_rigth = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2110/myoRightEmg.csv"
+        file3_subject2_rigth = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2125/myoRightEmg.csv"
+        file4_subject2_rigth = "/Exp20201205_2myo_softType/HaluskaMaros_20201205_2145/myoRightEmg.csv"
         subject2_right_files = [file1_subject2_rigth, file2_subject2_rigth, file3_subject2_rigth, file4_subject2_rigth]
 
         # CSV data from subject 3
-        file1_subject3_left = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1700/myoLeftEmg.csv"
-        file2_subject3_left = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1715/myoLeftEmg.csv"
-        file3_subject3_left = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1725/myoLeftEmg.csv"
-        file4_subject3_left = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1735/myoLeftEmg.csv"
+        file1_subject3_left = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1745/myoLeftEmg.csv"
+        file2_subject3_left = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1755/myoLeftEmg.csv"
+        file3_subject3_left = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1810/myoLeftEmg.csv"
+        file4_subject3_left = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1825/myoLeftEmg.csv"
         subject3_left_files = [file1_subject3_left, file2_subject3_left, file3_subject3_left, file4_subject3_left]
-        file1_subject3_rigth = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1700/myoRightEmg.csv"
-        file2_subject3_rigth = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1715/myoRightEmg.csv"
-        file3_subject3_rigth = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1725/myoRightEmg.csv"
-        file4_subject3_rigth = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1735/myoRightEmg.csv"
+        file1_subject3_rigth = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1745/myoRightEmg.csv"
+        file2_subject3_rigth = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1755/myoRightEmg.csv"
+        file3_subject3_rigth = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1810/myoRightEmg.csv"
+        file4_subject3_rigth = "/Exp20201205_2myo_softType/HaluskovaBeata_20201205_1825/myoRightEmg.csv"
         subject3_right_files = [file1_subject3_rigth, file2_subject3_rigth, file3_subject3_rigth, file4_subject3_rigth]
 
         # CSV data from subject 4
-        file1_subject4_left = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1900/myoLeftEmg.csv"
-        file2_subject4_left = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1915/myoLeftEmg.csv"
-        file3_subject4_left = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1925/myoLeftEmg.csv"
-        file4_subject4_left = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1935/myoLeftEmg.csv"
+        file1_subject4_left = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1945/myoLeftEmg.csv"
+        file2_subject4_left = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1955/myoLeftEmg.csv"
+        file3_subject4_left = "/Exp20201205_2myo_softType/KelisekDavid_20201209_2010/myoLeftEmg.csv"
+        file4_subject4_left = "/Exp20201205_2myo_softType/KelisekDavid_20201209_2025/myoLeftEmg.csv"
         subject4_left_files = [file1_subject4_left, file2_subject4_left, file3_subject4_left, file4_subject4_left]
-        file1_subject4_rigth = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1900/myoRightEmg.csv"
-        file2_subject4_rigth = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1915/myoRightEmg.csv"
-        file3_subject4_rigth = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1925/myoRightEmg.csv"
-        file4_subject4_rigth = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1935/myoRightEmg.csv"
+        file1_subject4_rigth = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1945/myoRightEmg.csv"
+        file2_subject4_rigth = "/Exp20201205_2myo_softType/KelisekDavid_20201209_1955/myoRightEmg.csv"
+        file3_subject4_rigth = "/Exp20201205_2myo_softType/KelisekDavid_20201209_2010/myoRightEmg.csv"
+        file4_subject4_rigth = "/Exp20201205_2myo_softType/KelisekDavid_20201209_2025/myoRightEmg.csv"
         subject4_right_files = [file1_subject4_rigth, file2_subject4_rigth, file3_subject4_rigth, file4_subject4_rigth]
 
 
         # CSV data from subject 5
-        file1_subject5_left = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2030/myoLeftEmg.csv"
-        file2_subject5_left = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2040/myoLeftEmg.csv"
-        file3_subject5_left = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2050/myoLeftEmg.csv"
-        file4_subject5_left = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2100/myoLeftEmg.csv"
+        file1_subject5_left = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2110/myoLeftEmg.csv"
+        file2_subject5_left = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2120/myoLeftEmg.csv"
+        file3_subject5_left = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2130/myoLeftEmg.csv"
+        file4_subject5_left = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2140/myoLeftEmg.csv"
         subject5_left_files = [file1_subject5_left, file2_subject5_left, file3_subject5_left, file4_subject5_left]
-        file1_subject5_rigth = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2030/myoRightEmg.csv"
-        file2_subject5_rigth = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2040/myoRightEmg.csv"
-        file3_subject5_rigth = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2050/myoRightEmg.csv"
-        file4_subject5_rigth = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2100/myoRightEmg.csv"
+        file1_subject5_rigth = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2110/myoRightEmg.csv"
+        file2_subject5_rigth = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2120/myoRightEmg.csv"
+        file3_subject5_rigth = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2130/myoRightEmg.csv"
+        file4_subject5_rigth = "/Exp20201205_2myo_softType/KelisekRichard_20201209_2140/myoRightEmg.csv"
         subject5_right_files = [file1_subject5_rigth, file2_subject5_rigth, file3_subject5_rigth, file4_subject5_rigth]
 
         left_list = [subject1_left_files, subject2_left_files, subject3_left_files, subject4_left_files, subject5_left_files]
@@ -434,9 +434,11 @@ class CSV_handler:
             self.link_container_to_handler(data_container)
         return self.data_container_dict
 
+# Help: gets the str from emg nr
 def get_emg_str(emg_nr):
     return 'emg' + str(emg_nr)
 
+# Help: gets the min/max of a df
 def get_min_max_timestamp(df:DataFrame):
     min = int(np.floor(df['timestamp'].min()))
     max = df['timestamp'].max()
