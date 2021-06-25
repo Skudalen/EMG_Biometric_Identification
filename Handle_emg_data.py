@@ -33,6 +33,7 @@ class CSV_handler:
         filtered_df = tot_data_frame[["timestamp", emg_str]]
         return filtered_df
     
+    # Takes in a df and stores the information in a Data_container object
     def store_df_in_container(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container, round:int):
         df = self.get_time_emg_table(filename, emg_nr+1)
 
@@ -60,13 +61,14 @@ class CSV_handler:
         else:
             raise IndexError('Not a valid index')
     
+    # Links the data container for a subject to the handler object
     def link_container_to_handler(self, data_container:Data_container):
         # Links the retrieved data with the subjects data_container
         subject_nr = data_container.subject_nr
         self.data_container_dict[subject_nr] = data_container
-        #print(data_container.subject_name)
     
     # Loads the data from the csv files into a storing system in an CSV_handler object
+    # (hard, hardPP, soft and softPP)
     def load_hard_PP_emg_data(self):
 
         # CSV data from subject 1
