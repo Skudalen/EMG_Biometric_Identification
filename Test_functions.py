@@ -69,8 +69,8 @@ def test_total_denoising():
     plot_df(df)
 
     # Denoised df:
-    df_denoised = denoice_dataset(handler, 3, 'left', 3, 3)
-    print(df.head)
+    N_trans, y_values, df_denoised = denoice_dataset(handler, 3, 'left', 3, 3)
+    print(df_denoised.head)
     plot_df(df_denoised)
 
 test_total_denoising()
