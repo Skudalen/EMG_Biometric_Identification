@@ -71,9 +71,8 @@ def inverse_wavelet(df, cA_filt, cD_filt):
     return y_new_values
 
 # Takes in handler and detailes to denoise. Returns arrays and df
-def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, emg_nr, round):
-    
-    print(df.head)
+def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, emg_nr):
+    df = handler.get_df_from_data_dict(subject_nr, which_arm, round, emg_nr)
 
     N = get_xory_from_df('x', df)
     N_trans, cA, cD = wavelet_db4_denoising(df)

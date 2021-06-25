@@ -443,6 +443,7 @@ class CSV_handler:
         self.data_type = 'soft'
         return self.data_container_dict
 
+    # Retrieves df via the data_dict in the handler object
     def get_df_from_data_dict(self, subject_nr, which_arm, round, emg_nr):
         data_type = self.data_type
         container = self.data_container_dict.get(subject_nr)
