@@ -12,7 +12,8 @@ def test_df_extraction(emg_nr):
     return subject1_left_emg1, emg_nr
 
 def test_load_func():
-    test_dict = load_user_emg_data()
+    handler = CSV_handler()
+    test_dict = handler.load_hard_PP_emg_data()
     subject2_container = test_dict[2]
     print(subject2_container.data_dict['left'][1])
 

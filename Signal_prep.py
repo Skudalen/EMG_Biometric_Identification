@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from pandas.core.frame import DataFrame
 from scipy.fft import fft, fftfreq
 import pywt
-from scipy.signal import wavelets
+#from scipy.signal import wavelets
 #import pyyawt
 
 import Handle_emg_data as Handler
@@ -31,7 +31,7 @@ def fft_of_df(df:DataFrame):
     norm = normalize_wave(y_values)
     N_trans = fftfreq(N, 1 / SAMPLE_RATE)
     y_f = fft(norm)
-    return N_trans, y_f, duration
+    return N_trans, y_f
 
 # Removes noise with db4 wavelet function 
 def wavelet_db4_denoising(df:DataFrame):
