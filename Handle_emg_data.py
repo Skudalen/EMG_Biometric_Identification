@@ -447,7 +447,7 @@ class CSV_handler:
     def get_df_from_data_dict(self, subject_nr, which_arm, round, emg_nr):
         data_type = self.data_type
         container = self.data_container_dict.get(subject_nr)
-        df = container.dict_list[round - 1].get(which_arm)[emg_nr]
+        df = container.dict_list[round - 1].get(which_arm)[emg_nr - 1]
         return df
 
 

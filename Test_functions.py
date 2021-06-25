@@ -1,3 +1,4 @@
+from matplotlib import lines
 from numpy import load
 from Handle_emg_data import *
 import matplotlib.pyplot as plt
@@ -66,11 +67,19 @@ def test_total_denoising():
     # Original df:
     df = handler.get_df_from_data_dict(3, 'left', 3, 3)
     print(df.head)
-    plot_df(df)
+    
 
     # Denoised df:
-    N_trans, y_values, df_denoised = denoice_dataset(handler, 3, 'left', 3, 3)
+    df_denoised = denoice_dataset(handler, 3, 'left', 3, 3, 0.2)
     print(df_denoised.head)
-    plot_df(df_denoised)
+
+    x = get_xory_from_df('x', df)
+    y1 = get_xory_from_df('y', df)
+    y2 = get_xory_from_df('y', df_denoised)
+
+    figure, axis = plt.subplots(1, 2)
+    axis[0].plot(x, y1)
+    axis[1].plot(x, y2)
+    plt.show()
 
 test_total_denoising()
