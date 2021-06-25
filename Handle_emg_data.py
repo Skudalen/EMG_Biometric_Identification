@@ -13,12 +13,18 @@ class Data_container:
         self.data_dict_round2 = {'left': [None]*8, 'right': [None]*8}
         self.data_dict_round3 = {'left': [None]*8, 'right': [None]*8}
         self.data_dict_round4 = {'left': [None]*8, 'right': [None]*8}
+        self.dict_list =    [self.data_dict_round1, 
+                            self.data_dict_round2, 
+                            self.data_dict_round3, 
+                            self.data_dict_round4
+                            ]
     
 class CSV_handler:
 
     def __init__(self):
         self.working_dir = str(Path.cwd()) 
-        self.data_container_dict = {} # Dict with keys equal subject numbers and values equal the relvant datacontainer 
+        self.data_container_dict = {} # Dict with keys equal subject numbers and values equal the relvant datacontainer
+        self.data_type = ''
 
     # Makes dataframe from the csv files in the working directory
     def make_df(self, filename):
@@ -158,6 +164,7 @@ class CSV_handler:
                     self.store_df_in_container(filename, emg_nr, 'right', data_container, round+1)
             # Links the stored data in the data_container to the Handler
             self.link_container_to_handler(data_container)
+        self.data_type = 'hardPP'
         return self.data_container_dict
 
     def load_soft_PP_emg_data(self):
@@ -249,6 +256,7 @@ class CSV_handler:
                     self.store_df_in_container(filename, emg_nr, 'right', data_container, round+1)
             # Links the stored data in the data_container to the Handler
             self.link_container_to_handler(data_container)
+        self.data_type = 'softPP'
         return self.data_container_dict
 
     def load_hard_original_emg_data(self):
@@ -340,7 +348,7 @@ class CSV_handler:
                     self.store_df_in_container(filename, emg_nr, 'right', data_container, round+1)
             # Links the stored data in the data_container to the Handler
             self.link_container_to_handler(data_container)
-        
+        self.data_type = 'hard'
         return self.data_container_dict
 
     def load_soft_original_emg_data(self):
@@ -432,6 +440,7 @@ class CSV_handler:
                     self.store_df_in_container(filename, emg_nr, 'right', data_container, round+1)
             # Links the stored data in the data_container to the Handler
             self.link_container_to_handler(data_container)
+        self.data_type = 'soft'
         return self.data_container_dict
 
 # Help: gets the str from emg nr
