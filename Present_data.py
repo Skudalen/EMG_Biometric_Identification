@@ -49,7 +49,7 @@ def plot_mfcc(mfcc_data, data_label:str):
     ax.set_xlabel('Time(s)')
     plt.show() 
 
-def plot_3_mfcc(mfcc_data1, mfcc_data2, mfcc_data3, data_label1:str, data_label2:str, data_label3:str):
+def plot_3_mfcc(mfcc_data1, data_label1:str, mfcc_data2, data_label2:str, mfcc_data3, data_label3:str):
     
     fig, axes = plt.subplots(nrows=3)
     plt.subplots_adjust(hspace=1.4, wspace=0.4)
@@ -63,7 +63,7 @@ def plot_3_mfcc(mfcc_data1, mfcc_data2, mfcc_data3, data_label1:str, data_label2
         ax.xaxis.set_major_formatter(ticks_x)
    
         ax.imshow(mfcc_data, interpolation='nearest', cmap=cm.coolwarm, origin='lower')
-        ax.set_title('MFCC: ' + label)
+        ax.set_title('MFCC: ' + str(label))
         ax.set_ylabel('Cepstral Coefficients')
         ax.set_xlabel('Time(s)')
 
@@ -108,7 +108,8 @@ def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, e
     df_new = Handler.make_df_from_xandy(N, y_values, emg_nr)
     return df_new
 
-
+# Slightly modified mfcc with inputs like below.
+# Returns N (x_values from original df) and mfcc_y_values 
 def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize):
     N = get_xory_from_df('x', df)
     y = get_xory_from_df('y', df)
@@ -127,26 +128,31 @@ def compare_with_wavelet_filter(data_frame):
 
     plot_compare_two_df(data_frame_freq, 'Original data', data_frame_freq_filt, 'Analyzed data')
 
+def compare_mfcc_3_plots(csv_handler:CSV_handler):
+    df1, samplerate1 = get_data(csv_handler, 1, 'left', 1, 1)
+    df2, samplerate2 = get_data(csv_handler, 1, 'left', 2, 1)
+    df3, samplerate3 = get_data(csv_handler, 2, 'left', 1, 1)
+    print(df1.head, samplerate1)
+    print(df2.head, samplerate2)
+    print(df3.head, samplerate3)
+
+    N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, mfcc_windowsize, mfcc_stepsize)
+    N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, mfcc_windowsize, mfcc_stepsize)
+    N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, mfcc_windowsize, mfcc_stepsize)
+
+    label_1 = 'Subject 1, session 1'
+    label_2 = 'Subject 1, session 2'
+    label_3 = 'Subject 2, session 1'
+
+    plot_3_mfcc(mfcc_feat1, label_1, mfcc_feat2, label_2, mfcc_feat3, label_3)
 
 # MAIN: ------------------------------------------------------------------------: 
 
 def main():
 
     csv_handler = CSV_handler()
-    load_data(csv_handler, 'hard')
-    df1, samplerate1 = get_data(csv_handler, 1, 'left', 1, 1)
-    df2, samplerate2 = get_data(csv_handler, 1, 'left', 2, 1)
-    df3, samplerate3 = get_data(csv_handler, 2, 'left', 1, 1)
-
-    N, mfcc_feat1 = mfcc_custom(df1[:5000], samplerate1, mfcc_windowsize, mfcc_stepsize)
-    N, mfcc_feat2 = mfcc_custom(df2[:5000], samplerate2, mfcc_windowsize, mfcc_stepsize)
-    N, mfcc_feat3 = mfcc_custom(df3[:5000], samplerate3, mfcc_windowsize, mfcc_stepsize)
-
-    label_1 = 'Subject 1, session 1'
-    label_2 = 'Subject 1, session 2'
-    label_3 = 'Subject 2, session 1'
-
-    plot_3_mfcc(mfcc_feat1, mfcc_feat2, mfcc_feat3, label_1, label_2, label_3)
+    load_data(csv_handler, 'soft')
+    compare_mfcc_3_plots(csv_handler)
     
 
 main()
