@@ -20,10 +20,10 @@ class Data_container:
     
 class CSV_handler:
 
-    def __init__(self, data_type):
+    def __init__(self):
         self.working_dir = str(Path.cwd()) 
         self.data_container_dict = {} # Dict with keys equal subject numbers and values equal the relvant datacontainer
-        self.data_type = data_type
+        self.data_type = None
 
     # Makes dataframe from the csv files in the working directory
     def make_df(self, filename):

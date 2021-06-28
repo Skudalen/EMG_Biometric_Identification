@@ -77,9 +77,9 @@ def cepstrum(df:DataFrame):
     
     return None
 
-def mfcc(df:DataFrame):
+def mfcc(df:DataFrame, window_lenth):
     N = get_xory_from_df('x', df)
     y = get_xory_from_df('y', df)
-    return N, base.mfcc(y, SAMPLE_RATE)
+    return N, base.mfcc(y, SAMPLE_RATE, window_lenth)
     
 

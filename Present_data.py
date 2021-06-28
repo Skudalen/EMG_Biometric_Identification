@@ -1,3 +1,4 @@
+from logging import error
 from Handle_emg_data import *
 from Signal_prep import *
 import matplotlib.pyplot as plt
@@ -41,13 +42,16 @@ def plot_mfcc(mfcc_data):
 
 # Loads in data. Choose data_type: hard, hardPP, soft og softPP as str. Returns None
 def load_data(csv_handler:CSV_handler, data_type):
-    switcher = {
-                'hard': csv_handler.load_hard_original_emg_data(),
-                'hardPP':csv_handler.load_hard_PP_emg_data(),
-                'soft':csv_handler.load_soft_original_emg_data(),
-                'softPP':csv_handler.load_soft_PP_emg_data(),
-                }
-    return switcher.get(data_type)
+    if data_type == 'hard': 
+        csv_handler.load_hard_original_emg_data()
+    elif data_type == 'hardPP':
+        csv_handler.load_hard_PP_emg_data()
+    elif data_type == 'soft':
+        csv_handler.load_soft_original_emg_data()
+    elif data_type == 'softPP':
+        csv_handler.load_soft_PP_emg_data()
+    else:
+        raise Exception('Wrong input')
 
 # Retrieved data. Send in loaded csv_handler and data detailes you want. Returns DataFrame
 def get_data(csv_handler:CSV_handler, subject_nr, which_arm, session, emg_nr):
@@ -83,13 +87,15 @@ def compare_with_wavelet(data_frame):
 
 def main():
 
-    csv_handler = CSV_handler('hard')
+    csv_handler = CSV_handler()
     load_data(csv_handler, 'hard')
+    print(csv_handler.data_type)
     data_frame = get_data(csv_handler, 1, 'left', 1, 1)
 
-    N, y_mfcc = mfcc(data_frame)
-    plt.plot(y_mfcc)
-    plt.show()
+    print(data_frame.head)
+    
+    N, y_mfcc = mfcc(data_frame, 0.1)
+    plot_mfcc(y_mfcc)
 
     return None
 
