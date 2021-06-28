@@ -1,12 +1,11 @@
 import numpy as np 
-import matplotlib.pyplot as plt
-import pandas
 from pandas.core.frame import DataFrame
 from scipy.fft import fft, fftfreq
 import pywt
-import pyhton_speech_features as psf
-#from scipy.signal import wavelets
-#import pyyawt
+#from pyhton_speech_features.base import mfcc
+import sys
+sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/python_speech_features/python_speech_features')
+from python_speech_features.python_speech_features import *
 
 import Handle_emg_data as Handler
 
@@ -78,9 +77,9 @@ def cepstrum(df:DataFrame):
     
     return None
 
-'''
 def mfcc(df:DataFrame):
     N = get_xory_from_df('x', df)
     y = get_xory_from_df('y', df)
-    spf.mfcc(y, )
-'''
+    return N, base.mfcc(y, SAMPLE_RATE)
+    
+
