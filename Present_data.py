@@ -2,7 +2,12 @@ from logging import error
 from Handle_emg_data import *
 from Signal_prep import *
 import matplotlib.pyplot as plt
-from matplotlib import cm
+from matplotlib import cm, ticker
+
+
+SAMPLE_RATE = 200
+mfcc_stepsize = 0.5
+mfcc_windowsize = 2
 
 # PLOT FUNCTIONS:
 
@@ -29,9 +34,15 @@ def plot_compare_two_df(df_old, old_name, df_new, new_name):
     plt.show()
 
 def plot_mfcc(mfcc_data):
+    #plt.rcParams["figure.figsize"] = [7.50, 15]
+    #plt.rcParams["figure.autolayout"] = True
+
     fig, ax = plt.subplots()
     mfcc_data= np.swapaxes(mfcc_data, 0 ,1)
-    cax = ax.imshow(mfcc_data, interpolation='nearest', cmap=cm.coolwarm, origin='lower')
+    #ax.axis([0, mfcc_stepsize * len(mfcc_data[0]), 0, len(mfcc_data[:,0])])
+    #ticks = ticker.get_xticks()* 1/10
+    #ticker.set_xticklabels(ticks)
+    ax.imshow(mfcc_data, interpolation='nearest', cmap=cm.coolwarm, origin='lower')
     ax.set_title('MFCC')
     plt.show() 
 
@@ -89,13 +100,15 @@ def main():
 
     csv_handler = CSV_handler()
     load_data(csv_handler, 'hard')
-    print(csv_handler.data_type)
     data_frame = get_data(csv_handler, 1, 'left', 1, 1)
 
-    print(data_frame.head)
+    #print(data_frame.head)
     
-    N, y_mfcc = mfcc(data_frame, 0.1)
-    plot_mfcc(y_mfcc)
+
+    mfcc_data = get_xory_from_df('y', data_frame[:5000])
+    mfcc_feat = base.mfcc(mfcc_data, SAMPLE_RATE, mfcc_windowsize, mfcc_stepsize)
+    print(mfcc_feat.shape)
+    plot_mfcc(mfcc_feat)
 
     return None
 
