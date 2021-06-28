@@ -9,7 +9,6 @@ from python_speech_features.python_speech_features import *
 
 import Handle_emg_data as Handler
 
-SAMPLE_RATE = 200
 
 
 # Takes in a df and outputs np arrays for x and y values
@@ -30,7 +29,7 @@ def fft_of_df(df:DataFrame):
     y_values = get_xory_from_df('y', df)
     N = y_values.size
     norm = normalize_wave(y_values)
-    N_trans = fftfreq(N, 1 / SAMPLE_RATE)
+    N_trans = fftfreq(N, 1 / Handler.get_samplerate(df))
     y_f = fft(norm)
     return N_trans, y_f
 

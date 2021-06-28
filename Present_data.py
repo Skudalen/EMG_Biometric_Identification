@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.ticker as ticker
 
-
-SAMPLE_RATE = 200
+# Global variables for MFCC
 mfcc_stepsize = 0.5
 mfcc_windowsize = 2
 
-# PLOT FUNCTIONS:
+
+# PLOT FUNCTIONS --------------------------------------------------------------: 
 
 # Plots DataFrame objects
 def plot_df(df:DataFrame):
@@ -36,19 +36,20 @@ def plot_compare_two_df(df_old, old_name, df_new, new_name):
     axis[1].set_title(new_name)
     plt.show()
 
-def plot_mfcc(mfcc_data):
-    #plt.rcParams["figure.figsize"] = [7.50, 15]
-    #plt.rcParams["figure.autolayout"] = True
-
+def plot_mfcc(mfcc_data, data_label:str):
     fig, ax = plt.subplots()
     mfcc_data= np.swapaxes(mfcc_data, 0 ,1)
-    #ax.axis([0, mfcc_stepsize * len(mfcc_data[0]), 0, len(mfcc_data[:,0])])
-    #ax.set_xticks(range(int(len(mfcc_data) * 1 / mfcc_stepsize)))
+    
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * mfcc_stepsize))
+    ax.xaxis.set_major_formatter(ticks_x)
+
     ax.imshow(mfcc_data, interpolation='nearest', cmap=cm.coolwarm, origin='lower')
-    ax.set_title('MFCC')
+    ax.set_title('MFCC:' + data_label)
+    ax.set_ylabel('Cepstral coefficients')
+    ax.set_xlabel('Time(s)')
     plt.show() 
 
-# DATA FUNCTIONS:
+# DATA FUNCTIONS: --------------------------------------------------------------: 
 
 # The CSV_handler takes in data_type, but only for visuals. 
 # E.g. handler = CSV_handler('soft')
@@ -66,10 +67,11 @@ def load_data(csv_handler:CSV_handler, data_type):
     else:
         raise Exception('Wrong input')
 
-# Retrieved data. Send in loaded csv_handler and data detailes you want. Returns DataFrame
+# Retrieved data. Send in loaded csv_handler and data detailes you want. Returns DataFrame and samplerate
 def get_data(csv_handler:CSV_handler, subject_nr, which_arm, session, emg_nr):
     data_frame = csv_handler.get_df_from_data_dict(subject_nr, which_arm, session, emg_nr)
-    return data_frame
+    samplerate = get_samplerate(data_frame)
+    return data_frame, samplerate
     
 #Takes in handler and detailes to denoise. Returns arrays and df
 def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, emg_nr):
@@ -88,9 +90,9 @@ def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize):
     y = get_xory_from_df('y', df)
     return N, base.mfcc(y, samplesize, windowsize, stepsize)
 
-# CASE FUNTIONS 
+# CASE FUNTIONS ----------------------------------------------------------------: 
 
-def compare_with_wavelet(data_frame):
+def compare_with_wavelet_filter(data_frame):
     N_trans, cA, cD = wavelet_db4(data_frame)
     data_frame_freq = make_df_from_xandy(N_trans, cA, 1)
 
@@ -100,19 +102,18 @@ def compare_with_wavelet(data_frame):
     plot_compare_two_df(data_frame_freq, 'Original data', data_frame_freq_filt, 'Analyzed data')
 
 
-# MAIN:
+# MAIN: ------------------------------------------------------------------------: 
 
 def main():
 
     csv_handler = CSV_handler()
     load_data(csv_handler, 'hard')
-    data_frame = get_data(csv_handler, 2, 'left', 1, 1)
+    data_frame, samplerate = get_data(csv_handler, 2, 'left', 1, 1)
 
-    print(get_samplerate(data_frame))
-
-    N, mfcc_feat = mfcc_custom(data_frame[:5000], SAMPLE_RATE, mfcc_windowsize, mfcc_stepsize)
+    N, mfcc_feat = mfcc_custom(data_frame[:5000], samplerate, mfcc_windowsize, mfcc_stepsize)
     plot_mfcc(mfcc_feat)
-    print(get_sample_data)
+    #print(mfcc_feat)
+    
     
     return None
 
