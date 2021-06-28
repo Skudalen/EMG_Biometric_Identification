@@ -12,7 +12,7 @@ class Data_container:
         self.data_dict_round2 = {'left': [None]*8, 'right': [None]*8}
         self.data_dict_round3 = {'left': [None]*8, 'right': [None]*8}
         self.data_dict_round4 = {'left': [None]*8, 'right': [None]*8}
-        self.dict_list =    [self.data_dict_round1, 
+        self.dict_list =   [self.data_dict_round1, 
                             self.data_dict_round2, 
                             self.data_dict_round3, 
                             self.data_dict_round4
@@ -449,6 +449,8 @@ class CSV_handler:
         df = container.dict_list[round - 1].get(which_arm)[emg_nr - 1]
         return df
 
+
+# HELP FUNCTIONS: ------------------------------------------------------------------------: 
 
 # Help: gets the str from emg nr
 def get_emg_str(emg_nr):

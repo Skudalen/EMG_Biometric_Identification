@@ -69,6 +69,7 @@ def plot_3_mfcc(mfcc_data1, data_label1:str, mfcc_data2, data_label2:str, mfcc_d
 
     plt.show() 
 
+
 # DATA FUNCTIONS: --------------------------------------------------------------: 
 
 # The CSV_handler takes in data_type, but only for visuals. 
@@ -115,6 +116,7 @@ def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize):
     y = get_xory_from_df('y', df)
     return N, base.mfcc(y, samplesize, windowsize, stepsize)
 
+
 # CASE FUNTIONS ----------------------------------------------------------------: 
 
 # Takes in a df and compares the FFT and the wavelet denoising of the FFT
@@ -128,6 +130,9 @@ def compare_with_wavelet_filter(data_frame):
 
     plot_compare_two_df(data_frame_freq, 'Original data', data_frame_freq_filt, 'Analyzed data')
 
+# Loads three preset emg datasets, calculates mfcc for each and plots them.
+# Input: CSV_handler
+# Output: None --> Plot
 def compare_mfcc_3_plots(csv_handler:CSV_handler):
     df1, samplerate1 = get_data(csv_handler, 1, 'left', 1, 1)
     df2, samplerate2 = get_data(csv_handler, 1, 'left', 2, 1)
@@ -145,6 +150,7 @@ def compare_mfcc_3_plots(csv_handler:CSV_handler):
     label_3 = 'Subject 2, session 1'
 
     plot_3_mfcc(mfcc_feat1, label_1, mfcc_feat2, label_2, mfcc_feat3, label_3)
+
 
 # MAIN: ------------------------------------------------------------------------: 
 

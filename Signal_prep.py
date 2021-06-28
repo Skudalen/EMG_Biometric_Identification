@@ -2,13 +2,10 @@ import numpy as np
 from pandas.core.frame import DataFrame
 from scipy.fft import fft, fftfreq
 import pywt
-#from pyhton_speech_features.base import mfcc
 import sys
+import Handle_emg_data as Handler
 sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/python_speech_features/python_speech_features')
 from python_speech_features.python_speech_features import *
-
-import Handle_emg_data as Handler
-
 
 
 # Takes in a df and outputs np arrays for x and y values
@@ -42,14 +39,6 @@ def wavelet_db4(df:DataFrame):
     N_trans =  np.array(range(int(np.floor((y_values.size + wavelet.dec_len - 1) / 2))))
     return N_trans, cA, cD 
 
-# Filters signal accordning to Stein's Unbiased Risk Estimate(SURE)
-'''
-def sure_threshold_filter(cA, cD):
-    cA_filt = pyyawt.theselect(cA, 'rigrsure')
-    cD_filt = cD 
-    return cA_filt, cD_filt
-'''
-
 # soft filtering of wavelet trans with the a 1/2 std filter 
 def soft_threshold_filter(cA, cD):
     cA_filt = pywt.threshold(cA, np.std(cA)/2)
@@ -69,16 +58,9 @@ def inverse_wavelet(df, cA_filt, cD_filt):
             old_len = len(get_xory_from_df('y', df))
     return y_new_values
 
+# NOT FINISHED
 def cepstrum(df:DataFrame):
     N = get_xory_from_df('x', df)
     y = get_xory_from_df('y', df)
-    
-    
     return None
-
-def mfcc(df:DataFrame, samplesize, windowsize, stepsize):
-    N = get_xory_from_df('x', df)
-    y = get_xory_from_df('y', df)
-    return N, base.mfcc(y, samplesize, windowsize, stepsize)
-    
 
