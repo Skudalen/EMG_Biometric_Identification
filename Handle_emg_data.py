@@ -71,7 +71,7 @@ class CSV_handler:
         # Links the retrieved data with the subjects data_container
         subject_nr = data_container.subject_nr
         self.data_container_dict[subject_nr] = data_container
-    
+
     # Loads the data from the csv files into a storing system in an CSV_handler object
     # (hard, hardPP, soft and softPP)
     def load_hard_PP_emg_data(self):
@@ -467,3 +467,13 @@ def make_df_from_xandy(x, y, emg_nr):
     #print(df)
     return df
 
+# Help: returns the samplerate of a df
+def get_samplerate(df:DataFrame):
+        min, max = get_min_max_timestamp(df)
+        #print(min, max)
+        seconds = max - 60 - min
+        #print(seconds)
+        samples = len(df['timestamp'])
+        #print(samples)
+        samplerate = samples / seconds
+        return samplerate

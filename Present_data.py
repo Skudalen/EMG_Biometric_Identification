@@ -1,8 +1,11 @@
 from logging import error
+
+from matplotlib.cbook import get_sample_data
 from Handle_emg_data import *
 from Signal_prep import *
 import matplotlib.pyplot as plt
-from matplotlib import cm, ticker
+from matplotlib import cm
+import matplotlib.ticker as ticker
 
 
 SAMPLE_RATE = 200
@@ -40,8 +43,7 @@ def plot_mfcc(mfcc_data):
     fig, ax = plt.subplots()
     mfcc_data= np.swapaxes(mfcc_data, 0 ,1)
     #ax.axis([0, mfcc_stepsize * len(mfcc_data[0]), 0, len(mfcc_data[:,0])])
-    #ticks = ticker.get_xticks()* 1/10
-    #ticker.set_xticklabels(ticks)
+    #ax.set_xticks(range(int(len(mfcc_data) * 1 / mfcc_stepsize)))
     ax.imshow(mfcc_data, interpolation='nearest', cmap=cm.coolwarm, origin='lower')
     ax.set_title('MFCC')
     plt.show() 
@@ -81,6 +83,10 @@ def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, e
     df_new = Handler.make_df_from_xandy(N, y_values, emg_nr)
     return df_new
 
+def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize):
+    N = get_xory_from_df('x', df)
+    y = get_xory_from_df('y', df)
+    return N, base.mfcc(y, samplesize, windowsize, stepsize)
 
 # CASE FUNTIONS 
 
@@ -100,16 +106,14 @@ def main():
 
     csv_handler = CSV_handler()
     load_data(csv_handler, 'hard')
-    data_frame = get_data(csv_handler, 1, 'left', 1, 1)
+    data_frame = get_data(csv_handler, 2, 'left', 1, 1)
 
-    #print(data_frame.head)
-    
+    print(get_samplerate(data_frame))
 
-    mfcc_data = get_xory_from_df('y', data_frame[:5000])
-    mfcc_feat = base.mfcc(mfcc_data, SAMPLE_RATE, mfcc_windowsize, mfcc_stepsize)
-    print(mfcc_feat.shape)
+    N, mfcc_feat = mfcc_custom(data_frame[:5000], SAMPLE_RATE, mfcc_windowsize, mfcc_stepsize)
     plot_mfcc(mfcc_feat)
-
+    print(get_sample_data)
+    
     return None
 
 main()
