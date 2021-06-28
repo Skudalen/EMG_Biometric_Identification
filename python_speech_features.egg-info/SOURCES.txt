@@ -1,0 +1,7 @@
+python_speech_features/example.py
+python_speech_features/setup.py
+python_speech_features.egg-info/PKG-INFO
+python_speech_features.egg-info/SOURCES.txt
+python_speech_features.egg-info/dependency_links.txt
+python_speech_features.egg-info/requires.txt
+python_speech_features.egg-info/top_level.txt

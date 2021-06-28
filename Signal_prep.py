@@ -4,6 +4,7 @@ import pandas
 from pandas.core.frame import DataFrame
 from scipy.fft import fft, fftfreq
 import pywt
+import pyhton_speech_features as psf
 #from scipy.signal import wavelets
 #import pyyawt
 
@@ -35,7 +36,7 @@ def fft_of_df(df:DataFrame):
     return N_trans, y_f
 
 # Removes noise with db4 wavelet function 
-def wavelet_db4_denoising(df:DataFrame):
+def wavelet_db4(df:DataFrame):
     y_values = get_xory_from_df('y', df)
     #y_values = normalize_wave(y_values)
     wavelet = pywt.Wavelet('db4')
@@ -51,10 +52,10 @@ def sure_threshold_filter(cA, cD):
     return cA_filt, cD_filt
 '''
 
-# soft filtering of wavelet trans with the 40% lowest removed
-def soft_threshold_filter(cA, cD, threshold):
-    cA_filt = pywt.threshold(cA, threshold * cA.max())
-    cD_filt = cD 
+# soft filtering of wavelet trans with the a 1/2 std filter 
+def soft_threshold_filter(cA, cD):
+    cA_filt = pywt.threshold(cA, np.std(cA)/2)
+    cD_filt = pywt.threshold(cD, np.std(cD)/2)
     return cA_filt, cD_filt
 
 # Inverse dwt for brining denoise signal back to the time domainfi
@@ -70,16 +71,16 @@ def inverse_wavelet(df, cA_filt, cD_filt):
             old_len = len(get_xory_from_df('y', df))
     return y_new_values
 
-# Takes in handler and detailes to denoise. Returns arrays and df
-def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, emg_nr, threshold):
-    df = handler.get_df_from_data_dict(subject_nr, which_arm, round, emg_nr)
-
+def cepstrum(df:DataFrame):
     N = get_xory_from_df('x', df)
-    N_trans, cA, cD = wavelet_db4_denoising(df)
-    cA_filt, cD_filt = soft_threshold_filter(cA, cD, threshold)
-    y_values = inverse_wavelet(df, cA_filt, cD_filt)
+    y = get_xory_from_df('y', df)
+    
+    
+    return None
 
-    df_new = Handler.make_df_from_xandy(N, y_values, emg_nr)
-    return df_new
-
-
+'''
+def mfcc(df:DataFrame):
+    N = get_xory_from_df('x', df)
+    y = get_xory_from_df('y', df)
+    spf.mfcc(y, )
+'''
