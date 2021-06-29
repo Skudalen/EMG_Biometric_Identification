@@ -449,6 +449,14 @@ class CSV_handler:
         df = container.dict_list[round - 1].get(which_arm)[emg_nr - 1]
         return df
 
+'''
+    def get_keyboard_data(self, filename:str, pres_or_release:str='pressed'):
+        filepath = self.working_dir + str(filename)
+        df = pd.read_csv(filepath)
+        if pres_or_release == 'pressed':
+            df = df[(df['event'] == 'KeyPressed') and (df['event'] == 'KeyPressed')]
+        else
+'''
 
 # HELP FUNCTIONS: ------------------------------------------------------------------------: 
 

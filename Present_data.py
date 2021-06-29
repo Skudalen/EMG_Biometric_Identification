@@ -69,6 +69,34 @@ def plot_3_mfcc(mfcc_data1, data_label1:str, mfcc_data2, data_label2:str, mfcc_d
 
     plt.show() 
 
+def plot_all_emg_mfcc(data_list:list, label_list:list):
+    fig, axes = plt.subplots(nrows=4, ncols=2)
+    plt.subplots_adjust(hspace=1.4, wspace=0.4)
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * mfcc_stepsize))
+    plt.autoscale()
+
+    d_list = np.array([ [data_list[0], data_list[4]],
+                        [data_list[1], data_list[5]],
+                        [data_list[2], data_list[6]],
+                        [data_list[3], data_list[7]]
+                      ])
+    l_list = np.array([ [label_list[0], label_list[4]],
+                        [label_list[1], label_list[5]],
+                        [label_list[2], label_list[6]],
+                        [label_list[3], label_list[7]]
+                      ])
+
+    for col in [0, 1]:
+        for ax, data, label in zip(axes[:,col], d_list[:,col], l_list[:,col]):
+            mfcc_data= np.swapaxes(data, 0 ,1)
+            ax.xaxis.set_major_formatter(ticks_x)
+    
+            ax.imshow(mfcc_data, interpolation='nearest', cmap=cm.coolwarm, origin='lower')
+            ax.set_title('MFCC: ' + str(label))
+            ax.set_ylabel('Coefficients')
+            ax.set_xlabel('Time(s)')
+
+    plt.show() 
 
 # DATA FUNCTIONS: --------------------------------------------------------------: 
 
@@ -168,14 +196,45 @@ def mfcc_3_plots_3_3_4(csv_handler:CSV_handler):
 
     plot_3_mfcc(mfcc_feat1, label_1, mfcc_feat2, label_2, mfcc_feat3, label_3)
 
+def mfcc_all_emg_plots(csv_handler:CSV_handler):
+    df1, samplerate1 = get_data(csv_handler, 1, 'left', 1, 1)
+    df2, samplerate2 = get_data(csv_handler, 1, 'left', 1, 2)
+    df3, samplerate3 = get_data(csv_handler, 1, 'left', 1, 3)
+    df4, samplerate4 = get_data(csv_handler, 1, 'left', 1, 4)
+    df5, samplerate5 = get_data(csv_handler, 1, 'left', 1, 5)
+    df6, samplerate6 = get_data(csv_handler, 1, 'left', 1, 6)
+    df7, samplerate7 = get_data(csv_handler, 1, 'left', 1, 7)
+    df8, samplerate8 = get_data(csv_handler, 1, 'left', 1, 8)
+    N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, mfcc_windowsize, mfcc_stepsize)
+    N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, mfcc_windowsize, mfcc_stepsize)
+    N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, mfcc_windowsize, mfcc_stepsize)
+    N4, mfcc_feat4 = mfcc_custom(df4, samplerate4, mfcc_windowsize, mfcc_stepsize)
+    N5, mfcc_feat5 = mfcc_custom(df5, samplerate5, mfcc_windowsize, mfcc_stepsize)
+    N6, mfcc_feat6 = mfcc_custom(df6, samplerate6, mfcc_windowsize, mfcc_stepsize)
+    N7, mfcc_feat7 = mfcc_custom(df7, samplerate7, mfcc_windowsize, mfcc_stepsize)
+    N8, mfcc_feat8 = mfcc_custom(df8, samplerate8, mfcc_windowsize, mfcc_stepsize)
+    feat_list = [mfcc_feat1, mfcc_feat2, mfcc_feat3, mfcc_feat4, mfcc_feat5, mfcc_feat6, mfcc_feat7, mfcc_feat8]
+    label_1 = 'Subject 1, session 1, left arm, emg nr. 1'
+    label_2 = 'Subject 1, session 1, left arm, emg nr. 2'
+    label_3 = 'Subject 1, session 1, left arm, emg nr. 3'
+    label_4 = 'Subject 1, session 1, left arm, emg nr. 4'
+    label_5 = 'Subject 1, session 1, left arm, emg nr. 5'
+    label_6 = 'Subject 1, session 1, left arm, emg nr. 6'
+    label_7 = 'Subject 1, session 1, left arm, emg nr. 7'
+    label_8 = 'Subject 1, session 1, left arm, emg nr. 8'
+    label_list = [label_1, label_2, label_3, label_4, label_5, label_6, label_7, label_8]
+
+    plot_all_emg_mfcc(feat_list, label_list)
+
 # MAIN: ------------------------------------------------------------------------: 
 
 def main():
 
     csv_handler = CSV_handler()
     load_data(csv_handler, 'soft')
-    mfcc_3_plots_1_1_2(csv_handler)
-    mfcc_3_plots_3_3_4(csv_handler)
+    #mfcc_3_plots_1_1_2(csv_handler)
+    #mfcc_3_plots_3_3_4(csv_handler)
+    mfcc_all_emg_plots(csv_handler)
     
 
 main()
