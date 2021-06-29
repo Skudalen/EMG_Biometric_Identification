@@ -64,7 +64,7 @@ def plot_3_mfcc(mfcc_data1, data_label1:str, mfcc_data2, data_label2:str, mfcc_d
    
         ax.imshow(mfcc_data, interpolation='nearest', cmap=cm.coolwarm, origin='lower')
         ax.set_title('MFCC: ' + str(label))
-        ax.set_ylabel('Cepstral Coefficients')
+        ax.set_ylabel('Coefficients')
         ax.set_xlabel('Time(s)')
 
     plt.show() 
@@ -130,27 +130,43 @@ def compare_with_wavelet_filter(data_frame):
 
     plot_compare_two_df(data_frame_freq, 'Original data', data_frame_freq_filt, 'Analyzed data')
 
-# Loads three preset emg datasets, calculates mfcc for each and plots them.
+# Loads three preset emg_1 datasets(subj1:session1, subj1:session2, subj2:session1), calculates mfcc for each and plots them.
 # Input: CSV_handler
 # Output: None --> Plot
-def compare_mfcc_3_plots(csv_handler:CSV_handler):
+def mfcc_3_plots_1_1_2(csv_handler:CSV_handler):
     df1, samplerate1 = get_data(csv_handler, 1, 'left', 1, 1)
     df2, samplerate2 = get_data(csv_handler, 1, 'left', 2, 1)
     df3, samplerate3 = get_data(csv_handler, 2, 'left', 1, 1)
-    print(df1.head, samplerate1)
-    print(df2.head, samplerate2)
-    print(df3.head, samplerate3)
-
+    #print(df1.head, samplerate1)
+    #print(df2.head, samplerate2)
+    #print(df3.head, samplerate3)
     N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, mfcc_windowsize, mfcc_stepsize)
     N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, mfcc_windowsize, mfcc_stepsize)
     N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, mfcc_windowsize, mfcc_stepsize)
-
-    label_1 = 'Subject 1, session 1'
-    label_2 = 'Subject 1, session 2'
-    label_3 = 'Subject 2, session 1'
+    label_1 = 'Subject 1, session 1, left arm, emg nr. 1'
+    label_2 = 'Subject 1, session 2, left arm, emg nr. 1'
+    label_3 = 'Subject 2, session 1, left arm, emg nr. 1'
 
     plot_3_mfcc(mfcc_feat1, label_1, mfcc_feat2, label_2, mfcc_feat3, label_3)
 
+# Loads three preset emg_1 datasets(subj3:session1, subj3:session2, subj4:session1), calculates mfcc for each and plots them.
+# Input: CSV_handler
+# Output: None --> Plot
+def mfcc_3_plots_3_3_4(csv_handler:CSV_handler):
+    df1, samplerate1 = get_data(csv_handler, 3, 'left', 1, 1)
+    df2, samplerate2 = get_data(csv_handler, 3, 'left', 2, 1)
+    df3, samplerate3 = get_data(csv_handler, 4, 'left', 1, 1)
+    #print(df1.head, samplerate1)
+    #print(df2.head, samplerate2)
+    #print(df3.head, samplerate3)
+    N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, mfcc_windowsize, mfcc_stepsize)
+    N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, mfcc_windowsize, mfcc_stepsize)
+    N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, mfcc_windowsize, mfcc_stepsize)
+    label_1 = 'Subject 3, session 1, left arm, emg nr. 1'
+    label_2 = 'Subject 3, session 2, left arm, emg nr. 1'
+    label_3 = 'Subject 4, session 1, left arm, emg nr. 1'
+
+    plot_3_mfcc(mfcc_feat1, label_1, mfcc_feat2, label_2, mfcc_feat3, label_3)
 
 # MAIN: ------------------------------------------------------------------------: 
 
@@ -158,7 +174,8 @@ def main():
 
     csv_handler = CSV_handler()
     load_data(csv_handler, 'soft')
-    compare_mfcc_3_plots(csv_handler)
+    mfcc_3_plots_1_1_2(csv_handler)
+    mfcc_3_plots_3_3_4(csv_handler)
     
 
 main()
