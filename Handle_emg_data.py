@@ -458,6 +458,32 @@ class CSV_handler:
         else
 '''
 
+class DL_data_handler:
+
+    def __init__(self) -> None:
+        pass
+
+    def make_subj_sample(tot_emgs_list):
+        starting_point:DataFrame = tot_emgs_list[0].rename(columns={'emg1':'emg'})
+        print(starting_point)
+
+        result:DataFrame = None
+
+        left_nr_remaining = len(tot_emgs_list) - 1
+        for i in range(left_nr_remaining):
+            i += 1
+            emg_str = get_emg_str(i)
+            tot_emgs_list[i].rename(columns={emg_str: 'emg'}, inplace=True)
+            result = starting_point.append(tot_emgs_list[i])
+        return result
+    
+    def get_emg_list(csv_handler:CSV_handler, subject_nr, session_nr, split) -> list:
+
+        
+        return None
+
+
+
 # HELP FUNCTIONS: ------------------------------------------------------------------------: 
 
 # Help: gets the str from emg nr

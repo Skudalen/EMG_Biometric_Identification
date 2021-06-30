@@ -8,8 +8,10 @@ from matplotlib import cm
 import matplotlib.ticker as ticker
 
 # Global variables for MFCC
-mfcc_stepsize = 0.5
-mfcc_windowsize = 2
+mfcc_stepsize = 0.5     # Seconds
+mfcc_windowsize = 2     # Seconds
+nr_coefficients = 13    # Number of coefficients
+nr_mel_filters = 40     # Number of mel-filter-bins 
 
 
 # PLOT FUNCTIONS --------------------------------------------------------------: 
@@ -139,10 +141,10 @@ def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, e
 
 # Slightly modified mfcc with inputs like below.
 # Returns N (x_values from original df) and mfcc_y_values 
-def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize):
+def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters):
     N = get_xory_from_df('x', df)
     y = get_xory_from_df('y', df)
-    return N, base.mfcc(y, samplesize, windowsize, stepsize)
+    return N, base.mfcc(y, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters)
 
 
 # CASE FUNTIONS ----------------------------------------------------------------: 
@@ -232,9 +234,10 @@ def main():
 
     csv_handler = CSV_handler()
     load_data(csv_handler, 'soft')
-    #mfcc_3_plots_1_1_2(csv_handler)
-    #mfcc_3_plots_3_3_4(csv_handler)
-    mfcc_all_emg_plots(csv_handler)
+    df, samplerate = get_data(csv_handler, 1, 'left', 1, 1)
+    mfcc_data = mfcc_custom(df, samplerate, mfcc_windowsize, mfcc_stepsize)
+
+    print(np.array(mfcc_data).shape)
     
 
 main()
