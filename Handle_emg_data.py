@@ -461,7 +461,8 @@ class CSV_handler:
 
 class DL_data_handler:
 
-    def __init__(self) -> None:
+    def __init__(self, csv_handler:CSV_handler) -> None:
+        self.csv_handler = csv_handler
         self.samples_per_subject = {1: [],  # Should med 4 sessions * split nr of samples per person
                                     2: [], 
                                     3: [],
@@ -469,13 +470,13 @@ class DL_data_handler:
                                     5: []
                                     }
 
-    def get_emg_list(csv_handler:CSV_handler, subject_nr, session_nr) -> list:
+    def get_emg_list(self, subject_nr, session_nr) -> list:
         list_of_emgs = []
         for emg_nr in range(8):
-            df, _ = get_data(csv_handler, subject_nr, 'left', session_nr)
+            df, _ = get_data(self.csv_handler, subject_nr, 'left', session_nr)
             list_of_emgs.append(df)
         for emg_nr in range(8):
-            df, _ = get_data(csv_handler, subject_nr, 'right', session_nr)
+            df, _ = get_data(self.csv_handler, subject_nr, 'right', session_nr)
             list_of_emgs.append(df)
         return list_of_emgs
 
@@ -490,16 +491,15 @@ class DL_data_handler:
             i += 1
             emg_str = get_emg_str(i)
             list_of_emgs[i].rename(columns={emg_str: 'emg'}, inplace=True)
-            result = starting_point.append(list_of_emgs[i])
+            starting_point.append(list_of_emgs[i])
         return tot_session_df
     
-
-    def store_samples(self, csv_handler, split_nr) -> None:
+    def store_samples(self, split_nr) -> None:
         for subject_nr in range(5):
             subj_samples = []
             #session_df_list = []
             for session_nr in range(4):
-                list_of_emg = self.get_emg_list(csv_handler, subject_nr, session_nr)
+                list_of_emg = self.get_emg_list(self.csv_handler, subject_nr, session_nr)
                 tot_session_df = self.make_subj_sample(list_of_emg)
                 #session_df_list.append(tot_session_df)
                 samples = np.array_split(tot_session_df, split_nr)

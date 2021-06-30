@@ -234,10 +234,9 @@ def main():
 
     csv_handler = CSV_handler()
     load_data(csv_handler, 'soft')
-    df, samplerate = get_data(csv_handler, 1, 'left', 1, 1)
-    mfcc_data = mfcc_custom(df, samplerate, mfcc_windowsize, mfcc_stepsize)
-
-    print(np.array(mfcc_data).shape)
+    dl_data_handler = DL_data_handler(csv_handler)
+    dl_data_handler.store_samples(10)
+    print(dl_data_handler.samples_per_subject)
     
 
 main()
