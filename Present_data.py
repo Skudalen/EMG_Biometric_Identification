@@ -104,27 +104,6 @@ def plot_all_emg_mfcc(data_list:list, label_list:list):
 
 # The CSV_handler takes in data_type, but only for visuals. 
 # E.g. handler = CSV_handler('soft')
-
-# Loads in data to a CSV_handler. Choose data_type: hard, hardPP, soft og softPP as str. 
-# Returns None. 
-def load_data(csv_handler:CSV_handler, data_type):
-    if data_type == 'hard': 
-        csv_handler.load_hard_original_emg_data()
-    elif data_type == 'hardPP':
-        csv_handler.load_hard_PP_emg_data()
-    elif data_type == 'soft':
-        csv_handler.load_soft_original_emg_data()
-    elif data_type == 'softPP':
-        csv_handler.load_soft_PP_emg_data()
-    else:
-        raise Exception('Wrong input')
-
-# Retrieved data. Send in loaded csv_handler and data detailes you want. 
-# Returns DataFrame and samplerate
-def get_data(csv_handler:CSV_handler, subject_nr, which_arm, session, emg_nr):
-    data_frame = csv_handler.get_df_from_data_dict(subject_nr, which_arm, session, emg_nr)
-    samplerate = get_samplerate(data_frame)
-    return data_frame, samplerate
     
 # Takes in handler and detailes to denoise. 
 # Returns arrays and df

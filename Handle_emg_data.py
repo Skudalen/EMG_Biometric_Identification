@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 import numpy as np
 from pandas.core.frame import DataFrame
-from Present_data import get_data
+#from Present_data import get_data
 
 class Data_container:
       
@@ -450,6 +450,28 @@ class CSV_handler:
         df = container.dict_list[round - 1].get(which_arm)[emg_nr - 1]
         return df
 
+    # Loads in data to a CSV_handler. Choose data_type: hard, hardPP, soft og softPP as str. 
+    # Returns None. 
+    def load_data(self, data_type):
+        if data_type == 'hard': 
+            self.load_hard_original_emg_data()
+        elif data_type == 'hardPP':
+            self.load_hard_PP_emg_data()
+        elif data_type == 'soft':
+            self.load_soft_original_emg_data()
+        elif data_type == 'softPP':
+            self.load_soft_PP_emg_data()
+        else:
+            raise Exception('Wrong input')
+
+    # Retrieved data. Send in loaded csv_handler and data detailes you want. 
+    # Returns DataFrame and samplerate
+    def get_data(self, subject_nr, which_arm, session, emg_nr):
+        data_frame = self.get_df_from_data_dict(subject_nr, which_arm, session, emg_nr)
+        samplerate = get_samplerate(data_frame)
+        return data_frame, samplerate
+
+
 '''
     def get_keyboard_data(self, filename:str, pres_or_release:str='pressed'):
         filepath = self.working_dir + str(filename)
@@ -469,14 +491,16 @@ class DL_data_handler:
                                     4: [],
                                     5: []
                                     }
-
+    def get_samples_dict(self):
+        return self.samples_per_subject
+        
     def get_emg_list(self, subject_nr, session_nr) -> list:
         list_of_emgs = []
         for emg_nr in range(8):
-            df, _ = get_data(self.csv_handler, subject_nr, 'left', session_nr)
+            df, _ = self.csv_handler.get_data(self.csv_handler, subject_nr, 'left', session_nr)
             list_of_emgs.append(df)
         for emg_nr in range(8):
-            df, _ = get_data(self.csv_handler, subject_nr, 'right', session_nr)
+            df, _ = self.csv_handler.get_data(self.csv_handler, subject_nr, 'right', session_nr)
             list_of_emgs.append(df)
         return list_of_emgs
 
