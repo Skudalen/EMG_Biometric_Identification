@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 import numpy as np
 from pandas.core.frame import DataFrame
+from Present_data import get_data
 
 class Data_container:
       
@@ -461,27 +462,51 @@ class CSV_handler:
 class DL_data_handler:
 
     def __init__(self) -> None:
-        pass
+        self.samples_per_subject = {1: [],  # Should med 4 sessions * split nr of samples per person
+                                    2: [], 
+                                    3: [],
+                                    4: [],
+                                    5: []
+                                    }
 
-    def make_subj_sample(tot_emgs_list):
-        starting_point:DataFrame = tot_emgs_list[0].rename(columns={'emg1':'emg'})
+    def get_emg_list(csv_handler:CSV_handler, subject_nr, session_nr) -> list:
+        list_of_emgs = []
+        for emg_nr in range(8):
+            df, _ = get_data(csv_handler, subject_nr, 'left', session_nr)
+            list_of_emgs.append(df)
+        for emg_nr in range(8):
+            df, _ = get_data(csv_handler, subject_nr, 'right', session_nr)
+            list_of_emgs.append(df)
+        return list_of_emgs
+
+    def make_subj_sample(list_of_emgs):
+        starting_point:DataFrame = list_of_emgs[0].rename(columns={'emg1':'emg'})
         print(starting_point)
 
-        result:DataFrame = None
+        tot_session_df:DataFrame = None
 
-        left_nr_remaining = len(tot_emgs_list) - 1
+        left_nr_remaining = len(list_of_emgs) - 1
         for i in range(left_nr_remaining):
             i += 1
             emg_str = get_emg_str(i)
-            tot_emgs_list[i].rename(columns={emg_str: 'emg'}, inplace=True)
-            result = starting_point.append(tot_emgs_list[i])
-        return result
+            list_of_emgs[i].rename(columns={emg_str: 'emg'}, inplace=True)
+            result = starting_point.append(list_of_emgs[i])
+        return tot_session_df
     
-    def get_emg_list(csv_handler:CSV_handler, subject_nr, session_nr, split) -> list:
 
-        
-        return None
-
+    def store_samples(self, csv_handler, split_nr) -> None:
+        for subject_nr in range(5):
+            subj_samples = []
+            #session_df_list = []
+            for session_nr in range(4):
+                list_of_emg = self.get_emg_list(csv_handler, subject_nr, session_nr)
+                tot_session_df = self.make_subj_sample(list_of_emg)
+                #session_df_list.append(tot_session_df)
+                samples = np.array_split(tot_session_df, split_nr)
+                for array in samples:
+                    subj_samples.append(DataFrame(array))
+            
+            self.samples_per_subject[subject_nr] = subj_samples
 
 
 # HELP FUNCTIONS: ------------------------------------------------------------------------: 
