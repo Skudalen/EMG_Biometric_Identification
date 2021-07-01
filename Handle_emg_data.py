@@ -495,26 +495,29 @@ class DL_data_handler:
         
     def get_emg_list(self, subject_nr, session_nr) -> list:
         list_of_emgs = []
-        for emg_nr in range(8):
-            df, _ = self.csv_handler.get_data(subject_nr, 'left', session_nr, emg_nr+1)
-            list_of_emgs.append(df)
+        df, _ = self.csv_handler.get_data(subject_nr, 'left', session_nr, 1)
+        list_of_emgs.append(df)
+        for emg_nr in range(7):
+            df, _ = self.csv_handler.get_data(subject_nr, 'left', session_nr, emg_nr+2)
+            list_of_emgs.append(DataFrame(df[get_emg_str(emg_nr+2)]))
         for emg_nr in range(8):
             df, _ = self.csv_handler.get_data(subject_nr, 'right', session_nr, emg_nr+1)
-            list_of_emgs.append(df)
-        return list_of_emgs
+            list_of_emgs.append(DataFrame(df[get_emg_str(emg_nr+1)]))
+        return list_of_emgs     # list of emg data where first element also has timestamp column
 
     def make_subj_sample(self, list_of_emgs):
-        starting_point:DataFrame = list_of_emgs[0].rename(columns={'emg1':'emg'})
+        # starting_point:DataFrame = list_of_emgs[0].rename(columns={'emg1':'emg'})
         tot_session_df_list = []
-        for i in range(2, 9):
-            emg_str = get_emg_str(i)
-            df = list_of_emgs[i-1].rename(columns={emg_str: 'emg'})
+        for i in range(8):
+            #emg_str = get_emg_str(i)
+            df = list_of_emgs[i]  # .rename(columns={emg_str: 'emg'})
             tot_session_df_list.append(df)
         for i in range(1, 9):
-            emg_str = get_emg_str(i)
-            df = list_of_emgs[7+i].rename(columns={emg_str: 'emg'})
+            emg_str_old = get_emg_str(i)
+            emg_str_new = get_emg_str(8+i)
+            df:DataFrame = list_of_emgs[7+i].rename(columns={emg_str_old: emg_str_new})
             tot_session_df_list.append(df)
-        tot_session_df = starting_point.append(tot_session_df_list, ignore_index=True, sort=True)
+        tot_session_df = pd.concat(tot_session_df_list, axis=1)
 
         return tot_session_df
     
@@ -523,14 +526,22 @@ class DL_data_handler:
             subj_samples = []
             for session_nr in range(4):
                 list_of_emg = self.get_emg_list(subject_nr+1, session_nr+1)
-                tot_session_df, samplerate = self.make_subj_sample(list_of_emg)
-                samples = np.array_split(tot_session_df, split_nr)
+                tot_session_df = self.make_subj_sample(list_of_emg)
+                samples = np.array_split(tot_session_df.to_numpy(), split_nr)
                 for array in samples:
-                    df = DataFrame(array)
-                    samplerate = get_samplerate(df)
-                    subj_samples.append([df, samplerate])
+                    df = DataFrame(array).rename(columns={0:'timestamp'})
+                    df_finished, samplerate = self.reshape_session_df_to_signal(df)
+                    subj_samples.append([df_finished, samplerate])
             
-            self.samples_per_subject[subject_nr] = subj_samples
+            self.samples_per_subject[subject_nr+1] = subj_samples
+    
+    def reshape_session_df_to_signal(self, df:DataFrame):
+        main_df = df[['timestamp', 1]].rename(columns={1: 'emg'})
+        for i in range(2, 17):
+            adding_df = df[['timestamp', i]].rename(columns={i: 'emg'})
+            main_df = pd.concat([main_df, adding_df], ignore_index=True)
+        samplerate = get_samplerate(main_df)
+        return main_df, samplerate
 
 
 # HELP FUNCTIONS: ------------------------------------------------------------------------: 
@@ -541,7 +552,8 @@ def get_emg_str(emg_nr):
 
 # Help: gets the min/max of a df
 def get_min_max_timestamp(df:DataFrame):
-    min = int(np.floor(df['timestamp'].min()))
+    #min = int(np.floor(df['timestamp'].min()))
+    min = df['timestamp'].min()
     max = df['timestamp'].max()
     return min, max
 

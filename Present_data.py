@@ -100,6 +100,14 @@ def plot_all_emg_mfcc(data_list:list, label_list:list):
 
     plt.show() 
 
+def pretty(dict, indent=0):
+   for key, value in dict.items():
+      print('\t' * indent + str(key))
+      if isinstance(value, dict):
+         pretty(value, indent+1)
+      else:
+         print('\t' * (indent+1) + str(value))
+
 # DATA FUNCTIONS: --------------------------------------------------------------: 
 
 # The CSV_handler takes in data_type, but only for visuals. 
@@ -213,13 +221,15 @@ def main():
 
     csv_handler = CSV_handler()
     csv_handler.load_data('soft')
-    #print(csv_handler.get_data(1, 'left', 1, 1))
     dl_data_handler = DL_data_handler(csv_handler)
-    #dl_data_handler.store_samples(10)
-    #print(dl_data_handler.samples_per_subject)
-    emg_list = dl_data_handler.get_emg_list(1, 1)
-    df = dl_data_handler.make_subj_sample(emg_list)
-    print(df.head)
+    dl_data_handler.store_samples(10)
+    dict = dl_data_handler.samples_per_subject
+    
+    test_session_df = dict.get(1)[0]
+    print(test_session_df)
+    df, _ = dl_data_handler.reshape_session_df_to_signal(test_session_df)
+    print(df[:50])
+    
     
 
 main()
