@@ -143,9 +143,9 @@ def compare_with_wavelet_filter(data_frame):
 # Input: CSV_handler
 # Output: None --> Plot
 def mfcc_3_plots_1_1_2(csv_handler:CSV_handler):
-    df1, samplerate1 = get_data(csv_handler, 1, 'left', 1, 1)
-    df2, samplerate2 = get_data(csv_handler, 1, 'left', 2, 1)
-    df3, samplerate3 = get_data(csv_handler, 2, 'left', 1, 1)
+    df1, samplerate1 = csv_handler.get_data( 1, 'left', 1, 1)
+    df2, samplerate2 = csv_handler.get_data( 1, 'left', 2, 1)
+    df3, samplerate3 = csv_handler.get_data( 2, 'left', 1, 1)
     #print(df1.head, samplerate1)
     #print(df2.head, samplerate2)
     #print(df3.head, samplerate3)
@@ -162,9 +162,9 @@ def mfcc_3_plots_1_1_2(csv_handler:CSV_handler):
 # Input: CSV_handler
 # Output: None --> Plot
 def mfcc_3_plots_3_3_4(csv_handler:CSV_handler):
-    df1, samplerate1 = get_data(csv_handler, 3, 'left', 1, 1)
-    df2, samplerate2 = get_data(csv_handler, 3, 'left', 2, 1)
-    df3, samplerate3 = get_data(csv_handler, 4, 'left', 1, 1)
+    df1, samplerate1 = csv_handler.get_data(3, 'left', 1, 1)
+    df2, samplerate2 = csv_handler.get_data(3, 'left', 2, 1)
+    df3, samplerate3 = csv_handler.get_data(4, 'left', 1, 1)
     #print(df1.head, samplerate1)
     #print(df2.head, samplerate2)
     #print(df3.head, samplerate3)
@@ -178,14 +178,14 @@ def mfcc_3_plots_3_3_4(csv_handler:CSV_handler):
     plot_3_mfcc(mfcc_feat1, label_1, mfcc_feat2, label_2, mfcc_feat3, label_3)
 
 def mfcc_all_emg_plots(csv_handler:CSV_handler):
-    df1, samplerate1 = get_data(csv_handler, 1, 'left', 1, 1)
-    df2, samplerate2 = get_data(csv_handler, 1, 'left', 1, 2)
-    df3, samplerate3 = get_data(csv_handler, 1, 'left', 1, 3)
-    df4, samplerate4 = get_data(csv_handler, 1, 'left', 1, 4)
-    df5, samplerate5 = get_data(csv_handler, 1, 'left', 1, 5)
-    df6, samplerate6 = get_data(csv_handler, 1, 'left', 1, 6)
-    df7, samplerate7 = get_data(csv_handler, 1, 'left', 1, 7)
-    df8, samplerate8 = get_data(csv_handler, 1, 'left', 1, 8)
+    df1, samplerate1 = csv_handler.get_data( 1, 'left', 1, 1)
+    df2, samplerate2 = csv_handler.get_data( 1, 'left', 1, 2)
+    df3, samplerate3 = csv_handler.get_data( 1, 'left', 1, 3)
+    df4, samplerate4 = csv_handler.get_data( 1, 'left', 1, 4)
+    df5, samplerate5 = csv_handler.get_data( 1, 'left', 1, 5)
+    df6, samplerate6 = csv_handler.get_data( 1, 'left', 1, 6)
+    df7, samplerate7 = csv_handler.get_data( 1, 'left', 1, 7)
+    df8, samplerate8 = csv_handler.get_data( 1, 'left', 1, 8)
     N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, mfcc_windowsize, mfcc_stepsize)
     N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, mfcc_windowsize, mfcc_stepsize)
     N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, mfcc_windowsize, mfcc_stepsize)
@@ -212,10 +212,14 @@ def mfcc_all_emg_plots(csv_handler:CSV_handler):
 def main():
 
     csv_handler = CSV_handler()
-    load_data(csv_handler, 'soft')
+    csv_handler.load_data('soft')
+    #print(csv_handler.get_data(1, 'left', 1, 1))
     dl_data_handler = DL_data_handler(csv_handler)
-    dl_data_handler.store_samples(10)
-    print(dl_data_handler.samples_per_subject)
+    #dl_data_handler.store_samples(10)
+    #print(dl_data_handler.samples_per_subject)
+    emg_list = dl_data_handler.get_emg_list(1, 1)
+    df = dl_data_handler.make_subj_sample(emg_list)
+    print(df.head)
     
 
 main()

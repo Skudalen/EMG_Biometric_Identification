@@ -444,10 +444,9 @@ class CSV_handler:
         return self.data_container_dict
 
     # Retrieves df via the data_dict in the handler object
-    def get_df_from_data_dict(self, subject_nr, which_arm, round, emg_nr):
-        data_type = self.data_type
-        container = self.data_container_dict.get(subject_nr)
-        df = container.dict_list[round - 1].get(which_arm)[emg_nr - 1]
+    def get_df_from_data_dict(self, subject_nr, which_arm, session, emg_nr):
+        container:Data_container = self.data_container_dict.get(subject_nr)
+        df = container.dict_list[session - 1].get(which_arm)[emg_nr - 1]
         return df
 
     # Loads in data to a CSV_handler. Choose data_type: hard, hardPP, soft og softPP as str. 
@@ -497,38 +496,39 @@ class DL_data_handler:
     def get_emg_list(self, subject_nr, session_nr) -> list:
         list_of_emgs = []
         for emg_nr in range(8):
-            df, _ = self.csv_handler.get_data(self.csv_handler, subject_nr, 'left', session_nr)
+            df, _ = self.csv_handler.get_data(subject_nr, 'left', session_nr, emg_nr+1)
             list_of_emgs.append(df)
         for emg_nr in range(8):
-            df, _ = self.csv_handler.get_data(self.csv_handler, subject_nr, 'right', session_nr)
+            df, _ = self.csv_handler.get_data(subject_nr, 'right', session_nr, emg_nr+1)
             list_of_emgs.append(df)
         return list_of_emgs
 
-    def make_subj_sample(list_of_emgs):
+    def make_subj_sample(self, list_of_emgs):
         starting_point:DataFrame = list_of_emgs[0].rename(columns={'emg1':'emg'})
-        print(starting_point)
-
-        tot_session_df:DataFrame = None
-
-        left_nr_remaining = len(list_of_emgs) - 1
-        for i in range(left_nr_remaining):
-            i += 1
+        tot_session_df_list = []
+        for i in range(2, 9):
             emg_str = get_emg_str(i)
-            list_of_emgs[i].rename(columns={emg_str: 'emg'}, inplace=True)
-            starting_point.append(list_of_emgs[i])
+            df = list_of_emgs[i-1].rename(columns={emg_str: 'emg'})
+            tot_session_df_list.append(df)
+        for i in range(1, 9):
+            emg_str = get_emg_str(i)
+            df = list_of_emgs[7+i].rename(columns={emg_str: 'emg'})
+            tot_session_df_list.append(df)
+        tot_session_df = starting_point.append(tot_session_df_list, ignore_index=True, sort=True)
+
         return tot_session_df
     
     def store_samples(self, split_nr) -> None:
         for subject_nr in range(5):
             subj_samples = []
-            #session_df_list = []
             for session_nr in range(4):
-                list_of_emg = self.get_emg_list(self.csv_handler, subject_nr, session_nr)
-                tot_session_df = self.make_subj_sample(list_of_emg)
-                #session_df_list.append(tot_session_df)
+                list_of_emg = self.get_emg_list(subject_nr+1, session_nr+1)
+                tot_session_df, samplerate = self.make_subj_sample(list_of_emg)
                 samples = np.array_split(tot_session_df, split_nr)
                 for array in samples:
-                    subj_samples.append(DataFrame(array))
+                    df = DataFrame(array)
+                    samplerate = get_samplerate(df)
+                    subj_samples.append([df, samplerate])
             
             self.samples_per_subject[subject_nr] = subj_samples
 
