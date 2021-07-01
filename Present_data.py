@@ -100,13 +100,13 @@ def plot_all_emg_mfcc(data_list:list, label_list:list):
 
     plt.show() 
 
-def pretty(dict, indent=0):
-   for key, value in dict.items():
-      print('\t' * indent + str(key))
-      if isinstance(value, dict):
-         pretty(value, indent+1)
-      else:
-         print('\t' * (indent+1) + str(value))
+def pretty(dict):
+    for key, value in dict.items():
+        print('Subject', key, 'samples:')
+        print('\t\t Number av samples:', len(value)) 
+        print('\t\t EX sample nr 1:') 
+        print('\t\t\t Type:', type(value[0][0]), type(value[0][1]))
+        print('\t\t\t Sample:', value[0][0], value[0][1])
 
 # DATA FUNCTIONS: --------------------------------------------------------------: 
 
@@ -133,6 +133,13 @@ def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize, nr_coefficients,
     y = get_xory_from_df('y', df)
     return N, base.mfcc(y, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters)
 
+
+def test_for_NaN(dict, samples_per_person):
+    for key, value in dict.items():
+        for i in range(samples_per_person):
+            df = value[i][0]
+            #print(df)
+            print(df.isnull())
 
 # CASE FUNTIONS ----------------------------------------------------------------: 
 
@@ -224,11 +231,9 @@ def main():
     dl_data_handler = DL_data_handler(csv_handler)
     dl_data_handler.store_samples(10)
     dict = dl_data_handler.samples_per_subject
+
     
-    test_session_df = dict.get(1)[0]
-    print(test_session_df)
-    df, _ = dl_data_handler.reshape_session_df_to_signal(test_session_df)
-    print(df[:50])
+   
     
     
 

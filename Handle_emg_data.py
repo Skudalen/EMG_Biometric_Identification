@@ -1,7 +1,10 @@
+from numpy.core.arrayprint import IntegerFormat
+from numpy.lib import math
 import pandas as pd
 from pathlib import Path
 import numpy as np
 from pandas.core.frame import DataFrame
+from math import floor
 #from Present_data import get_data
 
 class Data_container:
@@ -42,6 +45,9 @@ class CSV_handler:
     # Takes in a df and stores the information in a Data_container object
     def store_df_in_container(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container, round:int):
         df = self.get_time_emg_table(filename, emg_nr+1)
+
+        if df.isnull().values.any():
+            print('NaN in: subject', data_container.subject_nr, 'arm:', which_arm, 'session:', round, 'emg nr:', emg_nr)
 
         # Places the data correctly:
         if round == 1:
@@ -484,7 +490,8 @@ class DL_data_handler:
 
     def __init__(self, csv_handler:CSV_handler) -> None:
         self.csv_handler = csv_handler
-        self.samples_per_subject = {1: [],  # Should med 4 sessions * split nr of samples per person
+        # Should med 4 sessions * split nr of samples per person. Each sample is structured like [sample_df, samplerate]
+        self.samples_per_subject = {1: [],  
                                     2: [], 
                                     3: [],
                                     4: [],
@@ -503,21 +510,41 @@ class DL_data_handler:
         for emg_nr in range(8):
             df, _ = self.csv_handler.get_data(subject_nr, 'right', session_nr, emg_nr+1)
             list_of_emgs.append(DataFrame(df[get_emg_str(emg_nr+1)]))
+        
         return list_of_emgs     # list of emg data where first element also has timestamp column
 
-    def make_subj_sample(self, list_of_emgs):
-        # starting_point:DataFrame = list_of_emgs[0].rename(columns={'emg1':'emg'})
+    def make_subj_sample(self, list_of_emgs_):
+        # Test and fix if the emgs have different size
+        list_of_emgs = []
+        length_left_emgs = int(len(list_of_emgs_[0].index))
+        length_right_emgs = int(len(list_of_emgs_[-1].index))
+        if length_left_emgs < length_right_emgs: 
+            for i in range(16):
+                new_emg_df = list_of_emgs_[i].head(length_left_emgs)
+                list_of_emgs.append(new_emg_df)
+        elif length_right_emgs < length_left_emgs:
+            for i in range(16):
+                new_emg_df = list_of_emgs_[i].head(length_right_emgs)
+                list_of_emgs.append(new_emg_df)
+        else:
+            list_of_emgs = list_of_emgs_
+        
         tot_session_df_list = []
         for i in range(8):
-            #emg_str = get_emg_str(i)
-            df = list_of_emgs[i]  # .rename(columns={emg_str: 'emg'})
+            df = list_of_emgs[i]
             tot_session_df_list.append(df)
         for i in range(1, 9):
             emg_str_old = get_emg_str(i)
             emg_str_new = get_emg_str(8+i)
-            df:DataFrame = list_of_emgs[7+i].rename(columns={emg_str_old: emg_str_new})
+            df = list_of_emgs[7+i].rename(columns={emg_str_old: emg_str_new})
             tot_session_df_list.append(df)
-        tot_session_df = pd.concat(tot_session_df_list, axis=1)
+        tot_session_df = pd.concat(tot_session_df_list, axis=1, ignore_index=True)
+
+        # TESTING FOR NAN
+        if tot_session_df.isnull().values.any():
+            print('NaN in: where? THERE')
+            print(length_left_emgs, length_right_emgs)
+            #print(tot_session_df_list)
 
         return tot_session_df
     
@@ -527,10 +554,25 @@ class DL_data_handler:
             for session_nr in range(4):
                 list_of_emg = self.get_emg_list(subject_nr+1, session_nr+1)
                 tot_session_df = self.make_subj_sample(list_of_emg)
+
+                # TESTING FOR NAN
+                if tot_session_df.isnull().values.any():
+                    print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? AFTER MAKE')
+
                 samples = np.array_split(tot_session_df.to_numpy(), split_nr)
                 for array in samples:
                     df = DataFrame(array).rename(columns={0:'timestamp'})
+                    '''
+                    # TESTING FOR NAN
+                    if df.isnull().values.any():
+                        print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? AFTER SPLIT')
+                    '''
                     df_finished, samplerate = self.reshape_session_df_to_signal(df)
+                    '''
+                    # TESTING FOR NAN
+                    if df_finished.isnull().values.any():
+                        print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? AFTER RESHAPE')
+                    '''
                     subj_samples.append([df_finished, samplerate])
             
             self.samples_per_subject[subject_nr+1] = subj_samples
@@ -567,10 +609,10 @@ def make_df_from_xandy(x, y, emg_nr):
 # Help: returns the samplerate of a df
 def get_samplerate(df:DataFrame):
         min, max = get_min_max_timestamp(df)
-        #print(min, max)
-        seconds = max - 60 - min
-        #print(seconds)
-        samples = len(df['timestamp'])
-        #print(samples)
+        if max > 60:
+            seconds = max - 60 - min
+        else:
+            seconds = max - min
+        samples = len(df.index)
         samplerate = samples / seconds
         return samplerate
