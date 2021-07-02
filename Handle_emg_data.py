@@ -9,7 +9,7 @@ import sys
 sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/python_speech_features/python_speech_features')
 from python_speech_features.python_speech_features import mfcc
 import json
-import librosa
+#import librosa
 #from Present_data import get_data
 
 # Global variables for MFCC
@@ -500,10 +500,6 @@ class CSV_handler:
 class DL_data_handler:
 
     JSON_PATH = "mfcc_data.json"
-    SAMPLE_RATE = None
-    TRACK_DURATION = None # measured in seconds
-    #SAMPLES_PER_TRACK = SAMPLE_RATE * TRACK_DURATION
-
 
     def __init__(self, csv_handler:CSV_handler) -> None:
         self.csv_handler = csv_handler
@@ -596,8 +592,6 @@ class DL_data_handler:
             "mfcc": []
         }
 
-        #hop_length = MFCC_STEPSIZE * sample_rate
-        #num_mfcc_vectors_per_segment = math.ceil(samples_per_subject / hop_length)
         raw_data_dict = self.get_samples_dict()
     
         # loop through all subjects to get samples
@@ -610,7 +604,7 @@ class DL_data_handler:
             print("\nProcessing: {}".format(subject_label))
 
             # process all audio files in genre sub-dir
-            for sample in value:
+            for i, (sample) in enumerate(value):
 
                 # load audio file
                 signal, sample_rate = sample[0], sample[1]
@@ -618,8 +612,8 @@ class DL_data_handler:
                 hop_length = MFCC_STEPSIZE * sample_rate
 
                 # extract mfcc
-                mfcc = librosa.feature.mfcc(signal, sample_rate, n_mfcc=NR_COEFFICIENTS, n_fft=n_fft, hop_length=hop_length)
-                #mfcc = mfcc_custom(signal, sample_rate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
+                #mfcc = librosa.feature.mfcc(signal, sample_rate, n_mfcc=NR_COEFFICIENTS, n_fft=n_fft, hop_length=hop_length)
+                _, mfcc = mfcc_custom(signal, sample_rate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
                 mfcc = mfcc.T
                 print(len(mfcc))
 
@@ -627,7 +621,7 @@ class DL_data_handler:
                 #if len(mfcc) == num_mfcc_vectors_per_segment:
                 data["mfcc"].append(mfcc.tolist())
                 data["labels"].append(key)
-                print("sample:{}".format(value.index(sample)))
+                print("sample:{}".format(i))
 
         # save MFCCs to json file
         with open(json_path, "w") as fp:
