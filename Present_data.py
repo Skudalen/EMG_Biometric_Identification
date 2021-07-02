@@ -126,7 +126,6 @@ def denoice_dataset(handler:CSV_handler, subject_nr, which_arm, round, emg_nr):
     df_new = make_df_from_xandy(N, y_values, emg_nr)
     return df_new
 
-
 def test_for_NaN(dict, samples_per_person):
     for key, value in dict.items():
         for i in range(samples_per_person):
@@ -222,9 +221,11 @@ def main():
     csv_handler = CSV_handler()
     csv_handler.load_data('soft')
     dl_data_handler = DL_data_handler(csv_handler)
-    dl_data_handler.store_samples(2)
-    dict = dl_data_handler.samples_per_subject
-    print(len(dict.get(2)))
+    dl_data_handler.store_samples(15)
+    #dict = dl_data_handler.samples_per_subject
+    #print(dict.get(1)[10][0], dict.get(1)[10][1])
+    #print(dict.get(1)[12][0], dict.get(1)[12][1])
+    
     dl_data_handler.save_mfcc()
 
     

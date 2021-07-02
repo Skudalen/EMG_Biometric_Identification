@@ -608,20 +608,22 @@ class DL_data_handler:
 
                 # load audio file
                 signal, sample_rate = sample[0], sample[1]
-                n_fft = MFCC_WINDOWSIZE * sample_rate
-                hop_length = MFCC_STEPSIZE * sample_rate
+                signal = signal['emg'].to_numpy()
+                test_df_for_bugs(signal, key, i)
 
                 # extract mfcc
+                #n_fft = MFCC_WINDOWSIZE * sample_rate
+                #hop_length = MFCC_STEPSIZE * sample_rate
                 #mfcc = librosa.feature.mfcc(signal, sample_rate, n_mfcc=NR_COEFFICIENTS, n_fft=n_fft, hop_length=hop_length)
-                _, mfcc = mfcc_custom(signal, sample_rate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
+                mfcc = mfcc_custom(signal, sample_rate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
                 mfcc = mfcc.T
-                print(len(mfcc))
+                #print(len(mfcc))
 
                 # store only mfcc feature with expected number of vectors
                 #if len(mfcc) == num_mfcc_vectors_per_segment:
                 data["mfcc"].append(mfcc.tolist())
                 data["labels"].append(key)
-                print("sample:{}".format(i))
+                print("sample:{}".format(i+1))
 
         # save MFCCs to json file
         with open(json_path, "w") as fp:
@@ -651,7 +653,7 @@ def make_df_from_xandy(x, y, emg_nr):
 # Help: returns the samplerate of a df
 def get_samplerate(df:DataFrame):
     min, max = get_min_max_timestamp(df)
-    if max > 60:
+    if max > 60 and min < 60:
         seconds = max - 60 - min
     else:
         seconds = max - min
@@ -669,10 +671,19 @@ def get_xory_from_df(x_or_y, df:DataFrame):
 
 # Slightly modified mfcc with inputs like below.
 # Returns N (x_values from original df) and mfcc_y_values 
-def mfcc_custom(df:DataFrame, samplesize, windowsize=MFCC_WINDOWSIZE, 
+def mfcc_custom(signal, samplesize, windowsize=MFCC_WINDOWSIZE, 
                                             stepsize=MFCC_STEPSIZE, 
                                             nr_coefficients=NR_COEFFICIENTS, 
                                             nr_mel_filters=NR_MEL_BINS):
-        N = get_xory_from_df('x', df)
-        y = get_xory_from_df('y', df)
-        return N, mfcc(y, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters)
+        
+    return mfcc(signal, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters)
+
+def test_df_for_bugs(signal, key, placement_index):
+    df = DataFrame(signal)
+    if df.isnull().values.any():
+        print('NaN in subject', key, 'in sample', placement_index)
+    if df.shape[1] != (1):
+        print('Shape:', df.shape[1], 'at subject', key, 'in sample', placement_index)
+
+
+
