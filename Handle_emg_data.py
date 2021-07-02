@@ -540,12 +540,6 @@ class DL_data_handler:
             tot_session_df_list.append(df)
         tot_session_df = pd.concat(tot_session_df_list, axis=1, ignore_index=True)
 
-        # TESTING FOR NAN
-        if tot_session_df.isnull().values.any():
-            print('NaN in: where? THERE')
-            print(length_left_emgs, length_right_emgs)
-            #print(tot_session_df_list)
-
         return tot_session_df
     
     def store_samples(self, split_nr) -> None:
@@ -557,22 +551,12 @@ class DL_data_handler:
 
                 # TESTING FOR NAN
                 if tot_session_df.isnull().values.any():
-                    print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? AFTER MAKE')
+                    print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? HERE')
 
                 samples = np.array_split(tot_session_df.to_numpy(), split_nr)
                 for array in samples:
                     df = DataFrame(array).rename(columns={0:'timestamp'})
-                    '''
-                    # TESTING FOR NAN
-                    if df.isnull().values.any():
-                        print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? AFTER SPLIT')
-                    '''
                     df_finished, samplerate = self.reshape_session_df_to_signal(df)
-                    '''
-                    # TESTING FOR NAN
-                    if df_finished.isnull().values.any():
-                        print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? AFTER RESHAPE')
-                    '''
                     subj_samples.append([df_finished, samplerate])
             
             self.samples_per_subject[subject_nr+1] = subj_samples
@@ -615,4 +599,4 @@ def get_samplerate(df:DataFrame):
             seconds = max - min
         samples = len(df.index)
         samplerate = samples / seconds
-        return samplerate
+        return int(samplerate)
