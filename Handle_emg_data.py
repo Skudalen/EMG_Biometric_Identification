@@ -4,13 +4,11 @@ import pandas as pd
 from pathlib import Path
 import numpy as np
 from pandas.core.frame import DataFrame
-from math import floor
 import sys
 sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/python_speech_features/python_speech_features')
 from python_speech_features.python_speech_features import mfcc
 import json
-#import librosa
-#from Present_data import get_data
+
 
 # Global variables for MFCC
 MFCC_STEPSIZE = 0.5     # Seconds
