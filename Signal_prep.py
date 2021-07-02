@@ -3,7 +3,7 @@ from pandas.core.frame import DataFrame
 from scipy.fft import fft, fftfreq
 import pywt
 import sys
-import Handle_emg_data as Handler
+from Handle_emg_data import *
 
 
 
@@ -17,7 +17,7 @@ def fft_of_df(df:DataFrame):
     y_values = get_xory_from_df('y', df)
     N = y_values.size
     norm = normalize_wave(y_values)
-    N_trans = fftfreq(N, 1 / Handler.get_samplerate(df))
+    N_trans = fftfreq(N, 1 / get_samplerate(df))
     y_f = fft(norm)
     return N_trans, y_f
 

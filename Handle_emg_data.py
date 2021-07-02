@@ -487,14 +487,14 @@ class CSV_handler:
         return data_frame, samplerate
 
 
-'''
+    '''
     def get_keyboard_data(self, filename:str, pres_or_release:str='pressed'):
         filepath = self.working_dir + str(filename)
         df = pd.read_csv(filepath)
         if pres_or_release == 'pressed':
             df = df[(df['event'] == 'KeyPressed') and (df['event'] == 'KeyPressed')]
         else
-'''
+    '''
 
 class DL_data_handler:
 
@@ -513,7 +513,7 @@ class DL_data_handler:
                                     4: [],
                                     5: []
                                     }
-                                    
+
     def get_samples_dict(self):
         return self.samples_per_subject
         
@@ -628,48 +628,52 @@ class DL_data_handler:
         with open(json_path, "w") as fp:
             json.dump(data, fp, indent=4)
     '''
-    # HELP FUNCTIONS: ------------------------------------------------------------------------: 
 
-    # Help: gets the str from emg nr
-    def get_emg_str(emg_nr):
-        return 'emg' + str(emg_nr)
+# HELP FUNCTIONS: ------------------------------------------------------------------------: 
 
-    # Help: gets the min/max of a df
-    def get_min_max_timestamp(df:DataFrame):
-        #min = int(np.floor(df['timestamp'].min()))
-        min = df['timestamp'].min()
-        max = df['timestamp'].max()
-        return min, max
+# Help: gets the str from emg nr
+def get_emg_str(emg_nr):
+    return 'emg' + str(emg_nr)
 
-    # Help: returns df_time_emg
-    def make_df_from_xandy(x, y, emg_nr):
-        dict = {'timestamp': x, get_emg_str(emg_nr): y}
-        df = DataFrame(dict)
-        #print(df)
-        return df
+# Help: gets the min/max of a df
+def get_min_max_timestamp(df:DataFrame):
+    #min = int(np.floor(df['timestamp'].min()))
+    min = df['timestamp'].min()
+    max = df['timestamp'].max()
+    return min, max
 
-    # Help: returns the samplerate of a df
-    def get_samplerate(df:DataFrame):
-        min, max = get_min_max_timestamp(df)
-        if max > 60:
-            seconds = max - 60 - min
-        else:
-            seconds = max - min
-        samples = len(df.index)
-        samplerate = samples / seconds
-        return int(samplerate)
+# Help: returns df_time_emg
+def make_df_from_xandy(x, y, emg_nr):
+    dict = {'timestamp': x, get_emg_str(emg_nr): y}
+    df = DataFrame(dict)
+    #print(df)
+    return df
 
-    # Takes in a df and outputs np arrays for x and y values
-    def get_xory_from_df(x_or_y, df:DataFrame):
-        swither = {
-            'x': df.iloc[:,0].to_numpy(),
-            'y': df.iloc[:,1].to_numpy()
-        }
-        return swither.get(x_or_y, 0)
-    
-    # Slightly modified mfcc with inputs like below.
-    # Returns N (x_values from original df) and mfcc_y_values 
-    def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters):
+# Help: returns the samplerate of a df
+def get_samplerate(df:DataFrame):
+    min, max = get_min_max_timestamp(df)
+    if max > 60:
+        seconds = max - 60 - min
+    else:
+        seconds = max - min
+    samples = len(df.index)
+    samplerate = samples / seconds
+    return int(samplerate)
+
+# Takes in a df and outputs np arrays for x and y values
+def get_xory_from_df(x_or_y, df:DataFrame):
+    swither = {
+        'x': df.iloc[:,0].to_numpy(),
+        'y': df.iloc[:,1].to_numpy()
+    }
+    return swither.get(x_or_y, 0)
+
+# Slightly modified mfcc with inputs like below.
+# Returns N (x_values from original df) and mfcc_y_values 
+def mfcc_custom(df:DataFrame, samplesize, windowsize=MFCC_WINDOWSIZE, 
+                                            stepsize=MFCC_STEPSIZE, 
+                                            nr_coefficients=NR_COEFFICIENTS, 
+                                            nr_mel_filters=NR_MEL_BINS):
         N = get_xory_from_df('x', df)
         y = get_xory_from_df('y', df)
         return N, base.mfcc(y, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters)

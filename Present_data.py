@@ -42,7 +42,7 @@ def plot_mfcc(mfcc_data, data_label:str):
     fig, ax = plt.subplots()
     mfcc_data= np.swapaxes(mfcc_data, 0 ,1)
     
-    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * mfcc_stepsize))
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * MFCC_STEPSIZE))
     ax.xaxis.set_major_formatter(ticks_x)
 
     ax.imshow(mfcc_data, interpolation='nearest', cmap=cm.coolwarm, origin='lower')
@@ -55,7 +55,7 @@ def plot_3_mfcc(mfcc_data1, data_label1:str, mfcc_data2, data_label2:str, mfcc_d
     
     fig, axes = plt.subplots(nrows=3)
     plt.subplots_adjust(hspace=1.4, wspace=0.4)
-    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * mfcc_stepsize))
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * MFCC_STEPSIZE))
 
     data_list = [mfcc_data1, mfcc_data2, mfcc_data3]
     label_list = [data_label1, data_label2, data_label3]
@@ -74,7 +74,7 @@ def plot_3_mfcc(mfcc_data1, data_label1:str, mfcc_data2, data_label2:str, mfcc_d
 def plot_all_emg_mfcc(data_list:list, label_list:list):
     fig, axes = plt.subplots(nrows=4, ncols=2)
     plt.subplots_adjust(hspace=1.4, wspace=0.4)
-    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * mfcc_stepsize))
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * MFCC_STEPSIZE))
     plt.autoscale()
 
     d_list = np.array([ [data_list[0], data_list[4]],
@@ -115,7 +115,7 @@ def pretty(dict):
     
 # Takes in handler and detailes to denoise. 
 # Returns arrays and df
-def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, emg_nr):
+def denoice_dataset(handler:CSV_handler, subject_nr, which_arm, round, emg_nr):
     df = handler.get_df_from_data_dict(subject_nr, which_arm, round, emg_nr)
 
     N = get_xory_from_df('x', df)
@@ -123,7 +123,7 @@ def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, e
     cA_filt, cD_filt = soft_threshold_filter(cA, cD)
     y_values = inverse_wavelet(df, cA_filt, cD_filt)
 
-    df_new = Handler.make_df_from_xandy(N, y_values, emg_nr)
+    df_new = make_df_from_xandy(N, y_values, emg_nr)
     return df_new
 
 
@@ -157,9 +157,9 @@ def mfcc_3_plots_1_1_2(csv_handler:CSV_handler):
     #print(df1.head, samplerate1)
     #print(df2.head, samplerate2)
     #print(df3.head, samplerate3)
-    N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, mfcc_windowsize, mfcc_stepsize)
-    N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, mfcc_windowsize, mfcc_stepsize)
-    N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, mfcc_windowsize, mfcc_stepsize)
+    N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
     label_1 = 'Subject 1, session 1, left arm, emg nr. 1'
     label_2 = 'Subject 1, session 2, left arm, emg nr. 1'
     label_3 = 'Subject 2, session 1, left arm, emg nr. 1'
@@ -176,9 +176,9 @@ def mfcc_3_plots_3_3_4(csv_handler:CSV_handler):
     #print(df1.head, samplerate1)
     #print(df2.head, samplerate2)
     #print(df3.head, samplerate3)
-    N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, mfcc_windowsize, mfcc_stepsize)
-    N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, mfcc_windowsize, mfcc_stepsize)
-    N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, mfcc_windowsize, mfcc_stepsize)
+    N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
     label_1 = 'Subject 3, session 1, left arm, emg nr. 1'
     label_2 = 'Subject 3, session 2, left arm, emg nr. 1'
     label_3 = 'Subject 4, session 1, left arm, emg nr. 1'
@@ -194,14 +194,14 @@ def mfcc_all_emg_plots(csv_handler:CSV_handler):
     df6, samplerate6 = csv_handler.get_data( 1, 'left', 1, 6)
     df7, samplerate7 = csv_handler.get_data( 1, 'left', 1, 7)
     df8, samplerate8 = csv_handler.get_data( 1, 'left', 1, 8)
-    N1, mfcc_feat1 = csv_handler.mfcc_custom(df1, samplerate1, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
-    N2, mfcc_feat2 = csv_handler.mfcc_custom(df2, samplerate2, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
-    N3, mfcc_feat3 = csv_handler.mfcc_custom(df3, samplerate3, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
-    N4, mfcc_feat4 = csv_handler.mfcc_custom(df4, samplerate4, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
-    N5, mfcc_feat5 = csv_handler.mfcc_custom(df5, samplerate5, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
-    N6, mfcc_feat6 = csv_handler.mfcc_custom(df6, samplerate6, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
-    N7, mfcc_feat7 = csv_handler.mfcc_custom(df7, samplerate7, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
-    N8, mfcc_feat8 = csv_handler.mfcc_custom(df8, samplerate8, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N4, mfcc_feat4 = mfcc_custom(df4, samplerate4, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N5, mfcc_feat5 = mfcc_custom(df5, samplerate5, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N6, mfcc_feat6 = mfcc_custom(df6, samplerate6, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N7, mfcc_feat7 = mfcc_custom(df7, samplerate7, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N8, mfcc_feat8 = mfcc_custom(df8, samplerate8, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
     feat_list = [mfcc_feat1, mfcc_feat2, mfcc_feat3, mfcc_feat4, mfcc_feat5, mfcc_feat6, mfcc_feat7, mfcc_feat8]
     label_1 = 'Subject 1, session 1, left arm, emg nr. 1'
     label_2 = 'Subject 1, session 1, left arm, emg nr. 2'
