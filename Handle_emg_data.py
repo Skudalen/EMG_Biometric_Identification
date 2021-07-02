@@ -5,7 +5,17 @@ from pathlib import Path
 import numpy as np
 from pandas.core.frame import DataFrame
 from math import floor
+import sys
+sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/python_speech_features/python_speech_features')
+from python_speech_features.python_speech_features import *
+import json
 #from Present_data import get_data
+
+# Global variables for MFCC
+MFCC_STEPSIZE = 0.5     # Seconds
+MFCC_WINDOWSIZE = 2     # Seconds
+NR_COEFFICIENTS = 13    # Number of coefficients
+NR_MEL_BINS = 40     # Number of mel-filter-bins 
 
 class Data_container:
       
@@ -488,6 +498,12 @@ class CSV_handler:
 
 class DL_data_handler:
 
+    JSON_PATH = "mfcc_data.json"
+    SAMPLE_RATE = None
+    TRACK_DURATION = None # measured in seconds
+    #SAMPLES_PER_TRACK = SAMPLE_RATE * TRACK_DURATION
+
+
     def __init__(self, csv_handler:CSV_handler) -> None:
         self.csv_handler = csv_handler
         # Should med 4 sessions * split nr of samples per person. Each sample is structured like [sample_df, samplerate]
@@ -497,6 +513,7 @@ class DL_data_handler:
                                     4: [],
                                     5: []
                                     }
+                                    
     def get_samples_dict(self):
         return self.samples_per_subject
         
@@ -568,30 +585,71 @@ class DL_data_handler:
             main_df = pd.concat([main_df, adding_df], ignore_index=True)
         samplerate = get_samplerate(main_df)
         return main_df, samplerate
+    '''
+    def save_mfcc(raw_data_dict, json_path, samples_per_subject):
+        
+        # dictionary to store mapping, labels, and MFCCs
+        data = {
+            "mapping": [],
+            "labels": [],
+            "mfcc": []
+        }
+
+        #hop_length = MFCC_STEPSIZE * sample_rate
+        #num_mfcc_vectors_per_segment = math.ceil(samples_per_subject / hop_length)
+
+        # loop through all subjects to get samples
+        for key, value in raw_data_dict.items():
 
 
-# HELP FUNCTIONS: ------------------------------------------------------------------------: 
+            # save genre label (i.e., sub-folder name) in the mapping
+            subject_label = 'Subject ' + key
+            data["mapping"].append(subject_label)
+            print("\nProcessing: {}".format(subject_label))
 
-# Help: gets the str from emg nr
-def get_emg_str(emg_nr):
-    return 'emg' + str(emg_nr)
+            # process all audio files in genre sub-dir
+            for sample in value:
 
-# Help: gets the min/max of a df
-def get_min_max_timestamp(df:DataFrame):
-    #min = int(np.floor(df['timestamp'].min()))
-    min = df['timestamp'].min()
-    max = df['timestamp'].max()
-    return min, max
+                # load audio file
+                signal, sample_rate = sample[0], sample[1]
 
-# Help: returns df_time_emg
-def make_df_from_xandy(x, y, emg_nr):
-    dict = {'timestamp': x, get_emg_str(emg_nr): y}
-    df = DataFrame(dict)
-    #print(df)
-    return df
+                # extract mfcc
+                mfcc = mfcc_custom(signal, sample_rate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
+                mfcc = mfcc.T
+                print(len(mfcc))
 
-# Help: returns the samplerate of a df
-def get_samplerate(df:DataFrame):
+                # store only mfcc feature with expected number of vectors
+                #if len(mfcc) == num_mfcc_vectors_per_segment:
+                data["mfcc"].append(mfcc.tolist())
+                data["labels"].append(key)
+                print("sample:{}".format(value.index(sample)))
+
+        # save MFCCs to json file
+        with open(json_path, "w") as fp:
+            json.dump(data, fp, indent=4)
+    '''
+    # HELP FUNCTIONS: ------------------------------------------------------------------------: 
+
+    # Help: gets the str from emg nr
+    def get_emg_str(emg_nr):
+        return 'emg' + str(emg_nr)
+
+    # Help: gets the min/max of a df
+    def get_min_max_timestamp(df:DataFrame):
+        #min = int(np.floor(df['timestamp'].min()))
+        min = df['timestamp'].min()
+        max = df['timestamp'].max()
+        return min, max
+
+    # Help: returns df_time_emg
+    def make_df_from_xandy(x, y, emg_nr):
+        dict = {'timestamp': x, get_emg_str(emg_nr): y}
+        df = DataFrame(dict)
+        #print(df)
+        return df
+
+    # Help: returns the samplerate of a df
+    def get_samplerate(df:DataFrame):
         min, max = get_min_max_timestamp(df)
         if max > 60:
             seconds = max - 60 - min
@@ -600,3 +658,18 @@ def get_samplerate(df:DataFrame):
         samples = len(df.index)
         samplerate = samples / seconds
         return int(samplerate)
+
+    # Takes in a df and outputs np arrays for x and y values
+    def get_xory_from_df(x_or_y, df:DataFrame):
+        swither = {
+            'x': df.iloc[:,0].to_numpy(),
+            'y': df.iloc[:,1].to_numpy()
+        }
+        return swither.get(x_or_y, 0)
+    
+    # Slightly modified mfcc with inputs like below.
+    # Returns N (x_values from original df) and mfcc_y_values 
+    def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters):
+        N = get_xory_from_df('x', df)
+        y = get_xory_from_df('y', df)
+        return N, base.mfcc(y, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters)

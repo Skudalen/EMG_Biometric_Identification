@@ -4,17 +4,8 @@ from scipy.fft import fft, fftfreq
 import pywt
 import sys
 import Handle_emg_data as Handler
-sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/python_speech_features/python_speech_features')
-from python_speech_features.python_speech_features import *
 
 
-# Takes in a df and outputs np arrays for x and y values
-def get_xory_from_df(x_or_y, df:DataFrame):
-    swither = {
-        'x': df.iloc[:,0].to_numpy(),
-        'y': df.iloc[:,1].to_numpy()
-    }
-    return swither.get(x_or_y, 0)
 
 # Normalizes a ndarray of a signal to the scale of int16(32767)
 def normalize_wave(y_values):

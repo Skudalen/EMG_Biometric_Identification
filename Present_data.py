@@ -8,10 +8,10 @@ from matplotlib import cm
 import matplotlib.ticker as ticker
 
 # Global variables for MFCC
-mfcc_stepsize = 0.5     # Seconds
-mfcc_windowsize = 2     # Seconds
-nr_coefficients = 13    # Number of coefficients
-nr_mel_filters = 40     # Number of mel-filter-bins 
+MFCC_STEPSIZE = 0.5     # Seconds
+MFCC_WINDOWSIZE = 2     # Seconds
+NR_COEFFICIENTS = 13    # Number of coefficients
+NR_MEL_BINS = 40     # Number of mel-filter-bins 
 
 
 # PLOT FUNCTIONS --------------------------------------------------------------: 
@@ -126,13 +126,6 @@ def denoice_dataset(handler:Handler.CSV_handler, subject_nr, which_arm, round, e
     df_new = Handler.make_df_from_xandy(N, y_values, emg_nr)
     return df_new
 
-# Slightly modified mfcc with inputs like below.
-# Returns N (x_values from original df) and mfcc_y_values 
-def mfcc_custom(df:DataFrame, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters):
-    N = get_xory_from_df('x', df)
-    y = get_xory_from_df('y', df)
-    return N, base.mfcc(y, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters)
-
 
 def test_for_NaN(dict, samples_per_person):
     for key, value in dict.items():
@@ -201,14 +194,14 @@ def mfcc_all_emg_plots(csv_handler:CSV_handler):
     df6, samplerate6 = csv_handler.get_data( 1, 'left', 1, 6)
     df7, samplerate7 = csv_handler.get_data( 1, 'left', 1, 7)
     df8, samplerate8 = csv_handler.get_data( 1, 'left', 1, 8)
-    N1, mfcc_feat1 = mfcc_custom(df1, samplerate1, mfcc_windowsize, mfcc_stepsize)
-    N2, mfcc_feat2 = mfcc_custom(df2, samplerate2, mfcc_windowsize, mfcc_stepsize)
-    N3, mfcc_feat3 = mfcc_custom(df3, samplerate3, mfcc_windowsize, mfcc_stepsize)
-    N4, mfcc_feat4 = mfcc_custom(df4, samplerate4, mfcc_windowsize, mfcc_stepsize)
-    N5, mfcc_feat5 = mfcc_custom(df5, samplerate5, mfcc_windowsize, mfcc_stepsize)
-    N6, mfcc_feat6 = mfcc_custom(df6, samplerate6, mfcc_windowsize, mfcc_stepsize)
-    N7, mfcc_feat7 = mfcc_custom(df7, samplerate7, mfcc_windowsize, mfcc_stepsize)
-    N8, mfcc_feat8 = mfcc_custom(df8, samplerate8, mfcc_windowsize, mfcc_stepsize)
+    N1, mfcc_feat1 = csv_handler.mfcc_custom(df1, samplerate1, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N2, mfcc_feat2 = csv_handler.mfcc_custom(df2, samplerate2, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N3, mfcc_feat3 = csv_handler.mfcc_custom(df3, samplerate3, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N4, mfcc_feat4 = csv_handler.mfcc_custom(df4, samplerate4, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N5, mfcc_feat5 = csv_handler.mfcc_custom(df5, samplerate5, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N6, mfcc_feat6 = csv_handler.mfcc_custom(df6, samplerate6, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N7, mfcc_feat7 = csv_handler.mfcc_custom(df7, samplerate7, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
+    N8, mfcc_feat8 = csv_handler.mfcc_custom(df8, samplerate8, MFCC_WINDOWSIZE, MFCC_STEPSIZE)
     feat_list = [mfcc_feat1, mfcc_feat2, mfcc_feat3, mfcc_feat4, mfcc_feat5, mfcc_feat6, mfcc_feat7, mfcc_feat8]
     label_1 = 'Subject 1, session 1, left arm, emg nr. 1'
     label_2 = 'Subject 1, session 1, left arm, emg nr. 2'
@@ -229,9 +222,13 @@ def main():
     csv_handler = CSV_handler()
     csv_handler.load_data('soft')
     dl_data_handler = DL_data_handler(csv_handler)
+    mfcc_3_plots_1_1_2(csv_handler)
+
+    '''
     dl_data_handler.store_samples(10)
     dict = dl_data_handler.samples_per_subject
-
+    dl_data_handler.save_mfcc()
+    '''
     
    
 main()
