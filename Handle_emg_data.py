@@ -7,8 +7,9 @@ from pandas.core.frame import DataFrame
 from math import floor
 import sys
 sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/python_speech_features/python_speech_features')
-from python_speech_features.python_speech_features import *
+from python_speech_features.python_speech_features import mfcc
 import json
+import librosa
 #from Present_data import get_data
 
 # Global variables for MFCC
@@ -585,8 +586,8 @@ class DL_data_handler:
             main_df = pd.concat([main_df, adding_df], ignore_index=True)
         samplerate = get_samplerate(main_df)
         return main_df, samplerate
-    '''
-    def save_mfcc(raw_data_dict, json_path, samples_per_subject):
+
+    def save_mfcc(self, json_path=JSON_PATH):
         
         # dictionary to store mapping, labels, and MFCCs
         data = {
@@ -597,13 +598,14 @@ class DL_data_handler:
 
         #hop_length = MFCC_STEPSIZE * sample_rate
         #num_mfcc_vectors_per_segment = math.ceil(samples_per_subject / hop_length)
-
+        raw_data_dict = self.get_samples_dict()
+    
         # loop through all subjects to get samples
         for key, value in raw_data_dict.items():
 
 
             # save genre label (i.e., sub-folder name) in the mapping
-            subject_label = 'Subject ' + key
+            subject_label = 'Subject ' + str(key)
             data["mapping"].append(subject_label)
             print("\nProcessing: {}".format(subject_label))
 
@@ -612,9 +614,12 @@ class DL_data_handler:
 
                 # load audio file
                 signal, sample_rate = sample[0], sample[1]
+                n_fft = MFCC_WINDOWSIZE * sample_rate
+                hop_length = MFCC_STEPSIZE * sample_rate
 
                 # extract mfcc
-                mfcc = mfcc_custom(signal, sample_rate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
+                mfcc = librosa.feature.mfcc(signal, sample_rate, n_mfcc=NR_COEFFICIENTS, n_fft=n_fft, hop_length=hop_length)
+                #mfcc = mfcc_custom(signal, sample_rate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
                 mfcc = mfcc.T
                 print(len(mfcc))
 
@@ -627,7 +632,7 @@ class DL_data_handler:
         # save MFCCs to json file
         with open(json_path, "w") as fp:
             json.dump(data, fp, indent=4)
-    '''
+
 
 # HELP FUNCTIONS: ------------------------------------------------------------------------: 
 
@@ -676,4 +681,4 @@ def mfcc_custom(df:DataFrame, samplesize, windowsize=MFCC_WINDOWSIZE,
                                             nr_mel_filters=NR_MEL_BINS):
         N = get_xory_from_df('x', df)
         y = get_xory_from_df('y', df)
-        return N, base.mfcc(y, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters)
+        return N, mfcc(y, samplesize, windowsize, stepsize, nr_coefficients, nr_mel_filters)

@@ -222,13 +222,11 @@ def main():
     csv_handler = CSV_handler()
     csv_handler.load_data('soft')
     dl_data_handler = DL_data_handler(csv_handler)
-    mfcc_3_plots_1_1_2(csv_handler)
-
-    '''
     dl_data_handler.store_samples(10)
     dict = dl_data_handler.samples_per_subject
+    print(len(dict.get(2)))
     dl_data_handler.save_mfcc()
-    '''
+
     
    
 main()
