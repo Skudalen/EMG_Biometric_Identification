@@ -610,15 +610,10 @@ class DL_data_handler:
                 test_df_for_bugs(signal, key, i)
 
                 # extract mfcc
-                #n_fft = MFCC_WINDOWSIZE * sample_rate
-                #hop_length = MFCC_STEPSIZE * sample_rate
-                #mfcc = librosa.feature.mfcc(signal, sample_rate, n_mfcc=NR_COEFFICIENTS, n_fft=n_fft, hop_length=hop_length)
+
                 mfcc = mfcc_custom(signal, sample_rate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
                 mfcc = mfcc.T
-                #print(len(mfcc))
 
-                # store only mfcc feature with expected number of vectors
-                #if len(mfcc) == num_mfcc_vectors_per_segment:
                 data["mfcc"].append(mfcc.tolist())
                 data["labels"].append(key)
                 print("sample:{}".format(i+1))
