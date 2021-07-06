@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "/Users/Markus/opt/Anaconda3/python"
+    "python.pythonPath": "/Users/Markus/opt/anaconda3/envs/Slovakia 2021/bin/python",
+    //"terminal.integrated.inheritEnv": false
 }

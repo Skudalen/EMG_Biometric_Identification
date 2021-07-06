@@ -501,7 +501,7 @@ class DL_data_handler:
 
     def __init__(self, csv_handler:CSV_handler) -> None:
         self.csv_handler = csv_handler
-        # Should med 4 sessions * split nr of samples per person. Each sample is structured like [sample_df, samplerate]
+        # Should med 4 sessions * split nr of samples per person. Each sample is structured like this: [sample_df, samplerate]
         self.samples_per_subject = {1: [],  
                                     2: [], 
                                     3: [],
@@ -572,6 +572,8 @@ class DL_data_handler:
                     subj_samples.append([df_finished, samplerate])
             
             self.samples_per_subject[subject_nr+1] = subj_samples
+
+        
     
     def reshape_session_df_to_signal(self, df:DataFrame):
         main_df = df[['timestamp', 1]].rename(columns={1: 'emg'})
@@ -593,30 +595,42 @@ class DL_data_handler:
         raw_data_dict = self.get_samples_dict()
     
         # loop through all subjects to get samples
+        mfcc_list = []
+        mfcc_frame_list = []
+
         for key, value in raw_data_dict.items():
 
 
-            # save genre label (i.e., sub-folder name) in the mapping
+            # save subject label in the mapping
             subject_label = 'Subject ' + str(key)
             data["mapping"].append(subject_label)
             print("\nProcessing: {}".format(subject_label))
 
-            # process all audio files in genre sub-dir
+            # process all samples per subject
             for i, (sample) in enumerate(value):
 
-                # load audio file
+                # load signal from sample
                 signal, sample_rate = sample[0], sample[1]
                 signal = signal['emg'].to_numpy()
                 test_df_for_bugs(signal, key, i)
+                #print(sample_rate)
 
                 # extract mfcc
-
                 mfcc = mfcc_custom(signal, sample_rate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
-                mfcc = mfcc.T
+                
+                mfcc_list.append(mfcc.tolist())
+                mfcc_frame_list.append(mfcc.shape[0])
 
-                data["mfcc"].append(mfcc.tolist())
+                #data["mfcc"].append(mfcc.tolist())
                 data["labels"].append(key)
-                print("sample:{}".format(i+1))
+                print("sample:{} is done".format(i+1))
+
+        minimum = min(mfcc_frame_list)
+
+        for mfcc_data in mfcc_list:
+
+            data["mfcc"].append(mfcc_data[:minimum])
+            print(np.array(mfcc_data[:minimum]).shape)
 
         # save MFCCs to json file
         with open(json_path, "w") as fp:

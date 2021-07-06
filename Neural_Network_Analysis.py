@@ -1,8 +1,9 @@
 import json
+from python_speech_features.python_speech_features.base import mfcc
 import numpy as np
 from sklearn.model_selection import train_test_split
-import tensorflow.keras as keras
 import tensorflow as tf
+import tensorflow.keras as keras
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,12 +16,16 @@ def load_data(data_path):
     with open(data_path, "r") as fp:
         data = json.load(fp)
 
-    # convert lists to numpy arrays
-    X = np.array(data["mfcc"])
+    # convert lists to numpy arraysls
+    #print('\n', data['mfcc'], '\n')
+    X = np.array(data['mfcc'])
+    print(X.shape)
+    #print((len(X), len(X[0]), len(X[0][0])))
+    #print((len(X), len(X[5]), len(X[5][0])))
+
     y = np.array(data["labels"])
-    #X = np.asarray(X).astype('float32')
-    #y = np.asarray(y).astype('float32')
-    #y = tf.expand_dims(y, axis=1)
+    print(y.shape)
+    
 
     print("Data succesfully loaded!")
 
@@ -102,17 +107,9 @@ if __name__ == "__main__":
     # get train, validation, test splits
     X_train, X_validation, X_test, y_train, y_validation, y_test = prepare_datasets(0.25, 0.2)
 
+    print(X_train.shape[1], X_train.shape[2])
     # create network
-
-    print(X_train.shape)
-    X_train = np.reshape(X_train, (X_train.shape[0], 1, X_train.shape[1]))
-    X_test = np.reshape(X_test, (X_test.shape[0], 1, X_test.shape[1]))
-    #X_validation = np.reshape(X_validation, (X_test.shape[0], 1, X_test.shape[1]))
-    print(X_train.shape)
-    print(X_train.shape[0])
-    print(X_train.shape[1])
-
-    input_shape = (X_train.shape[1], X_train.shape[2])  # 300, 13
+    input_shape = (X_train.shape[1], X_train.shape[2])  # 18, 13
     model = build_model(input_shape)
 
     # compile model
@@ -124,7 +121,7 @@ if __name__ == "__main__":
     model.summary()
 
     # train model
-    history = model.fit(X_train, y_train, validation_data=(X_validation, y_validation), batch_size=16, epochs=30)
+    history = model.fit(X_train, y_train, validation_data=(X_validation, y_validation), batch_size=100, epochs=30)
 
     # plot accuracy/error for training and validation
     plot_history(history)
@@ -132,4 +129,5 @@ if __name__ == "__main__":
     # evaluate model on test set
     test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
     print('\nTest accuracy:', test_acc)
+
 
