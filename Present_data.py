@@ -221,19 +221,13 @@ def main():
     csv_handler = CSV_handler()
     csv_handler.load_data('soft')
     dl_data_handler = DL_data_handler(csv_handler)
-    dl_data_handler.store_samples(5)
-    dict = dl_data_handler.samples_per_subject
-    #print(dict.get(1)[2][0], dict.get(1)[10][1])
-    #print(dict.get(1)[15][0], dict.get(1)[10][1])
-    #print(dict.get(1))
-    '''
-    print(len(dict.get(1)))
-    print(len(dict.get(2)))
-    print(len(dict.get(3)))
-    print(len(dict.get(4)))
-    print(len(dict.get(5)))
-    '''
-    dl_data_handler.save_mfcc()
+    emg_list = dl_data_handler.get_emg_list(1, 1)
+    session_df = dl_data_handler.make_subj_sample(emg_list)
+    print(session_df)
+    df = dl_data_handler.make_mfcc_df_from_session_df(session_df)
+    print(df)
+    print(len(df.iloc[0]))
+    
 
     
    

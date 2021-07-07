@@ -574,22 +574,27 @@ class DL_data_handler:
             
             self.samples_per_subject[subject_nr+1] = subj_samples
 
-    def make_mfcc_table_of_emglist(self, emg_list, df_original):
-        samplerate = get_samplerate(df_original)
-        signal = get_xory_from_df('y', emg_list[0])
-        mfcc_0 = mfcc_custom(signal, samplerate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
-        df = DataFrame(mfcc_0)
+    def make_mfcc_df_from_session_df(self, session_df):
+        session_df.rename(columns={0:'timestamp'}, inplace=True)
+        samplerate = get_samplerate(session_df)
+        #attach_func = lambda list_1, list_2: list_1.tolist().extend(list_2.tolist())
         attach_func = lambda list_1, list_2: list_1.extend(list_2)
-        
-        for i in range(15):
-            signal = get_xory_from_df('y', emg_list[i+1])
-            mfcc_i = mfcc_custom(signal, samplerate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
-            mfcc_i = DataFrame(mfcc_i)
-            df.combine(mfcc_i, attach_func)
 
-        return df
+        signal = session_df[1]
+        mfcc_0 = mfcc_custom(signal, samplerate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
+        df = DataFrame(mfcc_0).dropna()
+        df['combined'] = df.values.tolist()
+        result_df = df['combined']
+        #print(result_df)
 
-        pass
+        for i in range(2, 17):
+            signal_i = session_df[i]
+            mfcc_i = mfcc_custom(signal_i, samplerate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
+            mfcc_i = DataFrame(mfcc_i).dropna()
+            mfcc_i['combined'] = mfcc_i.values.tolist()
+            df = result_df.combine(mfcc_i['combined'], attach_func)
+
+        return result_df
 
     def store_mfcc_samples(self):
         for subject_nr in range(5):
