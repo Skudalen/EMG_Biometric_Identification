@@ -222,11 +222,14 @@ def main():
     csv_handler.load_data('soft')
     dl_data_handler = DL_data_handler(csv_handler)
     dl_data_handler.store_mfcc_samples()
+    dl_data_handler.save_json_reg()
+
+    '''
     dict = dl_data_handler.get_mfcc_samples_dict()
     subject1_df = dict.get(5)
     print(subject1_df)
     print(len(subject1_df.loc[1]))
-    
+    '''
 
     
    

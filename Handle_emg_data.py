@@ -498,7 +498,9 @@ class CSV_handler:
 
 class DL_data_handler:
 
-    JSON_PATH = "mfcc_data.json"
+    JSON_PATH_REG = "reg_data.json"
+    JSON_PATH_MFCC = "mfcc_data.json"
+
 
     def __init__(self, csv_handler:CSV_handler) -> None:
         self.csv_handler = csv_handler
@@ -634,7 +636,7 @@ class DL_data_handler:
             self.mfcc_samples_per_subject[subject_nr+1] = result_df
 
 
-    def save_json_ed1(self, json_path=JSON_PATH):
+    def save_json_reg(self, json_path=JSON_PATH_REG):
         
         # dictionary to store mapping, labels, and MFCCs
         data = {
@@ -643,7 +645,7 @@ class DL_data_handler:
             "mfcc": []
         }
 
-        raw_data_dict = self.get_samples_dict()
+        raw_data_dict = self.get_reg_samples_dict()
     
         # loop through all subjects to get samples
         mfcc_list = []
@@ -686,6 +688,37 @@ class DL_data_handler:
         # save MFCCs to json file
         with open(json_path, "w") as fp:
             json.dump(data, fp, indent=4)
+
+    def save_json_mfcc(self, json_path=JSON_PATH_MFCC):
+            
+            # dictionary to store mapping, labels, and MFCCs
+            data = {
+                "mapping": [],
+                "labels": [],
+                "mfcc": []
+            }
+
+            raw_data_dict = self.get_mfcc_samples_dict()
+        
+            # loop through all subjects to get samples
+            for key, value in raw_data_dict.items():
+                
+                # save subject label in the mapping
+                subject_label = 'Subject ' + str(key)
+                print("\nProcessing: {}".format(subject_label))
+                data["mapping"].append(subject_label)
+
+                # process all samples per subject
+                for i, sample in enumerate(value):
+
+                    data["labels"].append(key)
+                    data["mfcc"].append(sample)
+                    print("sample:{} is done".format(i+1))
+                    #print(np.array(mfcc_data).shape)
+
+            # save MFCCs to json file
+            with open(json_path, "w") as fp:
+                json.dump(data, fp, indent=4)
 
 
 # HELP FUNCTIONS: ------------------------------------------------------------------------: 
