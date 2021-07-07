@@ -1,3 +1,4 @@
+from typing import List
 from numpy.core.arrayprint import IntegerFormat
 from numpy.lib import math
 import pandas as pd
@@ -573,7 +574,33 @@ class DL_data_handler:
             
             self.samples_per_subject[subject_nr+1] = subj_samples
 
+    def make_mfcc_table_of_emglist(self, emg_list, df_original):
+        samplerate = get_samplerate(df_original)
+        signal = get_xory_from_df('y', emg_list[0])
+        mfcc_0 = mfcc_custom(signal, samplerate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
+        df = DataFrame(mfcc_0)
+        attach_func = lambda list_1, list_2: list_1.extend(list_2)
         
+        for i in range(15):
+            signal = get_xory_from_df('y', emg_list[i+1])
+            mfcc_i = mfcc_custom(signal, samplerate, MFCC_WINDOWSIZE, MFCC_STEPSIZE, NR_COEFFICIENTS, NR_MEL_BINS)
+            mfcc_i = DataFrame(mfcc_i)
+            df.combine(mfcc_i, attach_func)
+
+        return df
+
+        pass
+
+    def store_mfcc_samples(self):
+        for subject_nr in range(5):
+            subj_samples = []
+            for session_nr in range(4):
+                list_of_emg = self.get_emg_list(subject_nr+1, session_nr+1)
+                
+        
+        pass
+
+
     
     def reshape_session_df_to_signal(self, df:DataFrame):
         main_df = df[['timestamp', 1]].rename(columns={1: 'emg'})
