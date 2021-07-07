@@ -503,12 +503,19 @@ class DL_data_handler:
     def __init__(self, csv_handler:CSV_handler) -> None:
         self.csv_handler = csv_handler
         # Should med 4 sessions * split nr of samples per person. Each sample is structured like this: [sample_df, samplerate]
-        self.samples_per_subject = {1: [],  
-                                    2: [], 
-                                    3: [],
-                                    4: [],
-                                    5: []
-                                    }
+        self.reg_samples_per_subject = {1: [],  
+                                        2: [], 
+                                        3: [],
+                                        4: [],
+                                        5: []
+                                        }
+        # Should med 4 sessions * (~150, 208) of mfcc samples per person. One DataFrame per subject
+        self.mfcc_samples_per_subject = {1: None,  
+                                         2: None, 
+                                         3: None,
+                                         4: None,
+                                         5: None
+                                         }
 
     def get_samples_dict(self):
         return self.samples_per_subject
@@ -555,6 +562,14 @@ class DL_data_handler:
 
         return tot_session_df
     
+    def reshape_session_df_to_signal(self, df:DataFrame):
+            main_df = df[['timestamp', 1]].rename(columns={1: 'emg'})
+            for i in range(2, 17):
+                adding_df = df[['timestamp', i]].rename(columns={i: 'emg'})
+                main_df = pd.concat([main_df, adding_df], ignore_index=True)
+            samplerate = get_samplerate(main_df)
+            return main_df, samplerate
+
     def store_samples(self, split_nr) -> None:
         for subject_nr in range(5):
             subj_samples = []
@@ -572,9 +587,10 @@ class DL_data_handler:
                     df_finished, samplerate = self.reshape_session_df_to_signal(df)
                     subj_samples.append([df_finished, samplerate])
             
-            self.samples_per_subject[subject_nr+1] = subj_samples
+            self.reg_samples_per_subject[subject_nr+1] = subj_samples
 
-    def make_mfcc_df_from_session_df(self, session_df):
+
+    def make_mfcc_df_from_session_df(self, session_df) -> DataFrame:
         session_df.rename(columns={0:'timestamp'}, inplace=True)
         samplerate = get_samplerate(session_df)
         #attach_func = lambda list_1, list_2: list_1.tolist().extend(list_2.tolist())
@@ -596,26 +612,25 @@ class DL_data_handler:
 
         return result_df
 
-    def store_mfcc_samples(self):
+    def store_mfcc_samples(self) -> None:
         for subject_nr in range(5):
             subj_samples = []
             for session_nr in range(4):
                 list_of_emg = self.get_emg_list(subject_nr+1, session_nr+1)
+                tot_session_df = self.make_subj_sample(list_of_emg)
+            
+                # TESTING FOR NAN
+                if tot_session_df.isnull().values.any():
+                    print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? HERE')
                 
-        
-        pass
+                mfcc_df_i = self.make_mfcc_df_from_session_df(tot_session_df)
+                subj_samples.append(mfcc_df_i)
+            
+            result_df = pd.concat(subj_samples, axis=1, ignore_index=True)
+            self.mfcc_samples_per_subject[subject_nr+1] = result_df
 
 
-    
-    def reshape_session_df_to_signal(self, df:DataFrame):
-        main_df = df[['timestamp', 1]].rename(columns={1: 'emg'})
-        for i in range(2, 17):
-            adding_df = df[['timestamp', i]].rename(columns={i: 'emg'})
-            main_df = pd.concat([main_df, adding_df], ignore_index=True)
-        samplerate = get_samplerate(main_df)
-        return main_df, samplerate
-
-    def save_mfcc(self, json_path=JSON_PATH):
+    def save_json_ed1(self, json_path=JSON_PATH):
         
         # dictionary to store mapping, labels, and MFCCs
         data = {
