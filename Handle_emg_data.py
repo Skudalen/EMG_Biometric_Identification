@@ -517,9 +517,13 @@ class DL_data_handler:
                                          5: None
                                          }
 
-    def get_samples_dict(self):
-        return self.samples_per_subject
+    def get_reg_samples_dict(self):
+        return self.reg_samples_per_subject
         
+    def get_mfcc_samples_dict(self):
+        return self.mfcc_samples_per_subject
+
+
     def get_emg_list(self, subject_nr, session_nr) -> list:
         list_of_emgs = []
         df, _ = self.csv_handler.get_data(subject_nr, 'left', session_nr, 1)
@@ -626,7 +630,7 @@ class DL_data_handler:
                 mfcc_df_i = self.make_mfcc_df_from_session_df(tot_session_df)
                 subj_samples.append(mfcc_df_i)
             
-            result_df = pd.concat(subj_samples, axis=1, ignore_index=True)
+            result_df = pd.concat(subj_samples, axis=0, ignore_index=True)
             self.mfcc_samples_per_subject[subject_nr+1] = result_df
 
 
