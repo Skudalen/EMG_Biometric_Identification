@@ -222,7 +222,7 @@ def main():
     csv_handler.load_data('soft')
     dl_data_handler = DL_data_handler(csv_handler)
     dl_data_handler.store_mfcc_samples()
-    dl_data_handler.save_json_reg()
+    dl_data_handler.save_json_mfcc()
 
     '''
     dict = dl_data_handler.get_mfcc_samples_dict()

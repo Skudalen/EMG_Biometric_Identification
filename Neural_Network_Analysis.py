@@ -17,13 +17,12 @@ def load_data(data_path):
         data = json.load(fp)
 
     # convert lists to numpy arraysls
-    #print('\n', data['mfcc'], '\n')
     X = np.array(data['mfcc'])
+    X = X.reshape(X.shape[0], 1, X.shape[1])
     print(X.shape)
-    #print((len(X), len(X[0]), len(X[0][0])))
-    #print((len(X), len(X[5]), len(X[5][0])))
-
+    
     y = np.array(data["labels"])
+    y = y.reshape(y.shape[0], 1)
     print(y.shape)
     
 
@@ -109,7 +108,8 @@ if __name__ == "__main__":
 
     print(X_train.shape[1], X_train.shape[2])
     # create network
-    input_shape = (X_train.shape[1], X_train.shape[2])  # 18, 13
+    
+    input_shape = (X_train.shape[1], X_train.shape[2])  # 1, 208
     model = build_model(input_shape)
 
     # compile model
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     model.summary()
 
     # train model
-    history = model.fit(X_train, y_train, validation_data=(X_validation, y_validation), batch_size=100, epochs=30)
+    history = model.fit(X_train, y_train, validation_data=(X_validation, y_validation), batch_size=128, epochs=30)
 
     # plot accuracy/error for training and validation
     plot_history(history)
@@ -129,5 +129,6 @@ if __name__ == "__main__":
     # evaluate model on test set
     test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
     print('\nTest accuracy:', test_acc)
+    
 
 

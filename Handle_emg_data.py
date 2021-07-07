@@ -675,7 +675,7 @@ class DL_data_handler:
                 mfcc_frame_list.append(mfcc.shape[0])
 
                 #data["mfcc"].append(mfcc.tolist())
-                data["labels"].append(key)
+                data["labels"].append(key-1)
                 print("sample:{} is done".format(i+1))
 
         minimum = min(mfcc_frame_list)
@@ -711,7 +711,7 @@ class DL_data_handler:
                 # process all samples per subject
                 for i, sample in enumerate(value):
 
-                    data["labels"].append(key)
+                    data["labels"].append(key-1)
                     data["mfcc"].append(sample)
                     print("sample:{} is done".format(i+1))
                     #print(np.array(mfcc_data).shape)
