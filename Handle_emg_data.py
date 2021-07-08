@@ -486,8 +486,8 @@ class CSV_handler:
         samplerate = get_samplerate(data_frame)
         return data_frame, samplerate
 
-
-    '''
+    # NOT IMPLEMENTED
+    ''' 
     def get_keyboard_data(self, filename:str, pres_or_release:str='pressed'):
         filepath = self.working_dir + str(filename)
         df = pd.read_csv(filepath)
@@ -496,7 +496,7 @@ class CSV_handler:
         else
     '''
 
-class DL_data_handler:
+class NN_handler:
 
     JSON_PATH_REG = "reg_data.json"
     JSON_PATH_MFCC = "mfcc_data.json"
