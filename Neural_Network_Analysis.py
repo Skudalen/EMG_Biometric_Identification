@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 # path to json file that stores MFCCs and subject labels for each processed sample
 DATA_PATH = str(Path.cwd()) + "/mfcc_data.json"
 
-def load_data(data_path): 
+def load_data_from_json(data_path): 
 
     with open(data_path, "r") as fp:
         data = json.load(fp)
@@ -29,6 +29,7 @@ def load_data(data_path):
     print("Data succesfully loaded!")
 
     return X, y
+
 
 def plot_history(history):
     """Plots accuracy/loss for training/validation set as a function of the epochs
