@@ -21,14 +21,17 @@ def load_data_from_json(data_path):
 
     # convert lists to numpy arraysls
     X = np.array(data['mfcc'])
+    #print(X.shape)
     X = X.reshape(X.shape[0], 1, X.shape[1])
     #print(X.shape)
     
     y = np.array(data["labels"])
+    #print(y.shape)
     y = y.reshape(y.shape[0], 1)
     #print(y.shape)
 
-    session_lengths = data['session_lengths']
+    session_lengths = np.array(data['session_lengths'])
+    #print(session_lengths.shape)
     
 
     print("Data succesfully loaded!")
@@ -67,7 +70,7 @@ def plot_history(history):
 # Takes in data and labels, and splits it into train, validation and test sets by percentage
 # Input: Data, labels, whether to shuffle, % validatiion, % test
 # Ouput: X_train, X_validation, X_test, y_train, y_validation, y_test
-def prepare_datasets_percentsplit(X, y, shuffle_vars:bool, validation_size=0.2, test_size=0.25,):
+def prepare_datasets_percentsplit(X, y, shuffle_vars, validation_size=0.2, test_size=0.25,):
 
     # Create train, validation and test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=shuffle_vars)
@@ -80,14 +83,19 @@ def prepare_datasets_percentsplit(X, y, shuffle_vars:bool, validation_size=0.2, 
 # Ouput: X_train, X_test, y_train, y_test
 def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_subjects=5):
 
+    
+    #X_train = np.empty((1, 1, 208))
+    #y_train = np.empty((1, 208))
+    #X_test = np.empty((1, 1, 208))
+    #y_test = np.empty((1, 208))
+    X = X.tolist()
+    y = y.tolist()
+    session_lengths = session_lengths.tolist()
+    X_train = y_train = X_test = y_test = []
+
     subject_starting_index = 0
-    X_train = np.empty((1, 1, 208))
-    y_train = np.empty((1, 208))
-    X_test = np.empty((1, 1, 208))
-    y_test = np.empty((1, 208))
 
     for i in range(nr_subjects):
-        
         start_test_index = sum(session_lengths[i][:test_session_index])
         end_test_index = start_test_index + session_lengths[i][test_session_index-1]
         end_subject_index = sum(session_lengths[i])
@@ -112,7 +120,7 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
         subject_starting_index = end_subject_index
 
 
-    return X_train, X_test, y_train, y_test
+    return np.array(X_train), np.array(X_test), np.array(y_train), np.array(y_test)
 
 # Creates a RNN_LSTM neural network model
 # Input: input shape, classes of classification
@@ -162,13 +170,27 @@ if __name__ == "__main__":
     # Load data
     X, y, session_lengths = load_data_from_json(DATA_PATH_MFCC)
 
+    print(X.shape)
+    print(y.shape)
+    print(session_lengths.shape)
+
     # Get prepared data: train, validation, and test
+    '''
     (X_train, X_validation, 
     X_test, y_train, 
     y_validation, 
     y_test) = prepare_datasets_percentsplit(X, y, validation_size=0.2, test_size=0.25,  shuffle_vars=True)
-    #print(X_train.shape)
+    '''
+    (X_train, X_test, 
+    y_train, y_test) = prepare_datasets_sessions(X, y, session_lengths)
 
+    print(X_train.size)
+    print(X_train.shape)
+    print(X_test.shape)
+    print(y_train.shape)
+    print(y_test.shape)
+
+    '''
     # Make model
     model = RNN_LSTM(input_shape=(1, 208))
     model.summary()
@@ -182,6 +204,7 @@ if __name__ == "__main__":
     # evaluate model on test set
     test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
     print('\nTest accuracy:', test_acc)
+    '''
     
 
 

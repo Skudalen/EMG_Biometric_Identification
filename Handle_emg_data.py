@@ -759,7 +759,7 @@ class NN_handler:
                 for i, sample in enumerate(value[0]):
 
                     data["labels"].append(key-1)    # Subject nr
-                    data["mfcc"].append(sample[0])  # MFCC sample on same index
+                    data["mfcc"].append(sample)  # MFCC sample on same index
                      
                     print("sample:{} is done".format(i+1))
                     #print(np.array(mfcc_data).shape)
