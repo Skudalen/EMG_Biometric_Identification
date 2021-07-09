@@ -528,12 +528,12 @@ class NN_handler:
                                         4: [],
                                         5: []
                                         }
-        # Should med 4 sessions * (~150, 208) of mfcc samples per person. One DataFrame per subject
-        self.mfcc_samples_per_subject = {1: None,  
-                                         2: None, 
-                                         3: None,
-                                         4: None,
-                                         5: None
+        # Should med 4 sessions * (~150, 208) of mfcc samples per person. One [DataFrame, session_length_list] per subject
+        self.mfcc_samples_per_subject = {1: [],  
+                                         2: [], 
+                                         3: [],
+                                         4: [],
+                                         5: []
                                          }
 
     # GET method for reg_samples_dict
@@ -627,8 +627,8 @@ class NN_handler:
 
     # Takes in all EMG session Dataframe and creates DataFrame of MFCC samples
     # Input: DataFrame(shape[1]=16, EMG data)
-    # Output: DataFrame(merged MFCC data, shape: (n, 13*16))
-    def make_mfcc_df_from_session_df(self, session_df) -> DataFrame:
+    # Output: DataFrame(merged MFCC data, shape: (n, 13*16)), length of session datapoints
+    def make_mfcc_df_from_session_df(self, session_df):
         session_df.rename(columns={0:'timestamp'}, inplace=True)
         samplerate = get_samplerate(session_df)
         attach_func = lambda list_1, list_2: list_1.extend(list_2)
@@ -645,16 +645,19 @@ class NN_handler:
             mfcc_i = DataFrame(mfcc_i).dropna()
             mfcc_i['combined'] = mfcc_i.values.tolist()
             df = result_df.combine(mfcc_i['combined'], attach_func)
+        
+        session_length = (len(result_df.index)) # Add the length of session data points
 
-        return result_df
+        return result_df, session_length
 
     # Merges MFCC data from all sessions and stores the sample data in 
     # the NN_handler's mfcc_samples_per_subject dict
     # Input: None(NN_handler)
-    # Output: None -> stores in NN_handler
+    # Output: None -> stores in NN_handler [samples, session_length_list] for each subject
     def store_mfcc_samples(self) -> None:
         for subject_nr in range(5):
             subj_samples = []
+            session_length_list = []
             for session_nr in range(4):
                 list_of_emg = self.get_emg_list(subject_nr+1, session_nr+1)
                 tot_session_df = self.make_subj_sample(list_of_emg)
@@ -663,11 +666,12 @@ class NN_handler:
                 if tot_session_df.isnull().values.any():
                     print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? HERE')
                 
-                mfcc_df_i = self.make_mfcc_df_from_session_df(tot_session_df)
+                mfcc_df_i, session_length = self.make_mfcc_df_from_session_df(tot_session_df)
                 subj_samples.append(mfcc_df_i)
+                session_length_list.append(session_length)            
             
             result_df = pd.concat(subj_samples, axis=0, ignore_index=True)
-            self.mfcc_samples_per_subject[subject_nr+1] = result_df
+            self.mfcc_samples_per_subject[subject_nr+1] = [result_df, session_length_list]
 
 
     # Makes MFCC data from reg_samples_per_subject and stores it in a json file
@@ -735,7 +739,9 @@ class NN_handler:
             data = {
                 "mapping": [],
                 "labels": [],
-                "mfcc": []
+                "mfcc": [],
+
+                "session_lengths": []
             }
 
             raw_data_dict = self.get_mfcc_samples_dict()
@@ -746,13 +752,15 @@ class NN_handler:
                 # save subject label in the mapping
                 subject_label = 'Subject ' + str(key)
                 print("\nProcessing: {}".format(subject_label))
-                data["mapping"].append(subject_label)
+                data["mapping"].append(subject_label)       # Subject label
+                data["session_lengths"].append(value[1])   # List[subject][session_length_list]
 
                 # process all samples per subject
-                for i, sample in enumerate(value):
+                for i, sample in enumerate(value[0]):
 
-                    data["labels"].append(key-1)
-                    data["mfcc"].append(sample)
+                    data["labels"].append(key-1)    # Subject nr
+                    data["mfcc"].append(sample[0])  # MFCC sample on same index
+                     
                     print("sample:{} is done".format(i+1))
                     #print(np.array(mfcc_data).shape)
 

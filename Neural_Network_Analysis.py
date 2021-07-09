@@ -13,7 +13,7 @@ DATA_PATH_MFCC = str(Path.cwd()) + "/mfcc_data.json"
 
 # Loads data from the json file and reshapes X_data(samples, 1, 208) and y_data(samples, 1)
 # Input: JSON path
-# Ouput: X(mfcc data), y(labels)
+# Ouput: X(mfcc data), y(labels), session_lengths
 def load_data_from_json(data_path): 
 
     with open(data_path, "r") as fp:
@@ -27,11 +27,13 @@ def load_data_from_json(data_path):
     y = np.array(data["labels"])
     y = y.reshape(y.shape[0], 1)
     #print(y.shape)
+
+    session_lengths = data['session_lengths']
     
 
     print("Data succesfully loaded!")
 
-    return X, y
+    return X, y, session_lengths
 
 # Plots the training history with two subplots. First training and test accuracy, and then 
 # loss with respect to epochs
@@ -62,16 +64,55 @@ def plot_history(history):
 
     plt.show()
 
-# Takes in data and labels, and splits it into train, validation and test sets
+# Takes in data and labels, and splits it into train, validation and test sets by percentage
 # Input: Data, labels, whether to shuffle, % validatiion, % test
 # Ouput: X_train, X_validation, X_test, y_train, y_validation, y_test
 def prepare_datasets_percentsplit(X, y, shuffle_vars:bool, validation_size=0.2, test_size=0.25,):
 
-    # create train, validation and test split
+    # Create train, validation and test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=shuffle_vars)
     X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train, test_size=validation_size, shuffle=shuffle_vars)
 
     return X_train, X_validation, X_test, y_train, y_validation, y_test
+
+# Takes in data, labels, and session_lengths and splits it into train and test sets by session_index
+# Input: Data, labels, session_lengths, test_session_index
+# Ouput: X_train, X_test, y_train, y_test
+def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_subjects=5):
+
+    subject_starting_index = 0
+    X_train = np.empty((1, 1, 208))
+    y_train = np.empty((1, 208))
+    X_test = np.empty((1, 1, 208))
+    y_test = np.empty((1, 208))
+
+    for i in range(nr_subjects):
+        
+        start_test_index = sum(session_lengths[i][:test_session_index])
+        end_test_index = start_test_index + session_lengths[i][test_session_index-1]
+        end_subject_index = sum(session_lengths[i])
+        if start_test_index == subject_starting_index:
+            X_test.append(X[start_test_index:end_test_index])
+            y_test.append(y[start_test_index:end_test_index])
+            X_train.append(X[end_test_index:end_subject_index])
+            y_train.append(y[end_test_index:end_subject_index])
+            
+        elif end_test_index == end_subject_index:
+            X_train.append(X[subject_starting_index:start_test_index])
+            y_train.append(y[subject_starting_index:start_test_index])
+            X_test.append(X[start_test_index:end_test_index])
+            y_test.append(y[start_test_index:end_test_index])
+        else:
+            X_train.append(X[subject_starting_index:start_test_index])
+            y_train.append(y[subject_starting_index:start_test_index])
+            X_test.append(X[start_test_index:end_test_index])
+            y_test.append(y[start_test_index:end_test_index])
+            X_train.append(X[end_test_index:end_subject_index])
+            y_train.append(y[end_test_index:end_subject_index])
+        subject_starting_index = end_subject_index
+
+
+    return X_train, X_test, y_train, y_test
 
 # Creates a RNN_LSTM neural network model
 # Input: input shape, classes of classification
@@ -119,14 +160,14 @@ def train(model, batch_size, epochs, X_train, X_validation, y_train, y_validatio
 if __name__ == "__main__":
 
     # Load data
-    X, y = load_data_from_json(DATA_PATH_MFCC)
+    X, y, session_lengths = load_data_from_json(DATA_PATH_MFCC)
 
     # Get prepared data: train, validation, and test
-    X_train, X_validation, X_test, y_train, y_validation, y_test = prepare_datasets_percentsplit(X, y,
-                                                                                                validation_size=0.2, 
-                                                                                                test_size=0.25,  
-                                                                                                shuffle_vars=True)
-    print(X_train.shape)
+    (X_train, X_validation, 
+    X_test, y_train, 
+    y_validation, 
+    y_test) = prepare_datasets_percentsplit(X, y, validation_size=0.2, test_size=0.25,  shuffle_vars=True)
+    #print(X_train.shape)
 
     # Make model
     model = RNN_LSTM(input_shape=(1, 208))
