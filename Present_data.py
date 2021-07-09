@@ -22,10 +22,15 @@ def plot_df(df:DataFrame):
     plt.show()
 
 # Plots ndarrays after transformations 
+# Input: X-values and Y-values
+# Output: None --> Plot
 def plot_array(N, y):
     plt.plot(N, np.abs(y))
     plt.show()
 
+# Plots two subplots with two dataframes in order to compare them
+# Input: Old dataframe, old title, new dataframe, new title
+# Output: None --> Plot
 def plot_compare_two_df(df_old, old_name, df_new, new_name):
     x = get_xory_from_df('x', df_old)
     y1 = get_xory_from_df('y', df_old)
@@ -38,6 +43,9 @@ def plot_compare_two_df(df_old, old_name, df_new, new_name):
     axis[1].set_title(new_name)
     plt.show()
 
+# Plots one set of MFCC data
+# Input: 2d array of MFCC data(frame, coefficients), data_label for description
+# Output: None -> Plot
 def plot_mfcc(mfcc_data, data_label:str):
     fig, ax = plt.subplots()
     mfcc_data= np.swapaxes(mfcc_data, 0 ,1)
@@ -51,6 +59,9 @@ def plot_mfcc(mfcc_data, data_label:str):
     ax.set_xlabel('Time(s)')
     plt.show() 
 
+# Plots three sets of MFCC data
+# Input: 3 x (2d array of MFCC data(frame, coefficients)), 3 x (data_label for description)
+# Output: None -> Plot
 def plot_3_mfcc(mfcc_data1, data_label1:str, mfcc_data2, data_label2:str, mfcc_data3, data_label3:str):
     
     fig, axes = plt.subplots(nrows=3)
@@ -71,6 +82,9 @@ def plot_3_mfcc(mfcc_data1, data_label1:str, mfcc_data2, data_label2:str, mfcc_d
 
     plt.show() 
 
+# Plots eight subplots with all EMG data from Subject 1 and Session 1
+# Input: list of 8 arrays of EMG data(datapoints), list of 8 data_labels for description
+# Output: None -> Plot
 def plot_all_emg_mfcc(data_list:list, label_list:list):
     fig, axes = plt.subplots(nrows=4, ncols=2)
     plt.subplots_adjust(hspace=1.4, wspace=0.4)
@@ -108,13 +122,15 @@ def pretty(dict):
         print('\t\t\t Type:', type(value[0][0]), type(value[0][1]))
         print('\t\t\t Sample:', value[0][0], value[0][1])
 
+
 # DATA FUNCTIONS: --------------------------------------------------------------: 
 
-# The CSV_handler takes in data_type, but only for visuals. 
+# The CSV_handler takes in data_type(soft, hard, softPP, hardPP)
 # E.g. handler = CSV_handler('soft')
     
-# Takes in handler and detailes to denoise. 
-# Returns arrays and df
+# Denoices one set of EMG data 
+# Input: CSV_handler and detailes for ID 
+# Output: DataFrame(df)
 def denoice_dataset(handler:CSV_handler, subject_nr, which_arm, round, emg_nr):
     df = handler.get_df_from_data_dict(subject_nr, which_arm, round, emg_nr)
 
@@ -126,6 +142,9 @@ def denoice_dataset(handler:CSV_handler, subject_nr, which_arm, round, emg_nr):
     df_new = make_df_from_xandy(N, y_values, emg_nr)
     return df_new
 
+# Quick debug function for NN_handler dict
+# Input: NN_hanlder dict, nr of samples per person
+# Output: None -> prints if NaN
 def test_for_NaN(dict, samples_per_person):
     for key, value in dict.items():
         for i in range(samples_per_person):
@@ -133,10 +152,12 @@ def test_for_NaN(dict, samples_per_person):
             #print(df)
             print(df.isnull())
 
+
 # CASE FUNTIONS ----------------------------------------------------------------: 
 
 # Takes in a df and compares the FFT and the wavelet denoising of the FFT
-# Returns None. Plots the two
+# Input: timestamp/EMG Dataframe
+# Output: None --> Plot
 def compare_with_wavelet_filter(data_frame):
     N_trans, cA, cD = wavelet_db4(data_frame)
     data_frame_freq = make_df_from_xandy(N_trans, cA, 1)
@@ -146,7 +167,7 @@ def compare_with_wavelet_filter(data_frame):
 
     plot_compare_two_df(data_frame_freq, 'Original data', data_frame_freq_filt, 'Analyzed data')
 
-# Loads three preset emg_1 datasets(subj1:session1, subj1:session2, subj2:session1), calculates mfcc for each and plots them.
+# Loads three preset EMG nr 1 datasets(subj1:session1, subj1:session2, subj2:session1), calculates mfcc for each and plots them.
 # Input: CSV_handler
 # Output: None --> Plot
 def mfcc_3_plots_1_1_2(csv_handler:CSV_handler):
@@ -165,7 +186,7 @@ def mfcc_3_plots_1_1_2(csv_handler:CSV_handler):
 
     plot_3_mfcc(mfcc_feat1, label_1, mfcc_feat2, label_2, mfcc_feat3, label_3)
 
-# Loads three preset emg_1 datasets(subj3:session1, subj3:session2, subj4:session1), calculates mfcc for each and plots them.
+# Loads three preset EMG nr 1 datasets(subj3:session1, subj3:session2, subj4:session1), calculates mfcc for each and plots them.
 # Input: CSV_handler
 # Output: None --> Plot
 def mfcc_3_plots_3_3_4(csv_handler:CSV_handler):
@@ -184,6 +205,9 @@ def mfcc_3_plots_3_3_4(csv_handler:CSV_handler):
 
     plot_3_mfcc(mfcc_feat1, label_1, mfcc_feat2, label_2, mfcc_feat3, label_3)
 
+# Loads preset emg 1-8 datasets(subj1 and session1) and calculates mfcc for each and plots them.
+# Input: CSV_handler
+# Output: None --> Plot
 def mfcc_all_emg_plots(csv_handler:CSV_handler):
     df1, samplerate1 = csv_handler.get_data( 1, 'left', 1, 1)
     df2, samplerate2 = csv_handler.get_data( 1, 'left', 1, 2)
@@ -216,7 +240,7 @@ def mfcc_all_emg_plots(csv_handler:CSV_handler):
 
 # MAIN: ------------------------------------------------------------------------: 
 
-def main():
+if __name__ == "__main__":
 
     csv_handler = CSV_handler()
     csv_handler.load_data('soft')
@@ -224,13 +248,5 @@ def main():
     nn_handler.store_mfcc_samples()
     nn_handler.save_json_mfcc()
 
-    '''
-    dict = dl_data_handler.get_mfcc_samples_dict()
-    subject1_df = dict.get(5)
-    print(subject1_df)
-    print(len(subject1_df.loc[1]))
-    '''
 
-    
-   
-main()
+

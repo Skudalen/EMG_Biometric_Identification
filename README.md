@@ -37,10 +37,10 @@ Scripts to handle CSV files composed by 2 * 8 EMG sensors(left & right) devided 
 2. Place the data files in the working directory 
 3. (For now) Add the session filenames in the desired load_data() function 
 4. Assuming NN analysis:
-    1. Create `CSV_handler` object 
+    1. Create a `CSV_handler` object 
     2. Load data with `load_data(CSV_handler, <datatype>)`
-    3. Create `NN_handler` object with <CSV_handler> as input
+    3. Create `NN_handler` object with `CSV_handler` as input
     4. Load MFCC data into the `NN_handler` with `store_mfcc_samples()`
-    5. Run `save_json_mfcc()`
-    6. Run `Neural_Network_Analysis.py` 
+    5. Run `save_json_mfcc()` to save samples in json
+    6. Run `Neural_Network_Analysis.py` with desired config
 
