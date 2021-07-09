@@ -8,9 +8,12 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# path to json file that stores MFCCs and subject labels for each processed sample
+# Path to json file that stores MFCCs and subject labels for each processed sample
 DATA_PATH_MFCC = str(Path.cwd()) + "/mfcc_data.json"
 
+# Loads data from the json file and reshapes X_data(samples, 1, 208) and y_data(samples, 1)
+# Input: JSON path
+# Ouput: X(mfcc data), y(labels)
 def load_data_from_json(data_path): 
 
     with open(data_path, "r") as fp:
@@ -30,7 +33,10 @@ def load_data_from_json(data_path):
 
     return X, y
 
-
+# Plots the training history with two subplots. First training and test accuracy, and then 
+# loss with respect to epochs
+# Input: History(from model.fit(...))
+# Ouput: None -> plot
 def plot_history(history):
     """Plots accuracy/loss for training/validation set as a function of the epochs
         :param history: Training history of model
@@ -56,8 +62,10 @@ def plot_history(history):
 
     plt.show()
 
-
-def prepare_datasets_percentsplit(X, y, shuffle_vars, validation_size=0.2, test_size=0.25,):
+# Takes in data and labels, and splits it into train, validation and test sets
+# Input: Data, labels, whether to shuffle, % validatiion, % test
+# Ouput: X_train, X_validation, X_test, y_train, y_validation, y_test
+def prepare_datasets_percentsplit(X, y, shuffle_vars:bool, validation_size=0.2, test_size=0.25,):
 
     # create train, validation and test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=shuffle_vars)
@@ -65,7 +73,9 @@ def prepare_datasets_percentsplit(X, y, shuffle_vars, validation_size=0.2, test_
 
     return X_train, X_validation, X_test, y_train, y_validation, y_test
 
-
+# Creates a RNN_LSTM neural network model
+# Input: input shape, classes of classification
+# Ouput: model:Keras.model
 def RNN_LSTM(input_shape, nr_classes=5):
     """Generates RNN-LSTM model
     :param input_shape (tuple): Shape of input set
@@ -88,6 +98,9 @@ def RNN_LSTM(input_shape, nr_classes=5):
 
     return model
 
+# Trains the model 
+# Input: Keras.model, batch_size, nr epochs, training, and validation data
+# Ouput: History
 def train(model, batch_size, epochs, X_train, X_validation, y_train, y_validation):
 
     optimiser = keras.optimizers.Adam(learning_rate=0.0001)
@@ -102,6 +115,7 @@ def train(model, batch_size, epochs, X_train, X_validation, y_train, y_validatio
                         epochs=epochs)
     return history
 
+
 if __name__ == "__main__":
 
     # Load data
@@ -112,7 +126,7 @@ if __name__ == "__main__":
                                                                                                 validation_size=0.2, 
                                                                                                 test_size=0.25,  
                                                                                                 shuffle_vars=True)
-    #print(X_train.shape[1], X_train.shape[2])
+    print(X_train.shape)
 
     # Make model
     model = RNN_LSTM(input_shape=(1, 208))
