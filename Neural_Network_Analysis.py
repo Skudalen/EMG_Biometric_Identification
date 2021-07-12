@@ -90,12 +90,14 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
     end_test_index = start_test_index + session_lengths[0][test_session_index-1]
     end_subject_index = subject_starting_index + sum(session_lengths[0])
 
-    print(session_lengths[0])
+    # Testing to check correctly slicing
+    ''' 
+    print(session_lengths[0], 'Sum:', sum(session_lengths[0]))
     print('Subject start:', subject_starting_index)
     print('Test start:', start_test_index)
     print('Test end:', end_test_index)
     print('Subject end:', end_subject_index, '\n -------')
-
+    '''
     if start_test_index == subject_starting_index:
         X_test = X[start_test_index:end_test_index]
         y_test = y[start_test_index:end_test_index]
@@ -115,9 +117,9 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
         y_train = y[subject_starting_index:start_test_index]
         X_test = X[start_test_index:end_test_index]
         y_test = y[start_test_index:end_test_index]
-        X_train = X[end_test_index:end_subject_index]
-        y_train = y[end_test_index:end_subject_index]
-
+        X_train = np.concatenate((X_train, X[end_test_index:end_subject_index]))     
+        y_train = np.concatenate((y_train, y[end_test_index:end_subject_index]))
+    #print(X_train.shape, '\n -------')
     subject_starting_index = max(end_subject_index, end_test_index)
 
     for i in range(1, nr_subjects):
@@ -125,12 +127,14 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
         end_test_index = start_test_index + session_lengths[i][test_session_index-1]
         end_subject_index = subject_starting_index + sum(session_lengths[i])
         
-        print(session_lengths[i])
+        # Testing to check correctly slicing
+        '''
+        print(session_lengths[i], 'Sum:', sum(session_lengths[i]))
         print('Subject start:', subject_starting_index)
         print('Test start:', start_test_index)
         print('Test end:', end_test_index)
         print('Subject end:', end_subject_index, '\n -------')
-
+        '''
         if start_test_index == subject_starting_index:
             X_test  =   np.concatenate((X_test, X[start_test_index:end_test_index]))
             y_test  =   np.concatenate((y_test, y[start_test_index:end_test_index]))
@@ -151,7 +155,7 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
             y_test  =   np.concatenate((y_test, y[start_test_index:end_test_index]))    
             X_train =   np.concatenate((X_train, X[end_test_index:end_subject_index]))     
             y_train =   np.concatenate((y_train, y[end_test_index:end_subject_index]))
-
+        #print(X_train.shape, '\n -------')
         subject_starting_index = max(end_subject_index, end_test_index)
 
     return X_train, X_test, y_train, y_test
@@ -190,7 +194,7 @@ def train(model, X_train, X_validation, y_train, y_validation, batch_size=64, ep
     model.compile(optimizer=optimiser,
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
-
+    
     history = model.fit(X_train, 
                         y_train, 
                         validation_data=(X_validation, y_validation), 
@@ -202,34 +206,36 @@ def train(model, X_train, X_validation, y_train, y_validation, batch_size=64, ep
 # Gives nr of datapoints for chosen session
 # Input: session_lengths 2d-list, session_nr, nr of subjects
 # Ouput: int(datapoints)
-def get_nr_in_session(session_lengths:list, session_nr, nr_subjects):
+def get_nr_in_session(session_lengths:list, session_nr, nr_subjects=5):
     summ = 0
     for i in range(nr_subjects):
         summ += session_lengths[i][session_nr-1]
     return summ
 
+# Prints session and training data 
+# Input: None
+# Ouput: None -> print
+def print_session_train_data(X_train, X_test, y_train, y_test, session_lengths, session_nr):
+    print(X_train.size)
+    print(X_train.shape)
+    print(X_test.shape)
+    print(y_train.shape)
+    print(y_test.shape)
+    print('Datapoints in session ' + str(session_nr) + ':', get_nr_in_session(session_lengths, session_nr))
+    print('Should be remaining:', 2806 - get_nr_in_session(session_lengths, session_nr))
+    
 
 if __name__ == "__main__":
 
     # Load data
     X, y, session_lengths = load_data_from_json(DATA_PATH_MFCC)
 
-    print(X.shape)
-    print(y.shape)
-    print(session_lengths.shape)
-
     # Get prepared data: train, validation, and test
+    session_nr = 4
+    X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, session_nr)
+    #print_session_train_data(X_train, X_test, y_train, y_test, session_lengths, session_nr)
+
     
-    #X_train, X_validation, X_test, y_train, y_validation, y_test = prepare_datasets_percentsplit(X, y, shuffle_vars=True, validation_size=0.2, test_size=0.25)
-    X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, 3)
-
-    print(X_train.size)
-    print(X_train.shape)
-    print(X_test.shape)
-    print(y_train.shape)
-    print(y_test.shape)
-
-    '''
     # Make model
     model = RNN_LSTM(input_shape=(1, 208))
     model.summary()
@@ -243,7 +249,7 @@ if __name__ == "__main__":
     # evaluate model on test set
     test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
     print('\nTest accuracy:', test_acc)
-    '''
+    
     
 
 
