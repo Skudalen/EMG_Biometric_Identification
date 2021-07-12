@@ -83,44 +83,78 @@ def prepare_datasets_percentsplit(X, y, shuffle_vars, validation_size=0.2, test_
 # Ouput: X_train, X_test, y_train, y_test
 def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_subjects=5):
 
-    
-    #X_train = np.empty((1, 1, 208))
-    #y_train = np.empty((1, 208))
-    #X_test = np.empty((1, 1, 208))
-    #y_test = np.empty((1, 208))
-    X = X.tolist()
-    y = y.tolist()
     session_lengths = session_lengths.tolist()
-    X_train = y_train = X_test = y_test = []
 
     subject_starting_index = 0
+    start_test_index = subject_starting_index + sum(session_lengths[0][:test_session_index-1])
+    end_test_index = start_test_index + session_lengths[0][test_session_index-1]
+    end_subject_index = subject_starting_index + sum(session_lengths[0])
 
-    for i in range(nr_subjects):
-        start_test_index = sum(session_lengths[i][:test_session_index])
+    print(session_lengths[0])
+    print('Subject start:', subject_starting_index)
+    print('Test start:', start_test_index)
+    print('Test end:', end_test_index)
+    print('Subject end:', end_subject_index, '\n -------')
+
+    if start_test_index == subject_starting_index:
+        X_test = X[start_test_index:end_test_index]
+        y_test = y[start_test_index:end_test_index]
+        X_train = X[end_test_index:end_subject_index]
+        y_train = y[end_test_index:end_subject_index]
+        
+    elif end_test_index == end_subject_index:
+        #print(X[subject_starting_index:start_test_index].shape)
+        X_train = X[subject_starting_index:start_test_index]
+        y_train = y[subject_starting_index:start_test_index]
+        X_test = X[start_test_index:end_test_index]
+        #print(X[start_test_index:end_test_index].shape, '\n ---')
+        y_test = y[start_test_index:end_test_index]
+        
+    else:
+        X_train = X[subject_starting_index:start_test_index]
+        y_train = y[subject_starting_index:start_test_index]
+        X_test = X[start_test_index:end_test_index]
+        y_test = y[start_test_index:end_test_index]
+        X_train = X[end_test_index:end_subject_index]
+        y_train = y[end_test_index:end_subject_index]
+
+    subject_starting_index = max(end_subject_index, end_test_index)
+
+    for i in range(1, nr_subjects):
+        start_test_index = subject_starting_index + sum(session_lengths[i][:test_session_index-1])
         end_test_index = start_test_index + session_lengths[i][test_session_index-1]
-        end_subject_index = sum(session_lengths[i])
+        end_subject_index = subject_starting_index + sum(session_lengths[i])
+        
+        print(session_lengths[i])
+        print('Subject start:', subject_starting_index)
+        print('Test start:', start_test_index)
+        print('Test end:', end_test_index)
+        print('Subject end:', end_subject_index, '\n -------')
+
         if start_test_index == subject_starting_index:
-            X_test.append(X[start_test_index:end_test_index])
-            y_test.append(y[start_test_index:end_test_index])
-            X_train.append(X[end_test_index:end_subject_index])
-            y_train.append(y[end_test_index:end_subject_index])
-            
+            X_test  =   np.concatenate((X_test, X[start_test_index:end_test_index]))
+            y_test  =   np.concatenate((y_test, y[start_test_index:end_test_index]))
+            X_train =   np.concatenate((X_train, X[end_test_index:end_subject_index]))
+            y_train =   np.concatenate((y_train, y[end_test_index:end_subject_index]))
+           
         elif end_test_index == end_subject_index:
-            X_train.append(X[subject_starting_index:start_test_index])
-            y_train.append(y[subject_starting_index:start_test_index])
-            X_test.append(X[start_test_index:end_test_index])
-            y_test.append(y[start_test_index:end_test_index])
+            #print(X[subject_starting_index:start_test_index].shape)
+            X_train =   np.concatenate((X_train, X[subject_starting_index:start_test_index]))
+            y_train =   np.concatenate((y_train, y[subject_starting_index:start_test_index]))
+            #print(X[start_test_index:end_test_index].shape, '\n ---')
+            X_test  =   np.concatenate((X_test, X[start_test_index:end_test_index]))    
+            y_test  =   np.concatenate((y_test, y[start_test_index:end_test_index]))    
         else:
-            X_train.append(X[subject_starting_index:start_test_index])
-            y_train.append(y[subject_starting_index:start_test_index])
-            X_test.append(X[start_test_index:end_test_index])
-            y_test.append(y[start_test_index:end_test_index])
-            X_train.append(X[end_test_index:end_subject_index])
-            y_train.append(y[end_test_index:end_subject_index])
-        subject_starting_index = end_subject_index
+            X_train =   np.concatenate((X_train, X[subject_starting_index:start_test_index]))
+            y_train =   np.concatenate((y_train, y[subject_starting_index:start_test_index]))
+            X_test  =   np.concatenate((X_test, X[start_test_index:end_test_index]))
+            y_test  =   np.concatenate((y_test, y[start_test_index:end_test_index]))    
+            X_train =   np.concatenate((X_train, X[end_test_index:end_subject_index]))     
+            y_train =   np.concatenate((y_train, y[end_test_index:end_subject_index]))
 
+        subject_starting_index = max(end_subject_index, end_test_index)
 
-    return np.array(X_train), np.array(X_test), np.array(y_train), np.array(y_test)
+    return X_train, X_test, y_train, y_test
 
 # Creates a RNN_LSTM neural network model
 # Input: input shape, classes of classification
@@ -150,7 +184,7 @@ def RNN_LSTM(input_shape, nr_classes=5):
 # Trains the model 
 # Input: Keras.model, batch_size, nr epochs, training, and validation data
 # Ouput: History
-def train(model, batch_size, epochs, X_train, X_validation, y_train, y_validation):
+def train(model, X_train, X_validation, y_train, y_validation, batch_size=64, epochs=30):
 
     optimiser = keras.optimizers.Adam(learning_rate=0.0001)
     model.compile(optimizer=optimiser,
@@ -165,6 +199,16 @@ def train(model, batch_size, epochs, X_train, X_validation, y_train, y_validatio
     return history
 
 
+# Gives nr of datapoints for chosen session
+# Input: session_lengths 2d-list, session_nr, nr of subjects
+# Ouput: int(datapoints)
+def get_nr_in_session(session_lengths:list, session_nr, nr_subjects):
+    summ = 0
+    for i in range(nr_subjects):
+        summ += session_lengths[i][session_nr-1]
+    return summ
+
+
 if __name__ == "__main__":
 
     # Load data
@@ -175,14 +219,9 @@ if __name__ == "__main__":
     print(session_lengths.shape)
 
     # Get prepared data: train, validation, and test
-    '''
-    (X_train, X_validation, 
-    X_test, y_train, 
-    y_validation, 
-    y_test) = prepare_datasets_percentsplit(X, y, validation_size=0.2, test_size=0.25,  shuffle_vars=True)
-    '''
-    (X_train, X_test, 
-    y_train, y_test) = prepare_datasets_sessions(X, y, session_lengths)
+    
+    #X_train, X_validation, X_test, y_train, y_validation, y_test = prepare_datasets_percentsplit(X, y, shuffle_vars=True, validation_size=0.2, test_size=0.25)
+    X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, 3)
 
     print(X_train.size)
     print(X_train.shape)
