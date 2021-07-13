@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import tensorflow.keras as keras
 from keras import backend as K
+from keras.regularizers import l2
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -21,21 +22,15 @@ def load_data_from_json(data_path, nr_classes):
     with open(data_path, "r") as fp:
         data = json.load(fp)
 
-    # convert lists to numpy arraysls
+    # Convert lists to numpy arrays and reshapes them
     X = np.array(data['mfcc'])
-    #print(X.shape)
     X = X.reshape(X.shape[0], 1, X.shape[1])
-    print(X.shape)
     
     y = np.array(data["labels"])
-    #print(y.shape)
     y = keras.utils.to_categorical(y, nr_classes)
-    print(y.shape)
 
     session_lengths = np.array(data['session_lengths'])
-    #print(session_lengths.shape)
     
-
     print("Data succesfully loaded!")
 
     return X, y, session_lengths
@@ -44,24 +39,22 @@ def load_data_from_json(data_path, nr_classes):
 # loss with respect to epochs
 # Input: History(from model.fit(...))
 # Ouput: None -> plot
-def plot_history(history):
-    """Plots accuracy/loss for training/validation set as a function of the epochs
-        :param history: Training history of model
-        :return:
-    """
+def plot_train_history(history, val_data=False):
 
     fig, axs = plt.subplots(2)
 
     # create accuracy sublpot
     axs[0].plot(history.history["accuracy"], label="train accuracy")
-    axs[0].plot(history.history["val_accuracy"], label="test accuracy")
+    if val_data:
+        axs[0].plot(history.history["val_accuracy"], label="validation accuracy")
     axs[0].set_ylabel("Accuracy")
     axs[0].legend(loc="lower right")
     axs[0].set_title("Accuracy eval")
 
     # create error sublpot
     axs[1].plot(history.history["loss"], label="train error")
-    axs[1].plot(history.history["val_loss"], label="test error")
+    if val_data:
+        axs[1].plot(history.history["val_loss"], label="validation error")
     axs[1].set_ylabel("Error")
     axs[1].set_xlabel("Epoch")
     axs[1].legend(loc="upper right")
@@ -162,31 +155,6 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
 
     return X_train, X_test, y_train, y_test
 
-# Creates a RNN_LSTM neural network model
-# Input: input shape, classes of classification
-# Ouput: model:Keras.model
-def RNN_LSTM(input_shape, nr_classes=5):
-    """Generates RNN-LSTM model
-    :param input_shape (tuple): Shape of input set
-    :return model: RNN-LSTM model
-    """
-
-    # build network topology
-    model = keras.Sequential()
-
-    # 2 LSTM layers
-    model.add(keras.layers.LSTM(64, input_shape=input_shape, return_sequences=True))
-    model.add(keras.layers.LSTM(64))
-
-    # dense layer
-    model.add(keras.layers.Dense(64, activation='relu'))
-    model.add(keras.layers.Dropout(0.3))
-
-    # output layer
-    model.add(keras.layers.Dense(nr_classes, activation='softmax'))
-
-    return model
-
 # Trains the model 
 # Input: Keras.model, batch_size, nr epochs, training, and validation data
 # Ouput: History
@@ -234,7 +202,7 @@ def print_session_train_data(X_train, X_test, y_train, y_test, session_lengths, 
     print('Datapoints in session ' + str(session_nr) + ':', get_nr_in_session(session_lengths, session_nr))
     print('Should be remaining:', 2806 - get_nr_in_session(session_lengths, session_nr))
 
-# Reshapes training og test data into batches 
+# Reshapes training og test data into batches NOT RELEVANT?
 # Input: training, test data (and validation), batch_size
 # Ouput: training, test data (and validation)
 def batch_formatting(X_train, X_test, y_train, y_test, batch_size=64, nr_classes=5, X_validation=None, y_validation=None):
@@ -264,11 +232,15 @@ def batch_formatting(X_train, X_test, y_train, y_test, batch_size=64, nr_classes
         return X_train_batch, X_test_batch, y_train_batch, y_test_batch, X_val_batch, y_val_batch
 
     return X_train_batch, X_test_batch, y_train_batch, y_test_batch
-        
-def session_cross_validation(X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
+
+# Retrieves data sets for each session as test set and evalutes 
+# the average of networks trained om them
+# Input: raw data, session_lengths list, total nr of sessions, batch_size, and nr of epochs 
+# Ouput: tuple(cross validation average, list(result for each dataset(len=nr_sessions)))
+def session_cross_validation_LSTM(X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
     session_training_results = []
     for i in range(nr_sessions):
-        model = RNN_LSTM(input_shape=(1, 208))
+        model = LSTM(input_shape=(1, 208))
         X_train_session, X_test_session, y_train_session, y_test_session = prepare_datasets_sessions(X, y, session_lengths, i)
         train(model, X_train_session, y_train_session, verbose=0, batch_size=batch_size, epochs=epochs)
         test_loss, test_acc = model.evaluate(X_test_session, y_test_session, verbose=2)
@@ -278,14 +250,45 @@ def session_cross_validation(X, y, session_lengths, nr_sessions, batch_size=64, 
         print('Session', i, 'as test data gives accuracy:', test_acc)
     average_result = statistics.mean((session_training_results))
     return average_result, session_training_results
-        
+
+
+# ----- MODELS ------
+
+# Creates a keras.model with focus on LSTM layers
+# Input: input shape, classes of classification
+# Ouput: model:Keras.model
+def LSTM(input_shape, nr_classes=5):
+
+    model = keras.Sequential()
+    model.add(keras.layers.Bidirectional(keras.layers.LSTM(64), input_shape=input_shape, name='Bidirectional_LSTM'))
+    model.add(keras.layers.Dense(64, activation='relu', activity_regularizer=l2(0.001), name='Dense_relu'))
+    model.add(keras.layers.Dropout(0.3, name='Dropout'))
+    # Output layer
+    model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Dense_relu_output'))
+
+    return model
+
+# Creates a keras.model with focus on GRU layers
+# Input: input shape, classes of classification
+# Ouput: model:Keras.model
+def GRU(input_shape, nr_classes=5):
+
+    model = keras.Sequential()
+    model.add(keras.layers.Bidirectional(keras.layers.GRU(64), input_shape=input_shape, name='Bidirectional_GRU'))
+    model.add(keras.layers.Dense(64, activation='relu', activity_regularizer=l2(0.001), name='Dense_relu'))
+    model.add(keras.layers.Dropout(0.3, name='Dropout'))
+    # Output layer:
+    model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Dense_relu_output'))
+
+    return model
+
 
 if __name__ == "__main__":
 
     # ----- Load data ------
-    # X.shape = (2806, 1, 208)
-    # y.shape = (2806, 5)
-    # session_lengths.shape = (5, 4)
+        # X.shape = (2806, 1, 208)
+        # y.shape = (2806, nr_subjects)
+        # session_lengths.shape = (nr_subjects, nr_sessions)
     X, y, session_lengths = load_data_from_json(DATA_PATH_MFCC, nr_classes=5)
 
     # Parameters:
@@ -293,34 +296,41 @@ if __name__ == "__main__":
     NR_SESSIONS = 4
     BATCH_SIZE = 64
     EPOCHS = 30
+
+    TEST_SESSION_NR = 4
+    VERBOSE = 0 
     
     # ----- Get prepared data: train, validation, and test ------
-    '''
+        # X_train.shape = (2806-X_test, 1, 208)
+        # X_test.shape = (X_test(from session nr. ?), 1, 208)
+        # y_train.shape = (2806-y_test, nr_subjects)
+        # y_test.shape = (y_test(from session nr. ?), nr_subjects)
+
+    X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, TEST_SESSION_NR)
     
-    X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, session_nr)
-    print(X_train.shape)
-    print(y_train.shape)
-    print(X_test.shape)
-    print(y_test.shape)
-    #print_session_train_data(X_train, X_test, y_train, y_test, session_lengths, session_nr)
-    '''
 
     #'''
     # ----- Make model ------
-    #model = RNN_LSTM(input_shape=(1, 208)) # (timestep, coefficients)
-    #model.summary()
+    model_GRU = GRU(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
+    model_LSTM = LSTM(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
+    
+    model_GRU.summary()
+    model_LSTM.summary()
     
     # ----- Train network ------
-    #history = train(model, X_train, y_train, batch_size=batch_size, epochs=30)
-    average = session_cross_validation(X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    print('\nCrossvalidated:', average)
+    history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
+    history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
+    #average = session_cross_validation_LSTM(X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    #print('\nCrossvalidated:', average)
     
-    # plot accuracy/error for training and validation
-    #plot_history(history)
+    # ----- Plot train accuracy/error -----
+    #plot_train_history(history)
 
     # ----- Evaluate model on test set ------
-    #test_loss, test_acc = model.evaluate(X_test, y_test, verbose=1)
-    #print('\nTest accuracy:', test_acc)
+    test_loss, test_acc = model_GRU.evaluate(X_test, y_test, verbose=VERBOSE)
+    print('\nTest accuracy GRU:', test_acc, '\n')
+    test_loss, test_acc = model_LSTM.evaluate(X_test, y_test, verbose=VERBOSE)
+    print('\nTest accuracy LSTM:', test_acc, '\n')
     #'''
     
 
