@@ -247,8 +247,7 @@ def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions,
         elif model_name == 'GRU':
             model = GRU(input_shape=(1, 208))
         elif model_name == 'CNN':
-            continue
-            model = CNN(input_shape=(1, 208))
+            model = CNN(input_shape=(52, 52, 104))
         elif model_name == 'FNN':
             model = FFN(input_shape=(1, 208))
         else:
@@ -257,6 +256,12 @@ def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions,
         model.summary()
 
         X_train_session, X_test_session, y_train_session, y_test_session = prepare_datasets_sessions(X, y, session_lengths, i)
+        if model_name == 'CNN':
+            X_train_session =  X_train_session[..., np.newaxis]
+            X_test_session =  X_test_session[..., np.newaxis]
+            X_train_session = np.reshape(X_train_session, (X_train_session.shape[0], 52, 52, 104))
+            X_test_session = np.reshape(X_test_session, (X_test_session.shape[0], 52, 52, 104))
+
         train(model, X_train_session, y_train_session, verbose=1, batch_size=batch_size, epochs=epochs)
         test_loss, test_acc = model.evaluate(X_test_session, y_test_session, verbose=2)
         session_training_results.append(test_acc)
@@ -295,11 +300,11 @@ def GRU(input_shape, nr_classes=5):
     model.add(keras.layers.Dense(128, activation='relu', activity_regularizer=l2(0.005), name='Dense_relu'))
     model.add(keras.layers.Dropout(0.3, name='Dropout'))
     # Output layer:
-    model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Dense_relu_output'))
+    model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Softmax'))
 
     return model
 
-# Creates a keras.model with focus on GRU layers
+# Creates a keras.model with a basic feed-forward-network
 # Input: input shape, classes of classification
 # Ouput: model:Keras.model
 def FFN(input_shape, nr_classes=5):
@@ -311,10 +316,36 @@ def FFN(input_shape, nr_classes=5):
     model.add(keras.layers.Dense(64, activation='relu', activity_regularizer=l2(0.005), name='Dense_relu_3'))
     model.add(keras.layers.Dropout(0.3, name='Dropout'))
     # Output layer:
-    model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Dense_relu_output'))
+    model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Softmax'))
 
     return model
 
+# Creates a keras.model with focus on Convulotion layers
+# Input: input shape, classes of classification
+# Ouput: model:Keras.model
+def CNN(input_shape, nr_classes=5):
+
+    model = keras.Sequential(name='CNN_model')
+    model.add(keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
+    model.add(keras.layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same'))
+    model.add(keras.layers.BatchNormalization())
+
+    model.add(keras.layers.Conv2D(32, (3, 3), activation='relu'))
+    model.add(keras.layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same'))
+    model.add(keras.layers.BatchNormalization())
+
+    model.add(keras.layers.Conv2D(32, (2, 2), activation='relu'))
+    model.add(keras.layers.MaxPooling2D((2, 2), strides=(2, 2), padding='same'))
+    model.add(keras.layers.BatchNormalization())
+
+    # flatten output and feed it into dense layer
+    model.add(keras.layers.Flatten())
+    model.add(keras.layers.Dense(64, activation='relu'))
+    model.add(keras.layers.Dropout(0.3))
+    # Ouput layer
+    model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Softmax'))
+
+    return model
 
 
 if __name__ == "__main__":
@@ -340,7 +371,7 @@ if __name__ == "__main__":
         # y_train.shape = (2806-y_test, nr_subjects)
         # y_test.shape = (y_test(from session nr. ?), nr_subjects)
 
-    X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, TEST_SESSION_NR)
+    #X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, TEST_SESSION_NR)
     
 
     #'''
@@ -351,21 +382,15 @@ if __name__ == "__main__":
     #model_GRU.summary()
     #model_LSTM.summary()
     
+
     # ----- Train network ------
     #history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
     #history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
 
-    #average_GRU = session_cross_validation('GRU', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    #verage_LSTM = session_cross_validation('LSTM', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    average_FFN = session_cross_validation('FNN', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    print('\n')
-    #print('Crossvalidated GRU:', average_GRU)
-    #print('Crossvalidated LSTM:', average_LSTM)
-    print('Crossvalidated FFN:', average_FFN)
-    print('\n')
     
     # ----- Plot train accuracy/error -----
     #plot_train_history(history)
+
 
     # ----- Evaluate model on test set ------
     #test_loss, test_acc = model_GRU.evaluate(X_test, y_test, verbose=VERBOSE)
@@ -375,4 +400,16 @@ if __name__ == "__main__":
     #'''
     
 
+    # ----- Cross validation ------
+    #average_GRU = session_cross_validation('GRU', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    #verage_LSTM = session_cross_validation('LSTM', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    #average_FFN = session_cross_validation('FNN', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    average_CNN = session_cross_validation('CNN', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+
+    print('\n')
+    #print('Crossvalidated GRU:', average_GRU)
+    #print('Crossvalidated LSTM:', average_LSTM)
+    #print('Crossvalidated FFN:', average_FFN)
+    print('Crossvalidated CNN:', average_CNN)
+    print('\n')
 
