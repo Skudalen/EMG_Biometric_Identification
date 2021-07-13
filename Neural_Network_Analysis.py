@@ -4,9 +4,11 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import tensorflow.keras as keras
+from keras import backend as K
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
+import statistics
 
 # Path to json file that stores MFCCs and subject labels for each processed sample
 DATA_PATH_MFCC = str(Path.cwd()) + "/mfcc_data.json"
@@ -14,7 +16,7 @@ DATA_PATH_MFCC = str(Path.cwd()) + "/mfcc_data.json"
 # Loads data from the json file and reshapes X_data(samples, 1, 208) and y_data(samples, 1)
 # Input: JSON path
 # Ouput: X(mfcc data), y(labels), session_lengths
-def load_data_from_json(data_path): 
+def load_data_from_json(data_path, nr_classes): 
 
     with open(data_path, "r") as fp:
         data = json.load(fp)
@@ -23,12 +25,12 @@ def load_data_from_json(data_path):
     X = np.array(data['mfcc'])
     #print(X.shape)
     X = X.reshape(X.shape[0], 1, X.shape[1])
-    #print(X.shape)
+    print(X.shape)
     
     y = np.array(data["labels"])
     #print(y.shape)
-    y = y.reshape(y.shape[0], 1)
-    #print(y.shape)
+    y = keras.utils.to_categorical(y, nr_classes)
+    print(y.shape)
 
     session_lengths = np.array(data['session_lengths'])
     #print(session_lengths.shape)
@@ -188,18 +190,26 @@ def RNN_LSTM(input_shape, nr_classes=5):
 # Trains the model 
 # Input: Keras.model, batch_size, nr epochs, training, and validation data
 # Ouput: History
-def train(model, X_train, X_validation, y_train, y_validation, batch_size=64, epochs=30):
+def train(model, X_train, y_train, verbose, batch_size=64, epochs=30, X_validation=None, y_validation=None):
 
     optimiser = keras.optimizers.Adam(learning_rate=0.0001)
     model.compile(optimizer=optimiser,
-                  loss='sparse_categorical_crossentropy',
+                  loss='categorical_crossentropy',
                   metrics=['accuracy'])
-    
-    history = model.fit(X_train, 
-                        y_train, 
-                        validation_data=(X_validation, y_validation), 
-                        batch_size=batch_size, 
-                        epochs=epochs)
+
+    if X_validation != None:
+        history = model.fit(X_train, 
+                            y_train, 
+                            validation_data=(X_validation, y_validation), 
+                            batch_size=batch_size, 
+                            epochs=epochs, 
+                            verbose=verbose)
+    else:
+        history = model.fit(X_train,  
+                            y_train,  
+                            batch_size=batch_size, 
+                            epochs=epochs, 
+                            verbose=verbose)
     return history
 
 
@@ -223,33 +233,95 @@ def print_session_train_data(X_train, X_test, y_train, y_test, session_lengths, 
     print(y_test.shape)
     print('Datapoints in session ' + str(session_nr) + ':', get_nr_in_session(session_lengths, session_nr))
     print('Should be remaining:', 2806 - get_nr_in_session(session_lengths, session_nr))
+
+# Reshapes training og test data into batches 
+# Input: training, test data (and validation), batch_size
+# Ouput: training, test data (and validation)
+def batch_formatting(X_train, X_test, y_train, y_test, batch_size=64, nr_classes=5, X_validation=None, y_validation=None):
     
+    train_splits = X_train.shape[0] // batch_size
+    train_rest = X_train.shape[0] % batch_size
+    test_splits = X_test.shape[0] // batch_size
+    test_rest = X_test.shape[0] % batch_size
+    
+    X_train = X_train[:-train_rest]
+    y_train = y_train[:-train_rest]
+    X_test = X_test[:-test_rest]
+    y_test = y_test[:-test_rest]
+    
+    X_train_batch = np.reshape(X_train, (batch_size, train_splits, 208))
+    y_train_batch = np.reshape(y_train, (batch_size, train_splits, nr_classes))
+    X_test_batch = np.reshape(X_test, (batch_size, test_splits, 208))
+    y_test_batch = np.reshape(y_test, (batch_size, test_splits, nr_classes))
+
+    if X_validation != None:
+        val_splits = X_validation.shape[0] // batch_size
+        val_rest = X_validation.shape[0] % batch_size
+        X_validation = X_validation[:-val_rest]
+        y_validation = y_validation[:-val_rest]
+        X_val_batch = np.reshape(X_validation, (batch_size, val_splits, 208))
+        y_val_batch = np.reshape(y_validation, (batch_size, val_splits))
+        return X_train_batch, X_test_batch, y_train_batch, y_test_batch, X_val_batch, y_val_batch
+
+    return X_train_batch, X_test_batch, y_train_batch, y_test_batch
+        
+def session_cross_validation(X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
+    session_training_results = []
+    for i in range(nr_sessions):
+        model = RNN_LSTM(input_shape=(1, 208))
+        X_train_session, X_test_session, y_train_session, y_test_session = prepare_datasets_sessions(X, y, session_lengths, i)
+        train(model, X_train_session, y_train_session, verbose=0, batch_size=batch_size, epochs=epochs)
+        test_loss, test_acc = model.evaluate(X_test_session, y_test_session, verbose=2)
+        session_training_results.append(test_acc)
+        del model
+        K.clear_session()
+        print('Session', i, 'as test data gives accuracy:', test_acc)
+    average_result = statistics.mean((session_training_results))
+    return average_result, session_training_results
+        
 
 if __name__ == "__main__":
 
-    # Load data
-    X, y, session_lengths = load_data_from_json(DATA_PATH_MFCC)
+    # ----- Load data ------
+    # X.shape = (2806, 1, 208)
+    # y.shape = (2806, 5)
+    # session_lengths.shape = (5, 4)
+    X, y, session_lengths = load_data_from_json(DATA_PATH_MFCC, nr_classes=5)
 
-    # Get prepared data: train, validation, and test
-    session_nr = 4
+    # Parameters:
+    NR_SUBJECTS = 5
+    NR_SESSIONS = 4
+    BATCH_SIZE = 64
+    EPOCHS = 30
+    
+    # ----- Get prepared data: train, validation, and test ------
+    '''
+    
     X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, session_nr)
+    print(X_train.shape)
+    print(y_train.shape)
+    print(X_test.shape)
+    print(y_test.shape)
     #print_session_train_data(X_train, X_test, y_train, y_test, session_lengths, session_nr)
+    '''
 
+    #'''
+    # ----- Make model ------
+    #model = RNN_LSTM(input_shape=(1, 208)) # (timestep, coefficients)
+    #model.summary()
     
-    # Make model
-    model = RNN_LSTM(input_shape=(1, 208))
-    model.summary()
-    
-    # Train network
-    history = train(model, X_train, X_validation, y_train, y_validation, batch_size=64, epochs=30)
+    # ----- Train network ------
+    #history = train(model, X_train, y_train, batch_size=batch_size, epochs=30)
+    average = session_cross_validation(X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    print('\nCrossvalidated:', average)
     
     # plot accuracy/error for training and validation
-    plot_history(history)
+    #plot_history(history)
 
-    # evaluate model on test set
-    test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
-    print('\nTest accuracy:', test_acc)
-    
+    # ----- Evaluate model on test set ------
+    #test_loss, test_acc = model.evaluate(X_test, y_test, verbose=1)
+    #print('\nTest accuracy:', test_acc)
+    #'''
     
 
 
