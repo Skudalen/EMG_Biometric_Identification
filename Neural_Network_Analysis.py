@@ -250,10 +250,11 @@ def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions,
             continue
             model = CNN(input_shape=(1, 208))
         elif model_name == 'FNN':
-            continue
             model = FFN(input_shape=(1, 208))
         else:
             raise Exception('Model not found')
+
+        model.summary()
 
         X_train_session, X_test_session, y_train_session, y_test_session = prepare_datasets_sessions(X, y, session_lengths, i)
         train(model, X_train_session, y_train_session, verbose=1, batch_size=batch_size, epochs=epochs)
@@ -298,6 +299,23 @@ def GRU(input_shape, nr_classes=5):
 
     return model
 
+# Creates a keras.model with focus on GRU layers
+# Input: input shape, classes of classification
+# Ouput: model:Keras.model
+def FFN(input_shape, nr_classes=5):
+
+    model = keras.Sequential(name='FFN_model')
+    model.add(keras.layers.Reshape((input_shape[-1],), input_shape=input_shape))
+    model.add(keras.layers.Dense(256, activation='relu', input_shape=input_shape, name='Dense_relu_1'))
+    model.add(keras.layers.Dense(128, activation='relu', activity_regularizer=l2(0.005), name='Dense_relu_2'))
+    model.add(keras.layers.Dense(64, activation='relu', activity_regularizer=l2(0.005), name='Dense_relu_3'))
+    model.add(keras.layers.Dropout(0.3, name='Dropout'))
+    # Output layer:
+    model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Dense_relu_output'))
+
+    return model
+
+
 
 if __name__ == "__main__":
 
@@ -337,10 +355,14 @@ if __name__ == "__main__":
     #history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
     #history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
 
-    average_GRU = session_cross_validation('GRU', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    average_LSTM = session_cross_validation('LSTM', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    print('\nCrossvalidated GRU:', average_GRU)
-    print('Crossvalidated LSTM:', average_LSTM)
+    #average_GRU = session_cross_validation('GRU', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    #verage_LSTM = session_cross_validation('LSTM', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    average_FFN = session_cross_validation('FNN', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    print('\n')
+    #print('Crossvalidated GRU:', average_GRU)
+    #print('Crossvalidated LSTM:', average_LSTM)
+    print('Crossvalidated FFN:', average_FFN)
+    print('\n')
     
     # ----- Plot train accuracy/error -----
     #plot_train_history(history)
