@@ -237,18 +237,34 @@ def batch_formatting(X_train, X_test, y_train, y_test, batch_size=64, nr_classes
 # the average of networks trained om them
 # Input: raw data, session_lengths list, total nr of sessions, batch_size, and nr of epochs 
 # Ouput: tuple(cross validation average, list(result for each dataset(len=nr_sessions)))
-def session_cross_validation_LSTM(X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
+def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
     session_training_results = []
     for i in range(nr_sessions):
-        model = LSTM(input_shape=(1, 208))
+
+        # Model:
+        if model_name == 'LSTM':
+            model = LSTM(input_shape=(1, 208))
+        elif model_name == 'GRU':
+            model = GRU(input_shape=(1, 208))
+        elif model_name == 'CNN':
+            continue
+            model = CNN(input_shape=(1, 208))
+        elif model_name == 'FNN':
+            continue
+            model = FFN(input_shape=(1, 208))
+        else:
+            raise Exception('Model not found')
+
         X_train_session, X_test_session, y_train_session, y_test_session = prepare_datasets_sessions(X, y, session_lengths, i)
-        train(model, X_train_session, y_train_session, verbose=0, batch_size=batch_size, epochs=epochs)
+        train(model, X_train_session, y_train_session, verbose=1, batch_size=batch_size, epochs=epochs)
         test_loss, test_acc = model.evaluate(X_test_session, y_test_session, verbose=2)
         session_training_results.append(test_acc)
         del model
         K.clear_session()
-        print('Session', i, 'as test data gives accuracy:', test_acc)
+        #print('Session', i, 'as test data gives accuracy:', test_acc)
+
     average_result = statistics.mean((session_training_results))
+
     return average_result, session_training_results
 
 
@@ -259,9 +275,9 @@ def session_cross_validation_LSTM(X, y, session_lengths, nr_sessions, batch_size
 # Ouput: model:Keras.model
 def LSTM(input_shape, nr_classes=5):
 
-    model = keras.Sequential()
-    model.add(keras.layers.Bidirectional(keras.layers.LSTM(64), input_shape=input_shape, name='Bidirectional_LSTM'))
-    model.add(keras.layers.Dense(64, activation='relu', activity_regularizer=l2(0.001), name='Dense_relu'))
+    model = keras.Sequential(name='LSTM_model')
+    model.add(keras.layers.Bidirectional(keras.layers.LSTM(128), input_shape=input_shape, name='Bidirectional_LSTM'))
+    model.add(keras.layers.Dense(128, activation='relu', activity_regularizer=l2(0.005), name='Dense_relu'))
     model.add(keras.layers.Dropout(0.3, name='Dropout'))
     # Output layer
     model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Dense_relu_output'))
@@ -273,9 +289,9 @@ def LSTM(input_shape, nr_classes=5):
 # Ouput: model:Keras.model
 def GRU(input_shape, nr_classes=5):
 
-    model = keras.Sequential()
-    model.add(keras.layers.Bidirectional(keras.layers.GRU(64), input_shape=input_shape, name='Bidirectional_GRU'))
-    model.add(keras.layers.Dense(64, activation='relu', activity_regularizer=l2(0.001), name='Dense_relu'))
+    model = keras.Sequential(name='GRU_model')
+    model.add(keras.layers.Bidirectional(keras.layers.GRU(128), input_shape=input_shape, name='Bidirectional_GRU'))
+    model.add(keras.layers.Dense(128, activation='relu', activity_regularizer=l2(0.005), name='Dense_relu'))
     model.add(keras.layers.Dropout(0.3, name='Dropout'))
     # Output layer:
     model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Dense_relu_output'))
@@ -311,26 +327,29 @@ if __name__ == "__main__":
 
     #'''
     # ----- Make model ------
-    model_GRU = GRU(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
-    model_LSTM = LSTM(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
+    #model_GRU = GRU(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
+    #model_LSTM = LSTM(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
     
-    model_GRU.summary()
-    model_LSTM.summary()
+    #model_GRU.summary()
+    #model_LSTM.summary()
     
     # ----- Train network ------
-    history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
-    history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
-    #average = session_cross_validation_LSTM(X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    #print('\nCrossvalidated:', average)
+    #history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
+    #history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
+
+    average_GRU = session_cross_validation('GRU', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    average_LSTM = session_cross_validation('LSTM', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    print('\nCrossvalidated GRU:', average_GRU)
+    print('Crossvalidated LSTM:', average_LSTM)
     
     # ----- Plot train accuracy/error -----
     #plot_train_history(history)
 
     # ----- Evaluate model on test set ------
-    test_loss, test_acc = model_GRU.evaluate(X_test, y_test, verbose=VERBOSE)
-    print('\nTest accuracy GRU:', test_acc, '\n')
-    test_loss, test_acc = model_LSTM.evaluate(X_test, y_test, verbose=VERBOSE)
-    print('\nTest accuracy LSTM:', test_acc, '\n')
+    #test_loss, test_acc = model_GRU.evaluate(X_test, y_test, verbose=VERBOSE)
+    #print('\nTest accuracy GRU:', test_acc, '\n')
+    #test_loss, test_acc = model_LSTM.evaluate(X_test, y_test, verbose=VERBOSE)
+    #print('\nTest accuracy LSTM:', test_acc, '\n')
     #'''
     
 
