@@ -1,15 +1,19 @@
 import json
-from python_speech_features.python_speech_features.base import mfcc
+
+from keras import callbacks
+from psf_lib.python_speech_features.python_speech_features.base import mfcc
 import numpy as np
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import tensorflow.keras as keras
 from keras import backend as K
 from keras.regularizers import l2
+from keras.callbacks import Callback, CSVLogger, ModelCheckpoint
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 import statistics
+import csv
 
 # Path to json file that stores MFCCs and subject labels for each processed sample
 DATA_PATH_MFCC = str(Path.cwd()) + "/mfcc_data.json"
@@ -158,12 +162,16 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
 # Trains the model 
 # Input: Keras.model, batch_size, nr epochs, training, and validation data
 # Ouput: History
-def train(model, X_train, y_train, verbose, batch_size=64, epochs=30, X_validation=None, y_validation=None):
+def train( model, X_train, y_train, verbose, batch_size=64, epochs=30, 
+            X_validation=None, y_validation=None):
 
     optimiser = keras.optimizers.Adam(learning_rate=0.0001)
     model.compile(optimizer=optimiser,
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
+    
+    #csv_path = str(Path.cwd()) + '/logs/{}/{}_train_log.csv'.format(MODEL_NAME, MODEL_NAME)
+    #csv_logger = CSVLogger(csv_path, append=False)
 
     if X_validation != None:
         history = model.fit(X_train, 
@@ -233,11 +241,11 @@ def batch_formatting(X_train, X_test, y_train, y_test, batch_size=64, nr_classes
 
     return X_train_batch, X_test_batch, y_train_batch, y_test_batch
 
-# Retrieves data sets for each session as test set and evalutes 
+# Retrieves data sets for each session as test set and evalutes. DOES USE prediction_csv_logger as default
 # the average of networks trained om them
 # Input: raw data, session_lengths list, total nr of sessions, batch_size, and nr of epochs 
 # Ouput: tuple(cross validation average, list(result for each dataset(len=nr_sessions)))
-def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
+def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions, log_to_csv=True, batch_size=64, epochs=30):
     session_training_results = []
     for i in range(nr_sessions):
 
@@ -246,25 +254,29 @@ def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions,
         # Model:
         if model_name == 'LSTM':
             model = LSTM(input_shape=(1, 208))
+
         elif model_name == 'GRU':
             model = GRU(input_shape=(1, 208))
-        elif model_name == 'CNN':
-            print(X_train_session.shape)
-            print(X_test_session.shape)
+
+        elif model_name == 'CNN_1D':
             X_train_session = np.reshape(X_train_session, (X_train_session.shape[0], 208, 1))
             X_test_session = np.reshape(X_test_session, (X_test_session.shape[0], 208, 1))
-            model = CNN(input_shape=(208, 1))
-        elif model_name == 'FNN':
+            model = CNN_1D(input_shape=(208, 1))
+
+        elif model_name == 'FFN':
             model = FFN(input_shape=(1, 208))
+
         else:
             raise Exception('Model not found')
 
-        model.summary()
+        #model.summary()
 
         
         train(model, X_train_session, y_train_session, verbose=1, batch_size=batch_size, epochs=epochs)
         test_loss, test_acc = model.evaluate(X_test_session, y_test_session, verbose=2)
         session_training_results.append(test_acc)
+        if log_to_csv:
+            prediction_csv_logger(X_test_session, y_test_session, model_name, model, i)
         del model
         K.clear_session()
         #print('Session', i, 'as test data gives accuracy:', test_acc)
@@ -273,6 +285,22 @@ def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions,
 
     return average_result, session_training_results
 
+# Takes in test data and logs input data and the prediction from a model
+# Input: raw data, session_lengths list, total nr of sessions, batch_size, and nr of epochs 
+# Ouput: tuple(cross validation average, list(result for each dataset(len=nr_sessions)))
+def prediction_csv_logger(X, y, model_name, model, session_nr):
+    
+    csv_path = str(Path.cwd()) + '/logs/{}/{}_session{}_log.csv'.format(model_name, model_name, session_nr+1)
+
+    layerOutput = model.predict(X, verbose=0)
+
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['input', 'prediction', 'solution'])
+        data = zip(X, layerOutput, y)
+        writer.writerows(data)
+        csv_file.close()
+    
 
 # ----- MODELS ------
 
@@ -323,17 +351,13 @@ def FFN(input_shape, nr_classes=5):
 # Creates a keras.model with focus on Convulotion layers
 # Input: input shape, classes of classification
 # Ouput: model:Keras.model
-def CNN(input_shape, nr_classes=5):
+def CNN_1D(input_shape, nr_classes=5):
 
     model = keras.Sequential(name='CNN_model')
-    #model.add(keras.layers.Input(name='the_input', shape=input_shape, dtype='float32'))
-    model.add(keras.layers.Conv1D(32, kernel_size= 5, activation='relu', input_shape=input_shape))   # , input_shape=input_shape
+    model.add(keras.layers.Conv1D(32, kernel_size=5, activation='relu', input_shape=input_shape))
     model.add(keras.layers.MaxPooling1D(pool_size=5))
-    #model.add(keras.layers.BatchNormalization())
-
     model.add(keras.layers.Flatten())
-    #model.add(keras.layers.GlobalAveragePooling1D())
-    model.add(keras.layers.Dense(64, activation='relu'))    # , input_shape=(...,1)
+    model.add(keras.layers.Dense(128, activation='relu'))
     model.add(keras.layers.Dropout(0.3))
     # Ouput layer
     model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Softmax'))
@@ -353,10 +377,12 @@ if __name__ == "__main__":
     NR_SUBJECTS = 5
     NR_SESSIONS = 4
     BATCH_SIZE = 64
-    EPOCHS = 30
+    EPOCHS = 5
 
     TEST_SESSION_NR = 4
-    VERBOSE = 0 
+    VERBOSE = 1
+    MODEL_NAME = 'CNN_1D'
+    LOG = True
     
     # ----- Get prepared data: train, validation, and test ------
         # X_train.shape = (2806-X_test, 1, 208)
@@ -367,7 +393,7 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, TEST_SESSION_NR)
     
 
-    #'''
+    '''
     # ----- Make model ------
     #model_GRU = GRU(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
     #model_LSTM = LSTM(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
@@ -381,33 +407,53 @@ if __name__ == "__main__":
     # ----- Train network ------
     #history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
     #history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
-    history_CNN_1D = train(model_CNN_1D, np.reshape(X_train, (X_train.shape[0], 208, 1)), y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
+    history_CNN_1D = train( model_CNN_1D, np.reshape(X_train, (X_train.shape[0], 208, 1)), 
+                            y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
     
+
     # ----- Plot train accuracy/error -----
     #plot_train_history(history)
 
 
     # ----- Evaluate model on test set ------
+
     #test_loss, test_acc = model_GRU.evaluate(X_test, y_test, verbose=VERBOSE)
     #print('\nTest accuracy GRU:', test_acc, '\n')
     #test_loss, test_acc = model_LSTM.evaluate(X_test, y_test, verbose=VERBOSE)
     #print('\nTest accuracy LSTM:', test_acc, '\n')
-    test_loss, test_acc = model_CNN_1D.evaluate(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, verbose=VERBOSE)
+    test_loss, test_acc = model_CNN_1D.evaluate(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, verbose=0)
     print('\nTest accuracy CNN_1D:', test_acc, '\n')
-    #'''
     
+
+    # ----- Store test predictions in CSV ------
+    prediction_csv_logger(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, MODEL_NAME, model_CNN_1D, TEST_SESSION_NR)
     '''
+
+
+    #'''
     # ----- Cross validation ------
-    #average_GRU = session_cross_validation('GRU', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    #verage_LSTM = session_cross_validation('LSTM', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    #average_FFN = session_cross_validation('FNN', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
-    average_CNN = session_cross_validation('CNN', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
+    average_GRU = session_cross_validation('GRU', X, y, session_lengths, nr_sessions=NR_SESSIONS, 
+                                                                        log_to_csv=LOG,
+                                                                        batch_size=BATCH_SIZE, 
+                                                                        epochs=EPOCHS)
+    average_LSTM = session_cross_validation('LSTM', X, y, session_lengths, nr_sessions=NR_SESSIONS,
+                                                                        log_to_csv=LOG,
+                                                                        batch_size=BATCH_SIZE, 
+                                                                        epochs=EPOCHS)
+    average_FFN = session_cross_validation('FFN', X, y, session_lengths, nr_sessions=NR_SESSIONS,
+                                                                        log_to_csv=LOG,
+                                                                        batch_size=BATCH_SIZE, 
+                                                                        epochs=EPOCHS)
+    average_CNN = session_cross_validation('CNN_1D', X, y, session_lengths, nr_sessions=NR_SESSIONS,
+                                                                        log_to_csv=LOG,
+                                                                        batch_size=BATCH_SIZE, 
+                                                                        epochs=EPOCHS)
 
     print('\n')
-    #print('Crossvalidated GRU:', average_GRU)
-    #print('Crossvalidated LSTM:', average_LSTM)
-    #print('Crossvalidated FFN:', average_FFN)
-    print('Cross-validated CNN:', average_CNN)
+    print('Crossvalidated GRU:', average_GRU)
+    print('Crossvalidated LSTM:', average_LSTM)
+    print('Crossvalidated FFN:', average_FFN)
+    print('Cross-validated CNN_1D:', average_CNN)
     print('\n')
-    '''
+    #'''
 

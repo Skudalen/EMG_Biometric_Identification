@@ -6,8 +6,8 @@ from pathlib import Path
 import numpy as np
 from pandas.core.frame import DataFrame
 import sys
-sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/python_speech_features/python_speech_features')
-from python_speech_features.python_speech_features import mfcc
+sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/psf_lib/python_speech_features/python_speech_features')
+from psf_lib.python_speech_features.python_speech_features import mfcc
 import json
 
 
