@@ -241,13 +241,19 @@ def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions,
     session_training_results = []
     for i in range(nr_sessions):
 
+        X_train_session, X_test_session, y_train_session, y_test_session = prepare_datasets_sessions(X, y, session_lengths, i)
+    
         # Model:
         if model_name == 'LSTM':
             model = LSTM(input_shape=(1, 208))
         elif model_name == 'GRU':
             model = GRU(input_shape=(1, 208))
         elif model_name == 'CNN':
-            model = CNN(input_shape=(52, 52, 104))
+            print(X_train_session.shape)
+            print(X_test_session.shape)
+            X_train_session = np.reshape(X_train_session, (X_train_session.shape[0], 208, 1))
+            X_test_session = np.reshape(X_test_session, (X_test_session.shape[0], 208, 1))
+            model = CNN(input_shape=(208, 1))
         elif model_name == 'FNN':
             model = FFN(input_shape=(1, 208))
         else:
@@ -255,13 +261,7 @@ def session_cross_validation(model_name:str, X, y, session_lengths, nr_sessions,
 
         model.summary()
 
-        X_train_session, X_test_session, y_train_session, y_test_session = prepare_datasets_sessions(X, y, session_lengths, i)
-        if model_name == 'CNN':
-            X_train_session =  X_train_session[..., np.newaxis]
-            X_test_session =  X_test_session[..., np.newaxis]
-            X_train_session = np.reshape(X_train_session, (X_train_session.shape[0], 52, 52, 104))
-            X_test_session = np.reshape(X_test_session, (X_test_session.shape[0], 52, 52, 104))
-
+        
         train(model, X_train_session, y_train_session, verbose=1, batch_size=batch_size, epochs=epochs)
         test_loss, test_acc = model.evaluate(X_test_session, y_test_session, verbose=2)
         session_training_results.append(test_acc)
@@ -326,21 +326,14 @@ def FFN(input_shape, nr_classes=5):
 def CNN(input_shape, nr_classes=5):
 
     model = keras.Sequential(name='CNN_model')
-    model.add(keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
-    model.add(keras.layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same'))
-    model.add(keras.layers.BatchNormalization())
+    #model.add(keras.layers.Input(name='the_input', shape=input_shape, dtype='float32'))
+    model.add(keras.layers.Conv1D(32, kernel_size= 5, activation='relu', input_shape=input_shape))   # , input_shape=input_shape
+    model.add(keras.layers.MaxPooling1D(pool_size=5))
+    #model.add(keras.layers.BatchNormalization())
 
-    model.add(keras.layers.Conv2D(32, (3, 3), activation='relu'))
-    model.add(keras.layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same'))
-    model.add(keras.layers.BatchNormalization())
-
-    model.add(keras.layers.Conv2D(32, (2, 2), activation='relu'))
-    model.add(keras.layers.MaxPooling2D((2, 2), strides=(2, 2), padding='same'))
-    model.add(keras.layers.BatchNormalization())
-
-    # flatten output and feed it into dense layer
     model.add(keras.layers.Flatten())
-    model.add(keras.layers.Dense(64, activation='relu'))
+    #model.add(keras.layers.GlobalAveragePooling1D())
+    model.add(keras.layers.Dense(64, activation='relu'))    # , input_shape=(...,1)
     model.add(keras.layers.Dropout(0.3))
     # Ouput layer
     model.add(keras.layers.Dense(nr_classes, activation='softmax', name='Softmax'))
@@ -371,14 +364,16 @@ if __name__ == "__main__":
         # y_train.shape = (2806-y_test, nr_subjects)
         # y_test.shape = (y_test(from session nr. ?), nr_subjects)
 
-    #X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, TEST_SESSION_NR)
+    X_train, X_test, y_train, y_test = prepare_datasets_sessions(X, y, session_lengths, TEST_SESSION_NR)
     
 
     #'''
     # ----- Make model ------
     #model_GRU = GRU(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
     #model_LSTM = LSTM(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
+    model_CNN_1D = CNN(input_shape=(208, 1)) # (timestep, 13*16 MFCC coefficients)
     
+    model_CNN_1D.summary()
     #model_GRU.summary()
     #model_LSTM.summary()
     
@@ -386,7 +381,7 @@ if __name__ == "__main__":
     # ----- Train network ------
     #history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
     #history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
-
+    history_CNN_1D = train(model_CNN_1D, np.reshape(X_train, (X_train.shape[0], 208, 1)), y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
     
     # ----- Plot train accuracy/error -----
     #plot_train_history(history)
@@ -397,9 +392,11 @@ if __name__ == "__main__":
     #print('\nTest accuracy GRU:', test_acc, '\n')
     #test_loss, test_acc = model_LSTM.evaluate(X_test, y_test, verbose=VERBOSE)
     #print('\nTest accuracy LSTM:', test_acc, '\n')
+    test_loss, test_acc = model_CNN_1D.evaluate(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, verbose=VERBOSE)
+    print('\nTest accuracy CNN_1D:', test_acc, '\n')
     #'''
     
-
+    '''
     # ----- Cross validation ------
     #average_GRU = session_cross_validation('GRU', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
     #verage_LSTM = session_cross_validation('LSTM', X, y, session_lengths, NR_SESSIONS, BATCH_SIZE, EPOCHS)
@@ -410,6 +407,7 @@ if __name__ == "__main__":
     #print('Crossvalidated GRU:', average_GRU)
     #print('Crossvalidated LSTM:', average_LSTM)
     #print('Crossvalidated FFN:', average_FFN)
-    print('Crossvalidated CNN:', average_CNN)
+    print('Cross-validated CNN:', average_CNN)
     print('\n')
+    '''
 
