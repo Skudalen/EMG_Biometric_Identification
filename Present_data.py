@@ -242,11 +242,17 @@ def mfcc_all_emg_plots(csv_handler:CSV_handler):
 
 if __name__ == "__main__":
 
-    csv_handler = CSV_handler()
-    csv_handler.load_data('soft')
-    nn_handler = NN_handler(csv_handler)
-    nn_handler.store_mfcc_samples()
-    nn_handler.save_json_mfcc()
+    NR_SUBJECTS = 5
+    NR_SESSIONS = 4
+
+    soft_dir_name = 'Exp20201205_2myo_softType'
+    hard_dir_name = 'Exp20201205_2myo_hardType'
+
+    csv_handler = CSV_handler(NR_SUBJECTS, NR_SESSIONS)
+    dict = csv_handler.load_general('soft', soft_dir_name)
+
+    pretty(dict)
+    
 
 
 

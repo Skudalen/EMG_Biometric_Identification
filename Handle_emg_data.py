@@ -9,6 +9,7 @@ import sys
 sys.path.insert(0, '/Users/Markus/Prosjekter git/Slovakia 2021/psf_lib/python_speech_features/python_speech_features')
 from psf_lib.python_speech_features.python_speech_features import mfcc
 import json
+import os
 
 
 # Global variables for MFCC
@@ -22,25 +23,29 @@ class Data_container:
     # Initiates personal data container for each subject. Dict for each session with keys 'left' and 'right',
     # and values equal to lists of EMG data indexed 0-7
     # NB! More sessions has to be added here in the future   
-    def __init__(self, subject_nr:int, subject_name:str):
+    def __init__(self, subject_nr:int, subject_name:str, nr_sessions:int):
         self.subject_nr = subject_nr
         self.subject_name = subject_name
-        self.data_dict_round1 = {'left': [None]*8, 'right': [None]*8}
-        self.data_dict_round2 = {'left': [None]*8, 'right': [None]*8}
-        self.data_dict_round3 = {'left': [None]*8, 'right': [None]*8}
-        self.data_dict_round4 = {'left': [None]*8, 'right': [None]*8}
-        self.dict_list =   [self.data_dict_round1, 
-                            self.data_dict_round2, 
-                            self.data_dict_round3, 
-                            self.data_dict_round4
-                            ]
+        self.dict_list =  [{'left': [None]*8, 'right': [None]*8} for i in range(nr_sessions)]
 
+
+        #self.data_dict_round1 = {'left': [None]*8, 'right': [None]*8}
+        #self.data_dict_round2 = {'left': [None]*8, 'right': [None]*8}
+        #self.data_dict_round3 = {'left': [None]*8, 'right': [None]*8}
+        #self.data_dict_round4 = {'left': [None]*8, 'right': [None]*8}
+        #self.dict_list =   [self.data_dict_round1, 
+        #                    self.data_dict_round2, 
+        #                    self.data_dict_round3, 
+        #                    self.data_dict_round4
+        #                    ]
 
 class CSV_handler:
 
     # Initiates object to store all datapoints in the experiment
-    def __init__(self):
-        self.working_dir = str(Path.cwd()) 
+    def __init__(self, nr_subjects:int, nr_sessions:int):
+        self.working_dir = str(Path.cwd())
+        self.nr_subjects = nr_subjects
+        self.nr_sessions = nr_sessions 
         self.data_container_dict = {}   # Dict with keys equal subject numbers and values equal to its respective datacontainer
         self.data_type = None   # String describing which type of data is stored in the object
 
@@ -48,7 +53,8 @@ class CSV_handler:
     # Input: filename of a csv-file
     # Output: DataFrame
     def make_df(self, filename):
-        filepath = self.working_dir + str(filename)
+        #filepath = self.working_dir + str(filename)
+        filepath = str(filename)
         df = pd.read_csv(filepath)
         return df
 
@@ -71,6 +77,9 @@ class CSV_handler:
             print('NaN in: subject', data_container.subject_nr, 'arm:', which_arm, 'session:', session, 'emg nr:', emg_nr)
 
         # Places the data correctly:
+        data_container.dict_list[session-1][which_arm][emg_nr] = df
+
+        '''
         if session == 1:
             if which_arm == 'left':
                 data_container.data_dict_round1['left'][emg_nr] = df    # Zero indexed emg_nr in the dict
@@ -93,6 +102,7 @@ class CSV_handler:
                 data_container.data_dict_round4['right'][emg_nr] = df
         else:
             raise IndexError('Not a valid index')
+        '''
     
     # Links the data container for a subject to the csv_handler object
     # Input: the subject's data_container
@@ -477,6 +487,50 @@ class CSV_handler:
             self.link_container_to_handler(data_container)
         self.data_type = 'soft'
         return self.data_container_dict
+
+
+    def load_general(self, type, type_dir_name:str):
+
+        data_path = self.working_dir + '/data/' + type_dir_name
+
+        for i, (path, subject_dir, session_dir) in enumerate(os.walk(data_path)):
+            
+            if path is not data_path:
+                #print(i)
+                #print(path)
+                #print(subject_dir)
+                #print(session_dir)
+                subject_id = 100
+                subject_name = 'bruh'
+                nr_sessions = 101
+                container = None
+                session_count = 0
+
+                if subject_dir:
+                    session_count = 0
+                    subject_id = int(path[-1])
+                    subject_name = subject_dir[0].split('_')[0]
+                    nr_sessions = len(subject_dir)
+                    container = Data_container(subject_id, subject_name, nr_sessions)
+                    continue
+                else:
+                    session_count += 1
+
+                for f in session_dir:
+                    spes_path = os.path.join(path, f)
+                    if f == 'myoLeftEmg.csv':
+                        print(path)
+                        print(spes_path)
+                        for emg_nr in range(8):
+                            self.store_df_in_container(spes_path, emg_nr, 'left', container, session_count)
+                    elif f == 'myoRightEmg.csv':
+                        for emg_nr in range(8):
+                            self.store_df_in_container(spes_path, emg_nr, 'right', container, session_count)
+
+        self.data_type = type
+        return self.data_container_dict
+
+
 
     # Loads data the to the CSV_handler(general load func). Choose data_type: hard, hardPP, soft og softPP as str. 
     # Input: String(datatype you want)
