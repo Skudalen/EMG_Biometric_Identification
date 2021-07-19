@@ -28,16 +28,8 @@ class Data_container:
         self.subject_name = subject_name
         self.dict_list =  [{'left': [None]*8, 'right': [None]*8} for i in range(nr_sessions)]
 
-
-        #self.data_dict_round1 = {'left': [None]*8, 'right': [None]*8}
-        #self.data_dict_round2 = {'left': [None]*8, 'right': [None]*8}
-        #self.data_dict_round3 = {'left': [None]*8, 'right': [None]*8}
-        #self.data_dict_round4 = {'left': [None]*8, 'right': [None]*8}
-        #self.dict_list =   [self.data_dict_round1, 
-        #                    self.data_dict_round2, 
-        #                    self.data_dict_round3, 
-        #                    self.data_dict_round4
-        #                    ]
+    def __str__(self) -> str:
+        return 'Name: {}, \tID: {}'.format(self.subject_name, self.subject_nr)
 
 class CSV_handler:
 
@@ -79,30 +71,6 @@ class CSV_handler:
         # Places the data correctly:
         data_container.dict_list[session-1][which_arm][emg_nr] = df
 
-        '''
-        if session == 1:
-            if which_arm == 'left':
-                data_container.data_dict_round1['left'][emg_nr] = df    # Zero indexed emg_nr in the dict
-            else:
-                data_container.data_dict_round1['right'][emg_nr] = df
-        elif session == 2:
-            if which_arm == 'left':
-                data_container.data_dict_round2['left'][emg_nr] = df
-            else:
-                data_container.data_dict_round2['right'][emg_nr] = df
-        elif session == 3:
-            if which_arm == 'left':
-                data_container.data_dict_round3['left'][emg_nr] = df
-            else:
-                data_container.data_dict_round3['right'][emg_nr] = df
-        elif session == 4:
-            if which_arm == 'left':
-                data_container.data_dict_round4['left'][emg_nr] = df
-            else:
-                data_container.data_dict_round4['right'][emg_nr] = df
-        else:
-            raise IndexError('Not a valid index')
-        '''
     
     # Links the data container for a subject to the csv_handler object
     # Input: the subject's data_container
@@ -120,9 +88,55 @@ class CSV_handler:
         df = container.dict_list[session - 1].get(which_arm)[emg_nr - 1]
         return df
 
-    # Loads the data from the csv files into the storing system of the CSV_handler object
-    # Input: None(CSV_handler)
+
+    # Loads data the to the CSV_handler(general load func). Choose data_type: hard, hardPP, soft og softPP as str. 
+    # Input: String(datatype you want), direction name of that type
     # Output: None -> load and stores data
+    def load_data(self, type:str, type_dir_name:str):
+
+        data_path = self.working_dir + '/data/' + type_dir_name
+        subject_id = 100
+        subject_name = 'bruh'
+        nr_sessions = 101
+        container = None
+        session_count = 0
+
+        for i, (path, subject_dir, session_dir) in enumerate(os.walk(data_path)):
+            
+            if path is not data_path:
+                
+                if subject_dir:
+                    session_count = 0
+                    subject_id = int(path[-1])
+                    subject_name = subject_dir[0].split('_')[0]
+                    nr_sessions = len(subject_dir)
+                    container = Data_container(subject_id, subject_name, nr_sessions)
+                    continue
+                else:
+                    session_count += 1
+
+                for f in session_dir:
+                    spes_path = os.path.join(path, f)
+                    if f == 'myoLeftEmg.csv':
+                        for emg_nr in range(8):
+                            self.store_df_in_container(spes_path, emg_nr, 'left', container, session_count)
+                    elif f == 'myoRightEmg.csv':
+                        for emg_nr in range(8):
+                            self.store_df_in_container(spes_path, emg_nr, 'right', container, session_count)
+                self.link_container_to_handler(container)
+        self.data_type = type
+        return self.data_container_dict
+
+    # Retrieved data. Send in loaded csv_handler and data detailes you want. 
+    # Input: Experiment detailes
+    # Output: DataFrame,  samplerate:int
+    def get_data(self, subject_nr, which_arm, session, emg_nr):
+        data_frame = self.get_df_from_data_dict(subject_nr, which_arm, session, emg_nr)
+        samplerate = get_samplerate(data_frame)
+        return data_frame, samplerate
+
+
+    # OBSOLETE
     def load_hard_PP_emg_data(self):
 
         # CSV data from subject 1
@@ -487,55 +501,7 @@ class CSV_handler:
             self.link_container_to_handler(data_container)
         self.data_type = 'soft'
         return self.data_container_dict
-
-
-    def load_general(self, type, type_dir_name:str):
-
-        data_path = self.working_dir + '/data/' + type_dir_name
-
-        for i, (path, subject_dir, session_dir) in enumerate(os.walk(data_path)):
-            
-            if path is not data_path:
-                #print(i)
-                #print(path)
-                #print(subject_dir)
-                #print(session_dir)
-                subject_id = 100
-                subject_name = 'bruh'
-                nr_sessions = 101
-                container = None
-                session_count = 0
-
-                if subject_dir:
-                    session_count = 0
-                    subject_id = int(path[-1])
-                    subject_name = subject_dir[0].split('_')[0]
-                    nr_sessions = len(subject_dir)
-                    container = Data_container(subject_id, subject_name, nr_sessions)
-                    continue
-                else:
-                    session_count += 1
-
-                for f in session_dir:
-                    spes_path = os.path.join(path, f)
-                    if f == 'myoLeftEmg.csv':
-                        print(path)
-                        print(spes_path)
-                        for emg_nr in range(8):
-                            self.store_df_in_container(spes_path, emg_nr, 'left', container, session_count)
-                    elif f == 'myoRightEmg.csv':
-                        for emg_nr in range(8):
-                            self.store_df_in_container(spes_path, emg_nr, 'right', container, session_count)
-
-        self.data_type = type
-        return self.data_container_dict
-
-
-
-    # Loads data the to the CSV_handler(general load func). Choose data_type: hard, hardPP, soft og softPP as str. 
-    # Input: String(datatype you want)
-    # Output: None -> load and stores data
-    def load_data(self, data_type):
+    def load_data_OLD(self, data_type):
         if data_type == 'hard': 
             self.load_hard_original_emg_data()
         elif data_type == 'hardPP':
@@ -547,13 +513,6 @@ class CSV_handler:
         else:
             raise Exception('Wrong input')
 
-    # Retrieved data. Send in loaded csv_handler and data detailes you want. 
-    # Input: Experiment detailes
-    # Output: DataFrame,  samplerate:int
-    def get_data(self, subject_nr, which_arm, session, emg_nr):
-        data_frame = self.get_df_from_data_dict(subject_nr, which_arm, session, emg_nr)
-        samplerate = get_samplerate(data_frame)
-        return data_frame, samplerate
 
     # NOT IMPLEMENTED
     def get_keyboard_data(self, filename:str, pres_or_release:str='pressed'):
@@ -576,19 +535,9 @@ class NN_handler:
     def __init__(self, csv_handler:CSV_handler) -> None:
         self.csv_handler = csv_handler
         # Should med 4 sessions * split nr of samples per person. Each sample is structured like this: [sample_df, samplerate]
-        self.reg_samples_per_subject = {1: [],  
-                                        2: [], 
-                                        3: [],
-                                        4: [],
-                                        5: []
-                                        }
+        self.reg_samples_per_subject = {k+1:[] for k in range(csv_handler.nr_subjects)}
         # Should med 4 sessions * (~150, 208) of mfcc samples per person. One [DataFrame, session_length_list] per subject
-        self.mfcc_samples_per_subject = {1: [],  
-                                         2: [], 
-                                         3: [],
-                                         4: [],
-                                         5: []
-                                         }
+        self.mfcc_samples_per_subject = {k+1:[] for k in range(csv_handler.nr_subjects)}
 
     # GET method for reg_samples_dict
     def get_reg_samples_dict(self) -> dict:
