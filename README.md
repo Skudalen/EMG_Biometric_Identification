@@ -11,12 +11,10 @@ Scripts to handle CSV files composed by 2 * 8 EMG sensors(left & right) devided 
 * Community libs: Python_speech_features, Pywt
 
 #### Challanges in the module
-* The CSV handlig is for the moment hard-coded to fit the current project due to a very specific file structure and respective naming convention.
+* The CSV handlig requires a specific file structure. Se "How to use it"
 * Preprocessing is still limited in Signal_prep.py
-* Neural_Network_Analysis.py lacks a more general way to access multiple types of networks
 
 #### Credits for insporational code
-
 * Kapre: Keunwoochoi
 * Audio-Classification: seth814
 * DeepLearningForAudioWithPyhton: musikalkemist
@@ -35,7 +33,8 @@ Scripts to handle CSV files composed by 2 * 8 EMG sensors(left & right) devided 
 
 1. Clone the repo
 2. Place the data files in the working directory 
-3. (For now) Add the session filenames in the desired load_data() function 
+3. Place the data files within the `data`-folder 
+(format: /`data`/<datatype>/<subject-folder+ID>/<session-folder>/<left/right-CSV-files>)
 4. Assuming NN analysis:
     1. Create a `CSV_handler` object 
     2. Load data with `load_data(CSV_handler, <datatype>)`
