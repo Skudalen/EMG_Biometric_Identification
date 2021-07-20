@@ -125,8 +125,9 @@ def pretty(dict):
 
 # DATA FUNCTIONS: --------------------------------------------------------------: 
 
-# The CSV_handler takes in data_type(soft, hard, softPP, hardPP)
-# E.g. handler = CSV_handler('soft')
+# The CSV_handler takes in nr of subjects and nr of sessions in the experiment
+# E.g. handler = CSV_handler(nr_subjects=5, nr_sessions=4)
+# Needs to load data: handler.load_data(<type>, <type_directory_name>)
     
 # Denoices one set of EMG data 
 # Input: CSV_handler and detailes for ID 
@@ -237,6 +238,7 @@ def mfcc_all_emg_plots(csv_handler:CSV_handler):
     label_list = [label_1, label_2, label_3, label_4, label_5, label_6, label_7, label_8]
 
     plot_all_emg_mfcc(feat_list, label_list)
+
 
 # MAIN: ------------------------------------------------------------------------: 
 

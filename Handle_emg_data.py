@@ -21,8 +21,7 @@ NR_MEL_BINS = 40     # Number of mel-filter-bins
 class Data_container:
     
     # Initiates personal data container for each subject. Dict for each session with keys 'left' and 'right',
-    # and values equal to lists of EMG data indexed 0-7
-    # NB! More sessions has to be added here in the future   
+    # and values equal to lists of EMG data indexed 0-7  
     def __init__(self, subject_nr:int, subject_name:str, nr_sessions:int):
         self.subject_nr = subject_nr
         self.subject_name = subject_name
@@ -37,9 +36,11 @@ class CSV_handler:
     def __init__(self, nr_subjects:int, nr_sessions:int):
         self.working_dir = str(Path.cwd())
         self.nr_subjects = nr_subjects
-        self.nr_sessions = nr_sessions 
-        self.data_container_dict = {}   # Dict with keys equal subject numbers and values equal to its respective datacontainer
-        self.data_type = None   # String describing which type of data is stored in the object
+        self.nr_sessions = nr_sessions
+        # Dict with keys equal subject numbers and values equal to its respective datacontainer 
+        self.data_container_dict = {i: None for i in range(nr_subjects)}  
+        # String describing which type of data is stored in the object 
+        self.data_type = None   
 
     # Makes dataframe from the csv files in the working directory
     # Input: filename of a csv-file
@@ -53,7 +54,7 @@ class CSV_handler:
     # Extracts out the timestamp and the selected emg signal into a new dataframe
     # Input: filename of a csv-file, EMG nr 
     # Output: DataFrame(timestamp/EMG)
-    def get_time_emg_table(self, filename:str, emg_nr:int):
+    def get_emg_table_from_file(self, filename:str, emg_nr:int):
         tot_data_frame = self.make_df(filename)
         emg_str = 'emg' + str(emg_nr)
         filtered_df = tot_data_frame[["timestamp", emg_str]]
@@ -63,7 +64,7 @@ class CSV_handler:
     # Input: filename of a csv-file, EMG nr, left/right arm, subject's data_container, session nr 
     # Output: None -> stores EMG data in data container
     def store_df_in_container(self, filename:str, emg_nr:int, which_arm:str, data_container:Data_container, session:int):
-        df = self.get_time_emg_table(filename, emg_nr+1)
+        df = self.get_emg_table_from_file(filename, emg_nr+1)
 
         if df.isnull().values.any():
             print('NaN in: subject', data_container.subject_nr, 'arm:', which_arm, 'session:', session, 'emg nr:', emg_nr)
@@ -527,21 +528,13 @@ class CSV_handler:
 class NN_handler:
 
     # Paths for data storage in json to later use in Neural_Network_Analysis.py
-    JSON_PATH_REG = "reg_data.json"
     JSON_PATH_MFCC = "mfcc_data.json"
 
     # Class to manipulate data from the CSV_handler and store it for further analysis
-    # NB! More subject needs to be added manually 
     def __init__(self, csv_handler:CSV_handler) -> None:
         self.csv_handler = csv_handler
-        # Should med 4 sessions * split nr of samples per person. Each sample is structured like this: [sample_df, samplerate]
-        self.reg_samples_per_subject = {k+1:[] for k in range(csv_handler.nr_subjects)}
         # Should med 4 sessions * (~150, 208) of mfcc samples per person. One [DataFrame, session_length_list] per subject
         self.mfcc_samples_per_subject = {k+1:[] for k in range(csv_handler.nr_subjects)}
-
-    # GET method for reg_samples_dict
-    def get_reg_samples_dict(self) -> dict:
-        return self.reg_samples_per_subject
 
     # GET method for mfcc_samples_dict  
     def get_mfcc_samples_dict(self) -> dict:
@@ -595,39 +588,6 @@ class NN_handler:
 
         return tot_session_df
     
-    # Takes in all EMG session Dataframe and merges the EMG data into one column, creating one signal 
-    # Input: DataFrame(shape[1]=16, EMG data)
-    # Output: DataFrame(signal), samplerate of it
-    def reshape_session_df_to_signal(self, df:DataFrame):
-            main_df = df[['timestamp', 1]].rename(columns={1: 'emg'})
-            for i in range(2, 17):
-                adding_df = df[['timestamp', i]].rename(columns={i: 'emg'})
-                main_df = pd.concat([main_df, adding_df], ignore_index=True)
-            samplerate = get_samplerate(main_df)
-            return main_df, samplerate
-
-    # Stores split, merged signals in the NN-handler's reg_samples_per_subject
-    # Input: Split_nr:int(how many times to split this merged signal)
-    # Output: None -> stores in NN_handler
-    def store_samples(self, split_nr) -> None:
-        for subject_nr in range(5):
-            subj_samples = []
-            for session_nr in range(4):
-                list_of_emg = self.get_emg_list(subject_nr+1, session_nr+1)
-                tot_session_df = self.make_subj_sample(list_of_emg)
-
-                # TESTING FOR NAN
-                if tot_session_df.isnull().values.any():
-                    print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? HERE')
-
-                samples = np.array_split(tot_session_df.to_numpy(), split_nr)
-                for array in samples:
-                    df = DataFrame(array).rename(columns={0:'timestamp'})
-                    df_finished, samplerate = self.reshape_session_df_to_signal(df)
-                    subj_samples.append([df_finished, samplerate])
-            
-            self.reg_samples_per_subject[subject_nr+1] = subj_samples
-
     # Takes in all EMG session Dataframe and creates DataFrame of MFCC samples
     # Input: DataFrame(shape[1]=16, EMG data)
     # Output: DataFrame(merged MFCC data, shape: (n, 13*16)), length of session datapoints
@@ -676,11 +636,75 @@ class NN_handler:
             result_df = pd.concat(subj_samples, axis=0, ignore_index=True)
             self.mfcc_samples_per_subject[subject_nr+1] = [result_df, session_length_list]
 
-
-    # Makes MFCC data from reg_samples_per_subject and stores it in a json file
+    # Stores MFCC data from mfcc_samples_per_subject in a json file
     # Input: Path to the json file
     # Output: None -> stores in json
-    def save_json_reg(self, json_path=JSON_PATH_REG):
+    def save_json_mfcc(self, json_path=JSON_PATH_MFCC):
+            
+            # dictionary to store mapping, labels, and MFCCs
+            data = {
+                "mapping": [],
+                "labels": [],
+                "mfcc": [],
+
+                "session_lengths": []
+            }
+
+            raw_data_dict = self.get_mfcc_samples_dict()
+        
+            # loop through all subjects to get samples
+            for key, value in raw_data_dict.items():
+                
+                # save subject label in the mapping
+                subject_label = 'Subject ' + str(key)
+                print("\nProcessing: {}".format(subject_label))
+                data["mapping"].append(subject_label)       # Subject label
+                data["session_lengths"].append(value[1])   # List[subject][session_length_list]
+
+                # process all samples per subject
+                for i, sample in enumerate(value[0]):
+
+                    data["labels"].append(key-1)    # Subject nr
+                    data["mfcc"].append(sample)  # MFCC sample on same index
+                     
+                    print("sample:{} is done".format(i+1))
+                    #print(np.array(mfcc_data).shape)
+
+            # save MFCCs to json file
+            with open(json_path, "w") as fp:
+                json.dump(data, fp, indent=4)
+
+
+
+    # OBSOLETE
+    def get_reg_samples_dict(self) -> dict:
+        return self.reg_samples_per_subject
+    def reshape_session_df_to_signal(self, df:DataFrame):
+            main_df = df[['timestamp', 1]].rename(columns={1: 'emg'})
+            for i in range(2, 17):
+                adding_df = df[['timestamp', i]].rename(columns={i: 'emg'})
+                main_df = pd.concat([main_df, adding_df], ignore_index=True)
+            samplerate = get_samplerate(main_df)
+            return main_df, samplerate
+    def store_samples(self, split_nr) -> None:
+        for subject_nr in range(5):
+            subj_samples = []
+            for session_nr in range(4):
+                list_of_emg = self.get_emg_list(subject_nr+1, session_nr+1)
+                tot_session_df = self.make_subj_sample(list_of_emg)
+
+                # TESTING FOR NAN
+                if tot_session_df.isnull().values.any():
+                    print('NaN in: subject', subject_nr+1, 'session:', session_nr+1, 'where? HERE')
+
+                samples = np.array_split(tot_session_df.to_numpy(), split_nr)
+                for array in samples:
+                    df = DataFrame(array).rename(columns={0:'timestamp'})
+                    df_finished, samplerate = self.reshape_session_df_to_signal(df)
+                    subj_samples.append([df_finished, samplerate])
+            
+            self.reg_samples_per_subject[subject_nr+1] = subj_samples
+    def save_json_reg(self, json_path):
         
         # Dictionary to store mapping, labels, and MFCCs
         data = {
@@ -733,43 +757,6 @@ class NN_handler:
         with open(json_path, "w") as fp:
             json.dump(data, fp, indent=4)
 
-    # Stores MFCC data from mfcc_samples_per_subject in a json file
-    # Input: Path to the json file
-    # Output: None -> stores in json
-    def save_json_mfcc(self, json_path=JSON_PATH_MFCC):
-            
-            # dictionary to store mapping, labels, and MFCCs
-            data = {
-                "mapping": [],
-                "labels": [],
-                "mfcc": [],
-
-                "session_lengths": []
-            }
-
-            raw_data_dict = self.get_mfcc_samples_dict()
-        
-            # loop through all subjects to get samples
-            for key, value in raw_data_dict.items():
-                
-                # save subject label in the mapping
-                subject_label = 'Subject ' + str(key)
-                print("\nProcessing: {}".format(subject_label))
-                data["mapping"].append(subject_label)       # Subject label
-                data["session_lengths"].append(value[1])   # List[subject][session_length_list]
-
-                # process all samples per subject
-                for i, sample in enumerate(value[0]):
-
-                    data["labels"].append(key-1)    # Subject nr
-                    data["mfcc"].append(sample)  # MFCC sample on same index
-                     
-                    print("sample:{} is done".format(i+1))
-                    #print(np.array(mfcc_data).shape)
-
-            # save MFCCs to json file
-            with open(json_path, "w") as fp:
-                json.dump(data, fp, indent=4)
 
 
 # HELP FUNCTIONS: ------------------------------------------------------------------------: 
