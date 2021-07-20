@@ -325,7 +325,9 @@ def prediction_csv_logger(X, y, model_name, model, session_nr, custom_path=None)
         writer.writerows(data)
         csv_file.close()
 
-
+# Prints info about session data
+# Input: session_lengths
+# Output: None -> print
 def get_session_info(session_lengths_soft, session_lengths_hard):
     print('Soft: {}\nHard: {}'.format(session_lengths_soft, session_lengths_hard))
     soft_avg_sess = np.average(list(np.average(x) for x in session_lengths_soft))
@@ -542,7 +544,9 @@ def plot_comp_accuracy(X, y, session_lengths, nr_sessions, batch_size=64, epochs
     plt.style.use('seaborn-dark-palette') 
     plt.show()
 
-
+# Plots training and validation history for CNN_1D network with SOFT and HARD data
+# Input: SOFT and HARD raw data, respective session_lengths, *details
+# Output: None -> plot
 def plot_comp_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, nr_sessions, batch_size=64, epochs=30):
     #'''
     train_dict = {'SOFT':[], 'HARD':[]}
