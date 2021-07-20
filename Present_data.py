@@ -249,14 +249,16 @@ if __name__ == "__main__":
 
     soft_dir_name = 'Exp20201205_2myo_softType'
     hard_dir_name = 'Exp20201205_2myo_hardType'
-    JSON_TEST_NAME = 'TEST_mfcc.json'
+    JSON_FILE_SOFT = 'mfcc_data_soft.json'
+    JSON_FILE_HARD = 'mfcc_data_hard.json'
+
 
     csv_handler = CSV_handler(NR_SUBJECTS, NR_SESSIONS)
     dict = csv_handler.load_data('soft', soft_dir_name)
     
     nn_handler = NN_handler(csv_handler)
     nn_handler.store_mfcc_samples()
-    nn_handler.save_json_mfcc(JSON_TEST_NAME)
+    nn_handler.save_json_mfcc(JSON_FILE_SOFT)
 
 
 

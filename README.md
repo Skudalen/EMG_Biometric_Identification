@@ -34,7 +34,7 @@ Scripts to handle CSV files composed by 2 * 8 EMG sensors(left & right) devided 
 1. Clone the repo
 2. Place the data files in the working directory 
 3. Place the data files within the `data`-folder 
-(format: /`data`/<datatype>/<subject-folder+ID>/<session-folder>/<left/right-CSV-files>)
+(format: `/data/<datatype>/<subject-folder+ID>/<session-folder>/<left/right-CSV-files>`)
 4. Assuming NN analysis:
     1. Create a `CSV_handler` object 
     2. Load data with `load_data(CSV_handler, <datatype>)`
