@@ -337,6 +337,17 @@ def get_session_info(session_lengths_soft, session_lengths_hard):
     print('Avg session:', soft_avg_sess, hard_avg_sess)
     print('Avg sub:', soft_avg_sub, hard_avg_sub)
 
+# Reduces the size of the train and test set with values [0.0, 1.0]
+# Input: Data sets, how much to reduce train set, how much to reduce test set with 
+# Output: Reduced data sets
+def reduce_data_set_sizes(X_train, X_test, y_train, y_test, train_reduction=0.5, test_reduction=0):
+    train_keep = X_train.shape[0] * (1 - train_reduction)
+    test_keep = X_test.shape[0] * (1 - test_reduction)
+    X_train = X_train[:train_keep]
+    y_train = y_train[:train_keep]
+    X_test = X_test[:test_keep]
+    y_test = y_test[:test_keep]
+    return X_train, X_test, y_train, y_test
 
 # ----- PLOTS ------
 
@@ -850,11 +861,10 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = prepare_datasets_sessions(X_soft, y_soft, session_lengths_soft, TEST_SESSION_NR)
     
 
-    '''
     # ----- Make model ------
     #model_GRU = GRU(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
     #model_LSTM = LSTM(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
-    model_CNN_1D = CNN(input_shape=(208, 1)) # (timestep, 13*16 MFCC coefficients)
+    model_CNN_1D = CNN_1D(input_shape=(208, 1)) # (timestep, 13*16 MFCC coefficients)
     
     model_CNN_1D.summary()
     #model_GRU.summary()
@@ -869,7 +879,7 @@ if __name__ == "__main__":
     
 
     # ----- Plot train accuracy/error -----
-    #plot_train_history(history)
+    plot_train_history(history_CNN_1D)
 
 
     # ----- Evaluate model on test set ------
@@ -878,13 +888,13 @@ if __name__ == "__main__":
     #print('\nTest accuracy GRU:', test_acc, '\n')
     #test_loss, test_acc = model_LSTM.evaluate(X_test, y_test, verbose=VERBOSE)
     #print('\nTest accuracy LSTM:', test_acc, '\n')
-    test_loss, test_acc = model_CNN_1D.evaluate(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, verbose=0)
-    print('\nTest accuracy CNN_1D:', test_acc, '\n')
+    #test_loss, test_acc = model_CNN_1D.evaluate(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, verbose=0)
+    #print('\nTest accuracy CNN_1D:', test_acc, '\n')
     
 
     # ----- Store test predictions in CSV ------
-    prediction_csv_logger(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, MODEL_NAME, model_CNN_1D, TEST_SESSION_NR)
-    '''
+    #prediction_csv_logger(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, MODEL_NAME, model_CNN_1D, TEST_SESSION_NR)
+    
 
 
     '''
@@ -949,7 +959,7 @@ if __name__ == "__main__":
     #plot_comp_accuracy_single(X_soft, y_soft, session_lengths_soft, NR_SESSIONS, epochs=30)
     #plot_comp_SoftHard_single(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
 
-    plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
+    #plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
 
 
 
