@@ -367,10 +367,10 @@ def plot_train_history(history, val_data=False):
 
     plt.show()
 
-# Plots the training history of four networks inverse cross-validated
+# Plots the training history of four networks inverse cross-validated (single trained)
 # Input: data, nr of sessions in total, batch_size and epochs
 # Ouput: None -> plot
-def plot_comp_session_spread(X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
+def plot_comp_spread_single(X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
 
     history_dict = {'GRU': [],
                     'LSTM': [],
@@ -407,6 +407,26 @@ def plot_comp_session_spread(X, y, session_lengths, nr_sessions, batch_size=64, 
         del model_CNN_1D
         K.clear_session()
     
+    # Logging data to CSV. Just copy, not implemented
+    '''
+    # Log data stream to CSV
+    csv_path = str(Path.cwd()) + '/logs/Network_acc_comparison_single/comparison_acc_data.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['GRU_train_acc', 'LSTM_train_acc', 'FFN_train_acc', 'CNN_1D_train_acc', 'GRU_val_acc', 'LSTM_val_acc', 'FFN_val_acc', 'CNN_1D_val_acc'])
+        data = zip(*history_dict.values(), *history_dict_val.values())
+        writer.writerows(data)
+        csv_file.close()
+    
+    # Log best results to CSV
+    csv_path = str(Path.cwd()) + '/logs/Network_acc_comparison_single/comparison_best.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['GRU_train_acc', 'LSTM_train_acc', 'FFN_train_acc', 'CNN_1D_train_acc', 'GRU_val_acc', 'LSTM_val_acc', 'FFN_val_acc', 'CNN_1D_val_acc'])
+        writer.writerow(    [np.max(history_dict.get('GRU_train')), np.max(history_dict.get('LSTM_train')), np.max(history_dict.get('FFN_train')), np.max(history_dict.get('CNN_1D_train')), 
+                            np.max(history_dict_val.get('GRU_val')), np.max(history_dict_val.get('LSTM_val')), np.max(history_dict_val.get('FFN_val')), np.max(history_dict_val.get('CNN_1D_val'))] )
+        csv_file.close()
+    '''
 
     fig, axs = plt.subplots(2, 2, sharey=True)
     plt.ylim(0, 1)
@@ -446,10 +466,10 @@ def plot_comp_session_spread(X, y, session_lengths, nr_sessions, batch_size=64, 
     plt.show()
     
 
-# Plots the average training history of four networks inverse cross-validated
+# Plots the average training history of four networks inverse cross-validated (single trained)
 # Input: data, nr of sessions in total, batch_size and epochs
 # Ouput: None -> plot
-def plot_comp_accuracy(X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
+def plot_comp_accuracy_single(X, y, session_lengths, nr_sessions, batch_size=64, epochs=30):
     #'''
     history_dict = {'GRU_train': [],
                     'LSTM_train': [],
@@ -517,7 +537,25 @@ def plot_comp_accuracy(X, y, session_lengths, nr_sessions, batch_size=64, epochs
                         'LSTM_val': [0.5, 0.9, 0.4, 0.8],
                         'FFN_val': [0.75, 0.8, 0.4, 0.8], 
                         'CNN_1D_val': [0.8, 0.95, 0.4, 0.8]}
-    '''
+    #'''
+
+    # Log data stream to CSV
+    csv_path = str(Path.cwd()) + '/logs/Network_acc_comparison_single/comparison_acc_data.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['GRU_train_acc', 'LSTM_train_acc', 'FFN_train_acc', 'CNN_1D_train_acc', 'GRU_val_acc', 'LSTM_val_acc', 'FFN_val_acc', 'CNN_1D_val_acc'])
+        data = zip(*history_dict.values(), *history_dict_val.values())
+        writer.writerows(data)
+        csv_file.close()
+    
+    # Log best results to CSV
+    csv_path = str(Path.cwd()) + '/logs/Network_acc_comparison_single/comparison_best.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['GRU_train_acc', 'LSTM_train_acc', 'FFN_train_acc', 'CNN_1D_train_acc', 'GRU_val_acc', 'LSTM_val_acc', 'FFN_val_acc', 'CNN_1D_val_acc'])
+        writer.writerow(    [np.max(history_dict.get('GRU_train')), np.max(history_dict.get('LSTM_train')), np.max(history_dict.get('FFN_train')), np.max(history_dict.get('CNN_1D_train')), 
+                            np.max(history_dict_val.get('GRU_val')), np.max(history_dict_val.get('LSTM_val')), np.max(history_dict_val.get('FFN_val')), np.max(history_dict_val.get('CNN_1D_val'))] )
+        csv_file.close()
 
     # Plot:
     fig, axs = plt.subplots(2, sharey=True)
@@ -544,10 +582,10 @@ def plot_comp_accuracy(X, y, session_lengths, nr_sessions, batch_size=64, epochs
     plt.style.use('seaborn-dark-palette') 
     plt.show()
 
-# Plots training and validation history for CNN_1D network with SOFT and HARD data
+# Plots training and validation history for CNN_1D network with SOFT and HARD data (single trained)
 # Input: SOFT and HARD raw data, respective session_lengths, *details
 # Output: None -> plot
-def plot_comp_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, nr_sessions, batch_size=64, epochs=30):
+def plot_comp_SoftHard_single(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, nr_sessions, batch_size=64, epochs=30):
     #'''
     train_dict = {'SOFT':[], 'HARD':[]}
     val_dict = {'SOFT':[], 'HARD':[]}
@@ -565,8 +603,8 @@ def plot_comp_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, ses
         model_CNN_1D = CNN_1D(input_shape=(208, 1))
         CNN_1D_h = train(model_CNN_1D, X_train_soft, y_train_soft, 1, batch_size=batch_size, epochs=epochs, 
                                                             X_validation=X_val_soft, y_validation=y_val_soft)
-        train_dict['SOFT'] = list(CNN_1D_h.history['accuracy'])
-        val_dict['SOFT'] = list(CNN_1D_h.history['val_accuracy'])
+        train_dict['SOFT'].append(list(CNN_1D_h.history['accuracy']))
+        val_dict['SOFT'].append(list(CNN_1D_h.history['val_accuracy']))
         del model_CNN_1D
         K.clear_session()
 
@@ -574,21 +612,41 @@ def plot_comp_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, ses
         model_CNN_1D = CNN_1D(input_shape=(208, 1))
         CNN_1D_h = train(model_CNN_1D, X_train_hard, y_train_hard, 1, batch_size=batch_size, epochs=epochs, 
                                                             X_validation=X_val_hard, y_validation=y_val_hard)
-        train_dict['HARD'] = list(CNN_1D_h.history['accuracy'])
-        val_dict['HARD'] = list(CNN_1D_h.history['val_accuracy'])
+        train_dict['HARD'].append(list(CNN_1D_h.history['accuracy']))
+        val_dict['HARD'].append(list(CNN_1D_h.history['val_accuracy']))
         del model_CNN_1D
         K.clear_session()
 
+    # Averaging out session training for each network
+    for key in train_dict:
+        train_dict[key] = list(np.average([x, y, z, c]) for x, y, z, c in list(zip(*train_dict[key])))
+    for key in val_dict:
+        val_dict[key] = list(np.average([x, y, z, c]) for x, y, z, c in list(zip(*val_dict[key])))
+
+
     '''
-    history_dict = {'GRU_train': [0.5, 0.8, 0.4, 0.8],
-                    'LSTM_train': [0.5, 0.9, 0.3, 0.9],
-                    'FFN_train': [0.75, 0.8, 0.2, 0.7], 
-                    'CNN_1D_train': [0.8, 0.95, 0.1, 0.6]}
-    history_dict_val = {'GRU_val': [0.5, 0.8, 0.4, 0.8],  
-                        'LSTM_val': [0.5, 0.9, 0.4, 0.8],
-                        'FFN_val': [0.75, 0.8, 0.4, 0.8], 
-                        'CNN_1D_val': [0.8, 0.95, 0.4, 0.8]}
+    train_dict = {'SOFT': [0.1, 0.7, 0.5, 0.69],
+                'HARD': [0.55, 0.9, 0.3, 0.92]}
+    val_dict = {'SOFT': [0.34, 0.85, 0.41, 0.74],  
+                'HARD': [0.63, 0.99, 0.49, 0.88]}
     '''
+
+    # Log data stream to CSV
+    csv_path = str(Path.cwd()) + '/logs/Soft_hard_comparison_single/soft_hard_comparison_acc_data.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['soft_train_acc', 'hard_train_acc', 'soft_val_acc', 'hard_val_acc'])
+        data = zip(*train_dict.values(), *val_dict.values())
+        writer.writerows(data)
+        csv_file.close()
+    
+    # Log best results to CSV
+    csv_path = str(Path.cwd()) + '/logs/Soft_hard_comparison_single/soft_hard_comparison_best.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['soft_train_best', 'hard_train_best', 'soft_val_best', 'hard_val_best'])
+        writer.writerow( [np.max(train_dict.get('SOFT')), np.max(train_dict.get('HARD')), np.max(val_dict.get('SOFT')), np.max(val_dict.get('HARD'))] )
+        csv_file.close()
 
     # Plot:
     fig, axs = plt.subplots(2, sharey=True)
@@ -612,6 +670,92 @@ def plot_comp_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, ses
     plt.show()
 
 
+# Plots training and validation history for CNN_1D network with SOFT and HARD data (three-session-trained)
+# Input: SOFT and HARD raw data, respective session_lengths, *details
+# Output: None -> plot
+def plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, nr_sessions, batch_size=64, epochs=30):
+    #'''
+    train_dict = {'SOFT':[], 'HARD':[]}
+    val_dict = {'SOFT':[], 'HARD':[]}
+    
+    for i in range(nr_sessions):
+        # Prepare data
+        X_train_soft, X_val_soft, y_train_soft, y_val_soft = prepare_datasets_sessions(X_soft, y_soft, session_lengths_soft, i)
+        X_train_hard, X_val_hard, y_train_hard, y_val_hard = prepare_datasets_sessions(X_hard, y_hard, session_lengths_hard, i)
+        X_train_soft = np.reshape(X_train_soft, (X_train_soft.shape[0], 208, 1))
+        X_val_soft = np.reshape(X_val_soft, (X_val_soft.shape[0], 208, 1))
+        X_train_hard = np.reshape(X_train_hard, (X_train_hard.shape[0], 208, 1))
+        X_val_hard = np.reshape(X_val_hard, (X_val_hard.shape[0], 208, 1))
+        
+        # CNN_1D SOFT
+        model_CNN_1D = CNN_1D(input_shape=(208, 1))
+        CNN_1D_h = train(model_CNN_1D, X_train_soft, y_train_soft, 1, batch_size=batch_size, epochs=epochs, 
+                                                            X_validation=X_val_soft, y_validation=y_val_soft)
+        train_dict['SOFT'].append(list(CNN_1D_h.history['accuracy']))
+        val_dict['SOFT'].append(list(CNN_1D_h.history['val_accuracy']))
+        del model_CNN_1D
+        K.clear_session()
+
+        # CNN_1D HARD
+        model_CNN_1D = CNN_1D(input_shape=(208, 1))
+        CNN_1D_h = train(model_CNN_1D, X_train_hard, y_train_hard, 1, batch_size=batch_size, epochs=epochs, 
+                                                            X_validation=X_val_hard, y_validation=y_val_hard)
+        train_dict['HARD'].append(list(CNN_1D_h.history['accuracy']))
+        val_dict['HARD'].append(list(CNN_1D_h.history['val_accuracy']))
+        del model_CNN_1D
+        K.clear_session()
+
+    # Averaging out session training for each network
+    for key in train_dict:
+        train_dict[key] = list(np.average([x, y, z, c]) for x, y, z, c in list(zip(*train_dict[key])))
+    for key in val_dict:
+        val_dict[key] = list(np.average([x, y, z, c]) for x, y, z, c in list(zip(*val_dict[key])))
+
+
+    '''
+    train_dict = {'SOFT': [0.1, 0.7, 0.5, 0.69],
+                'HARD': [0.55, 0.9, 0.3, 0.92]}
+    val_dict = {'SOFT': [0.34, 0.85, 0.41, 0.74],  
+                'HARD': [0.63, 0.99, 0.49, 0.88]}
+    '''
+
+    # Log data stream to CSV
+    csv_path = str(Path.cwd()) + '/logs/Soft_hard_comparison_3/soft_hard_comparison_acc_data.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['soft_train_acc', 'hard_train_acc', 'soft_val_acc', 'hard_val_acc'])
+        data = zip(*train_dict.values(), *val_dict.values())
+        writer.writerows(data)
+        csv_file.close()
+    
+    # Log best results to CSV
+    csv_path = str(Path.cwd()) + '/logs/Soft_hard_comparison_3/soft_hard_comparison_best.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['soft_train_best', 'hard_train_best', 'soft_val_best', 'hard_val_best'])
+        writer.writerow( [np.max(train_dict.get('SOFT')), np.max(train_dict.get('HARD')), np.max(val_dict.get('SOFT')), np.max(val_dict.get('HARD'))] )
+        csv_file.close()
+
+    # Plot:
+    fig, axs = plt.subplots(2, sharey=True)
+    plt.ylim(0, 1)
+    plt.subplots_adjust(hspace=1.0, top=0.85, bottom=0.15, right=0.75)
+    fig.suptitle('Model training and validation with SOFT/HARD data', fontsize=16)
+
+    axs[0].plot(train_dict['SOFT'], ':', label='CNN_1D SOFT')
+    axs[0].plot(train_dict['HARD'], '--', label='CNN_1D HARD')
+    axs[0].set_title('Training accuracy')
+    
+    axs[1].plot(val_dict['SOFT'], ':', label='CNN_1D SOFT')
+    axs[1].plot(val_dict['HARD'], '--', label='CNN_1D HARD')
+    axs[1].set_title('Validation accuracy')
+    
+    for ax in axs.flat:
+        ax.set(xlabel='Epochs', ylabel='Accuracy')
+    
+    plt.legend(bbox_to_anchor=(1.05, 1.5), title='Models used\n', loc='center left')
+    plt.style.use('seaborn-dark-palette') 
+    plt.show()
 
 
 # ----- MODELS ------
@@ -801,8 +945,12 @@ if __name__ == "__main__":
 
     # ----- PLOTTING ------
 
-    #plot_4xinverse_cross_val(X, y, session_lengths, NR_SESSIONS, epochs=30)
-    #plot_4_x_average_val(X_soft, y_soft, session_lengths, NR_SESSIONS, epochs=30)
-    #plot_comp_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
+    #plot_comp_spread_single(X, y, session_lengths, NR_SESSIONS, epochs=30)
+    #plot_comp_accuracy_single(X_soft, y_soft, session_lengths_soft, NR_SESSIONS, epochs=30)
+    #plot_comp_SoftHard_single(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
+
+    plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
+
+
 
 
