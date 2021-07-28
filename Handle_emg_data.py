@@ -38,7 +38,7 @@ class CSV_handler:
         self.nr_subjects = nr_subjects
         self.nr_sessions = nr_sessions
         # Dict with keys equal subject numbers and values equal to its respective datacontainer 
-        self.data_container_dict = {i: None for i in range(nr_subjects)}  
+        self.data_container_dict = {i+1: None for i in range(nr_subjects)}  
         # String describing which type of data is stored in the object 
         self.data_type = None   
 

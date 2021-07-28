@@ -239,6 +239,94 @@ def mfcc_all_emg_plots(csv_handler:CSV_handler):
 
     plot_all_emg_mfcc(feat_list, label_list)
 
+# Prints (and logs) max, min, mean, EMS and median of EMG data
+# Input: CSV_handler
+# Output: None --> Print
+def log_emg_characteristics(csv_handler:CSV_handler):
+
+    min_values = []
+    max_values = []
+    mean_list = []
+    RMS_list = [] 
+    median_list = []
+
+    if csv_handler.data_type == 'soft':
+
+        for subject_container in csv_handler.data_container_dict.values():
+            min_values_sub = []
+            max_values_sub = []
+            mean_list_sub = []
+            RMS_list_sub = []  
+            median_list_sub = []
+            for session_dict in subject_container.dict_list:
+                for emg_list in session_dict.values():
+                    for emg_df in emg_list:
+
+                        df = emg_df.iloc[:,1]
+                        min_values_sub.append(df.min())
+                        max_values_sub.append(df.max())
+                        mean_list_sub.append(df.abs().mean())
+                        RMS_list_sub.append(np.sqrt(np.mean(np.square(df.to_numpy()))))
+                        median_list_sub.append(df.abs().median())
+
+                        min_values.append(df.min())
+                        max_values.append(df.max())
+                        mean_list.append(df.abs().mean())
+                        RMS_list.append(np.sqrt(np.mean(np.square(df.to_numpy()))))
+                        median_list.append(df.abs().median())
+            
+            subject_nr = subject_container.subject_nr
+            #print('\n')
+            print('Natural typing behavior, subject {}, minimum EMG value:'.format(subject_nr), min(min_values_sub))
+            print('Natural typing behavior, subject {}, maximum EMG value:'.format(subject_nr), max(max_values_sub))
+            print('Natural typing behavior, subject {}, mean EMG value:'.format(subject_nr), np.mean(mean_list_sub))
+            print('Natural typing behavior, subject {}, RMS EMG value:'.format(subject_nr), np.sqrt(np.mean(np.square(RMS_list_sub))))
+            print('Natural typing behavior, subject {}, median EMG value:'.format(subject_nr), np.median(median_list_sub))
+            print('\n')
+    
+    elif csv_handler.data_type == 'hard':
+
+        for subject_container in csv_handler.data_container_dict.values():
+            min_values_sub = []
+            max_values_sub = []
+            mean_list_sub = []
+            RMS_list_sub = []  
+            median_list_sub = []
+            for session_dict in subject_container.dict_list:
+                for emg_list in session_dict.values():
+                    for emg_df in emg_list:
+
+                        df = emg_df.iloc[:,1]
+                        min_values_sub.append(df.min())
+                        max_values_sub.append(df.max())
+                        mean_list_sub.append(df.abs().mean())
+                        RMS_list_sub.append(np.sqrt(np.mean(np.square(df.to_numpy()))))
+                        median_list_sub.append(df.abs().median())
+
+                        min_values.append(df.min())
+                        max_values.append(df.max())
+                        mean_list.append(df.abs().mean())
+                        RMS_list.append(np.sqrt(np.mean(np.square(df.to_numpy()))))
+                        median_list.append(df.abs().median())
+            
+            subject_nr = subject_container.subject_nr
+            #print('\n')
+            print('Strong typing behavior, subject {}, minimum EMG value:'.format(subject_nr), min(min_values_sub))
+            print('Strong typing behavior, subject {}, maximum EMG value:'.format(subject_nr), max(max_values_sub))
+            print('Strong typing behavior, subject {}, mean EMG value:'.format(subject_nr), np.mean(mean_list_sub))
+            print('Strong typing behavior, subject {}, RMS EMG value:'.format(subject_nr), np.sqrt(np.mean(np.square(RMS_list_sub))))
+            print('Strong typing behavior, subject {}, median EMG value:'.format(subject_nr), np.median(median_list_sub))
+            print('\n')
+
+    else:
+        raise Exception('Not available data type')
+    
+    print(min_values)
+    print(max_values)
+    print(mean_list)
+    print(RMS_list)
+    print(median_list)
+    
 
 # MAIN: ------------------------------------------------------------------------: 
 
@@ -252,13 +340,16 @@ if __name__ == "__main__":
     JSON_FILE_SOFT = 'mfcc_data_soft.json'
     JSON_FILE_HARD = 'mfcc_data_hard.json'
 
-
     csv_handler = CSV_handler(NR_SUBJECTS, NR_SESSIONS)
     dict = csv_handler.load_data('soft', soft_dir_name)
     
-    nn_handler = NN_handler(csv_handler)
-    nn_handler.store_mfcc_samples()
-    nn_handler.save_json_mfcc(JSON_FILE_SOFT)
+
+    
+    
+
+    #nn_handler = NN_handler(csv_handler)
+    #nn_handler.store_mfcc_samples()
+    #nn_handler.save_json_mfcc(JSON_FILE_SOFT)
 
 
 

@@ -56,12 +56,12 @@ def prepare_datasets_percentsplit(X, y, shuffle_vars, validation_size=0.2, test_
 
     return X_train, X_validation, X_test, y_train, y_validation, y_test
 
-# Takes in data, labels, and session_lengths and splits it into train and test sets by session_index
-# Input: Data, labels, session_lengths, test_session_index
-# Ouput: X_train, X_test, y_train, y_test
+# Takes in data and labels, and splits it into train and test sets by session
+# Input: Data, labels, session_lengths and test_session_index
+# Ouput: X_train, X_validation, X_test, y_train, y_validation, y_test
 def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_subjects=5):
 
-    session_lengths = session_lengths.tolist()
+    session_lengths = list(session_lengths)
 
     subject_starting_index = 0
     start_test_index = subject_starting_index + sum(session_lengths[0][:test_session_index-1])
@@ -135,6 +135,49 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
             y_train =   np.concatenate((y_train, y[end_test_index:end_subject_index]))
         #print(X_train.shape, '\n -------')
         subject_starting_index = max(end_subject_index, end_test_index)
+
+    return X_train, X_test, y_train, y_test
+
+# NOT FUNCTIONAL
+def prepare_datasets_new(test_session_indexes:list, X, y, session_lengths, nr_subjects=5, nr_sessions=4):
+
+    X_list = []
+    y_list = []
+   
+    for session_i in range(nr_sessions):
+        X_session_list = []
+        y_session_list = []
+        for subject_i in range(nr_subjects):
+        
+            session_data_X = X[0:session_lengths[subject_i][session_i]]
+            session_data_y = y[0:session_lengths[subject_i][session_i]]
+            if session_i > 0:
+                start_index = X_list[session_i-1].shape[0]
+                session_data_X = X[start_index : start_index + session_lengths[subject_i][session_i]]
+                session_data_y = y[start_index : start_index + session_lengths[subject_i][session_i]]
+            X_session_list.append(session_data_X)
+            y_session_list.append(session_data_y)
+        X_list.append(np.concatenate(X_session_list))
+        y_list.append(np.concatenate(y_session_list))
+
+    X_test = []
+    y_test = []
+    X_train = []
+    y_train = []
+
+
+    for i in range(nr_sessions):
+        if i in test_session_indexes:
+            X_test.append(X_list[i])
+            y_test.append(y_list[i])
+        else:
+            X_train.append(X_list[i])
+            y_train.append(y_list[i])
+    
+    X_test = np.concatenate(X_test)
+    y_test = np.concatenate(y_test)
+    X_train = np.concatenate(X_train)
+    y_train = np.concatenate(y_train)
 
     return X_train, X_test, y_train, y_test
 
@@ -340,13 +383,29 @@ def get_session_info(session_lengths_soft, session_lengths_hard):
 # Reduces the size of the train and test set with values [0.0, 1.0]
 # Input: Data sets, how much to reduce train set, how much to reduce test set with 
 # Output: Reduced data sets
-def reduce_data_set_sizes(X_train, X_test, y_train, y_test, train_reduction=0.5, test_reduction=0):
-    train_keep = X_train.shape[0] * (1 - train_reduction)
-    test_keep = X_test.shape[0] * (1 - test_reduction)
-    X_train = X_train[:train_keep]
-    y_train = y_train[:train_keep]
-    X_test = X_test[:test_keep]
-    y_test = y_test[:test_keep]
+def reduce_data_set_sizes(X_train, X_test, y_train, y_test, train_reduction=0.5, test_reduction=0, nr_subjects=5):
+    
+    X_train = np.array_split(X_train, nr_subjects)
+    y_train = np.array_split(y_train, nr_subjects)
+    X_test = np.array_split(X_test, nr_subjects)
+    y_test = np.array_split(y_test, nr_subjects)
+    
+    train_keep = int(X_train[0].shape[0] * (1 - train_reduction))
+    test_keep = int(X_test[0].shape[0] * (1 - test_reduction))
+
+    for i in range(nr_subjects):
+        #print(len(X_train[i]))
+        X_train[i] = X_train[i][:train_keep]
+        y_train[i] = y_train[i][:train_keep]
+        X_test[i] = X_test[i][:test_keep]
+        y_test[i] = y_test[i][:test_keep]
+        #print(len(X_train[i]))
+    
+    X_train = np.concatenate(X_train, axis=0)
+    y_train = np.concatenate(y_train, axis=0)
+    X_test = np.concatenate(X_test, axis=0)
+    y_test = np.concatenate(y_test, axis=0)
+
     return X_train, X_test, y_train, y_test
 
 # ----- PLOTS ------
@@ -663,20 +722,20 @@ def plot_comp_SoftHard_single(X_soft, y_soft, X_hard, y_hard, session_lengths_so
     fig, axs = plt.subplots(2, sharey=True)
     plt.ylim(0, 1)
     plt.subplots_adjust(hspace=1.0, top=0.85, bottom=0.15, right=0.75)
-    fig.suptitle('Model training and validation with SOFT/HARD data', fontsize=16)
+    fig.suptitle('Model training (1x session) and validation (3x session) with Natural/Strong typing behavior', fontsize=16)
 
-    axs[0].plot(train_dict['SOFT'], ':', label='CNN_1D SOFT')
-    axs[0].plot(train_dict['HARD'], '--', label='CNN_1D HARD')
+    axs[0].plot(train_dict['SOFT'], ':', label='CNN_1D Natural')
+    axs[0].plot(train_dict['HARD'], '--', label='CNN_1D Strong')
     axs[0].set_title('Training accuracy')
     
-    axs[1].plot(val_dict['SOFT'], ':', label='CNN_1D SOFT')
-    axs[1].plot(val_dict['HARD'], '--', label='CNN_1D HARD')
+    axs[1].plot(val_dict['SOFT'], ':', label='CNN_1D Natural')
+    axs[1].plot(val_dict['HARD'], '--', label='CNN_1D Strong')
     axs[1].set_title('Validation accuracy')
     
     for ax in axs.flat:
         ax.set(xlabel='Epochs', ylabel='Accuracy')
     
-    plt.legend(bbox_to_anchor=(1.05, 1.5), title='Models used\n', loc='center left')
+    plt.legend(bbox_to_anchor=(1.05, 1.5), title='Typing behavior evaluated\n', loc='center left')
     plt.style.use('seaborn-dark-palette') 
     plt.show()
 
@@ -751,23 +810,132 @@ def plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, s
     fig, axs = plt.subplots(2, sharey=True)
     plt.ylim(0, 1)
     plt.subplots_adjust(hspace=1.0, top=0.85, bottom=0.15, right=0.75)
-    fig.suptitle('Model training and validation with SOFT/HARD data', fontsize=16)
+    fig.suptitle('Model training (3x session) and validation (1x session) with Natural/Strong typing behavior', fontsize=16)
 
-    axs[0].plot(train_dict['SOFT'], ':', label='CNN_1D SOFT')
-    axs[0].plot(train_dict['HARD'], '--', label='CNN_1D HARD')
+    axs[0].plot(train_dict['SOFT'], ':', label='CNN_1D Natural')
+    axs[0].plot(train_dict['HARD'], '--', label='CNN_1D Strong')
     axs[0].set_title('Training accuracy')
     
-    axs[1].plot(val_dict['SOFT'], ':', label='CNN_1D SOFT')
-    axs[1].plot(val_dict['HARD'], '--', label='CNN_1D HARD')
+    axs[1].plot(val_dict['SOFT'], ':', label='CNN_1D Natural')
+    axs[1].plot(val_dict['HARD'], '--', label='CNN_1D Strong')
     axs[1].set_title('Validation accuracy')
     
     for ax in axs.flat:
         ax.set(xlabel='Epochs', ylabel='Accuracy')
     
-    plt.legend(bbox_to_anchor=(1.05, 1.5), title='Models used\n', loc='center left')
+    plt.legend(bbox_to_anchor=(1.05, 1.5), title='Typing behavior evaluated\n', loc='center left')
     plt.style.use('seaborn-dark-palette') 
     plt.show()
 
+
+# Plots training and validation history for CNN_1D network with SOFT and HARD data (VAL, two data sets)
+# Input: SOFT and HARD raw data, respective session_lengths, *details
+# Output: None -> plot
+def plot_comp_val_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, nr_sessions, batch_size=64, epochs=30):
+    #'''
+    #train_dict = {'SOFT':[], 'HARD':[], 'SOFT_1':[], 'HARD_1':[]}
+    val_dict = {'SOFT':[], 'HARD':[], 'SOFT_1':[], 'HARD_1':[]}
+    
+    for i in range(nr_sessions):
+        # Prepare data
+        X_train_soft, X_val_soft, y_train_soft, y_val_soft = prepare_datasets_sessions(X_soft, y_soft, session_lengths_soft, i)
+        X_train_hard, X_val_hard, y_train_hard, y_val_hard = prepare_datasets_sessions(X_hard, y_hard, session_lengths_hard, i)
+        X_train_soft = np.reshape(X_train_soft, (X_train_soft.shape[0], 208, 1))
+        X_val_soft = np.reshape(X_val_soft, (X_val_soft.shape[0], 208, 1))
+        X_train_hard = np.reshape(X_train_hard, (X_train_hard.shape[0], 208, 1))
+        X_val_hard = np.reshape(X_val_hard, (X_val_hard.shape[0], 208, 1))
+        
+        # CNN_1D SOFT
+        model_CNN_1D = CNN_1D(input_shape=(208, 1))
+        CNN_1D_h = train(model_CNN_1D, X_train_soft, y_train_soft, 1, batch_size=batch_size, epochs=epochs, 
+                                                            X_validation=X_val_soft, y_validation=y_val_soft)
+        #train_dict['SOFT'].append(list(CNN_1D_h.history['accuracy']))
+        val_dict['SOFT'].append(list(CNN_1D_h.history['val_accuracy']))
+        del model_CNN_1D
+        K.clear_session()
+
+        # CNN_1D HARD
+        model_CNN_1D = CNN_1D(input_shape=(208, 1))
+        CNN_1D_h = train(model_CNN_1D, X_train_hard, y_train_hard, 1, batch_size=batch_size, epochs=epochs, 
+                                                            X_validation=X_val_hard, y_validation=y_val_hard)
+        #train_dict['HARD'].append(list(CNN_1D_h.history['accuracy']))
+        val_dict['HARD'].append(list(CNN_1D_h.history['val_accuracy']))
+        del model_CNN_1D
+        K.clear_session()
+
+        # ------ Single:
+        
+        # CNN_1D SOFT
+        model_CNN_1D = CNN_1D(input_shape=(208, 1))
+        CNN_1D_h = train(model_CNN_1D, X_val_soft, y_val_soft, 1, batch_size=batch_size, epochs=epochs, 
+                                                            X_validation=X_train_soft, y_validation=y_train_soft)
+        #train_dict['SOFT_1'].append(list(CNN_1D_h.history['accuracy']))
+        val_dict['SOFT_1'].append(list(CNN_1D_h.history['val_accuracy']))
+        del model_CNN_1D
+        K.clear_session()
+
+        # CNN_1D HARD
+        model_CNN_1D = CNN_1D(input_shape=(208, 1))
+        CNN_1D_h = train(model_CNN_1D, X_val_hard, y_val_hard, 1, batch_size=batch_size, epochs=epochs, 
+                                                            X_validation=X_train_hard, y_validation=y_train_hard)
+        #train_dict['HARD_1'].append(list(CNN_1D_h.history['accuracy']))
+        val_dict['HARD_1'].append(list(CNN_1D_h.history['val_accuracy']))
+        del model_CNN_1D
+        K.clear_session()
+
+
+    # Averaging out session training for each network
+    #for key in train_dict:
+    #    train_dict[key] = list(np.average([x, y, z, c]) for x, y, z, c in list(zip(*train_dict[key])))
+    for key in val_dict:
+        val_dict[key] = list(np.average([x, y, z, c]) for x, y, z, c in list(zip(*val_dict[key])))
+
+
+    '''
+    train_dict = {'SOFT': [0.1, 0.7, 0.5, 0.69],
+                'HARD': [0.55, 0.9, 0.3, 0.92]}
+    val_dict = {'SOFT': [0.34, 0.85, 0.41, 0.74],  
+                'HARD': [0.63, 0.99, 0.49, 0.88]}
+    '''
+    '''
+    # Log data stream to CSV
+    csv_path = str(Path.cwd()) + '/logs/Soft_hard_comparison_3/soft_hard_comparison_acc_data.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['soft_train_acc', 'hard_train_acc', 'soft_val_acc', 'hard_val_acc'])
+        data = zip(*train_dict.values(), *val_dict.values())
+        writer.writerows(data)
+        csv_file.close()
+    
+    # Log best results to CSV
+    csv_path = str(Path.cwd()) + '/logs/Soft_hard_comparison_3/soft_hard_comparison_best.csv'
+    with open(csv_path, 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(['soft_train_best', 'hard_train_best', 'soft_val_best', 'hard_val_best'])
+        writer.writerow( [np.max(train_dict.get('SOFT')), np.max(train_dict.get('HARD')), np.max(val_dict.get('SOFT')), np.max(val_dict.get('HARD'))] )
+        csv_file.close()
+    '''
+
+    # Plot:
+    fig, axs = plt.subplots(2, sharey=True)
+    plt.ylim(0, 1)
+    plt.subplots_adjust(hspace=1.0, top=0.85, bottom=0.15, right=0.75)
+    fig.suptitle('Model training and validation with Natural/Strong typing behavior', fontsize=16)
+
+    axs[0].plot(val_dict['SOFT'], ':', label='CNN_1D Natural')
+    axs[0].plot(val_dict['HARD'], '--', label='CNN_1D Strong')
+    axs[0].set_title('Validation accuracy (3 session training)')
+    
+    axs[1].plot(val_dict['SOFT_1'], ':', label='CNN_1D Natural')
+    axs[1].plot(val_dict['HARD_1'], '--', label='CNN_1D Strong')
+    axs[1].set_title('Validation accuracy (1 session training)')
+    
+    for ax in axs.flat:
+        ax.set(xlabel='Epochs', ylabel='Accuracy')
+    
+    plt.legend(bbox_to_anchor=(1.05, 1.5), title='Typing behavior evaluated\n', loc='center left')
+    plt.style.use('seaborn-dark-palette') 
+    plt.show()
 
 # ----- MODELS ------
 
@@ -845,7 +1013,7 @@ if __name__ == "__main__":
     NR_SUBJECTS = 5
     NR_SESSIONS = 4
     BATCH_SIZE = 64
-    EPOCHS = 10
+    EPOCHS = 30
 
     TEST_SESSION_NR = 4
     VERBOSE = 1
@@ -858,28 +1026,32 @@ if __name__ == "__main__":
         # y_train.shape = (2806-y_test, nr_subjects)
         # y_test.shape = (y_test(from session nr. ?), nr_subjects)
 
-    X_train, X_test, y_train, y_test = prepare_datasets_sessions(X_soft, y_soft, session_lengths_soft, TEST_SESSION_NR)
-    
+    #X_val, X_train, y_val, y_train = prepare_datasets_sessions(X_soft, y_soft, session_lengths_soft, TEST_SESSION_NR)
+    #X_train, X_val, y_train, y_val = reduce_data_set_sizes(X_train, X_val, y_train, y_val, train_reduction=0.5, test_reduction=0)
+    #print(X_soft.shape, y_soft.shape)
+    #X_train, X_val, y_train, y_val = prepare_datasets_new([0, 1], X_soft, y_soft, session_lengths_soft)
+    #print(X_train.shape, X_val.shape, y_train.shape, y_val.shape)
+
 
     # ----- Make model ------
     #model_GRU = GRU(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
     #model_LSTM = LSTM(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
-    model_CNN_1D = CNN_1D(input_shape=(208, 1)) # (timestep, 13*16 MFCC coefficients)
+    #model_CNN_1D = CNN_1D(input_shape=(208, 1)) # (timestep, 13*16 MFCC coefficients)
     
-    model_CNN_1D.summary()
     #model_GRU.summary()
     #model_LSTM.summary()
-    
+    #model_CNN_1D.summary()
 
     # ----- Train network ------
     #history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
     #history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
-    history_CNN_1D = train( model_CNN_1D, np.reshape(X_train, (X_train.shape[0], 208, 1)), 
-                            y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
+    #history_CNN_1D = train( model_CNN_1D, np.reshape(X_train, (X_train.shape[0], 208, 1)), 
+    #                        y_train, X_validation=np.reshape(X_val, (X_val.shape[0], 208, 1)), y_validation=y_val, verbose=VERBOSE, 
+    #                        batch_size=BATCH_SIZE, epochs=EPOCHS)
     
 
     # ----- Plot train accuracy/error -----
-    plot_train_history(history_CNN_1D)
+    #plot_train_history(history_CNN_1D, val_data=True)
 
 
     # ----- Evaluate model on test set ------
@@ -957,7 +1129,7 @@ if __name__ == "__main__":
 
     #plot_comp_spread_single(X, y, session_lengths, NR_SESSIONS, epochs=30)
     #plot_comp_accuracy_single(X_soft, y_soft, session_lengths_soft, NR_SESSIONS, epochs=30)
-    #plot_comp_SoftHard_single(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
+    plot_comp_val_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
 
     #plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
 
