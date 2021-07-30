@@ -1,6 +1,7 @@
 import json
 
 from keras import callbacks
+from pandas.core.frame import DataFrame
 from psf_lib.python_speech_features.python_speech_features.base import mfcc
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -139,7 +140,7 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
     return X_train, X_test, y_train, y_test
 
 # NOT FUNCTIONAL
-def prepare_datasets_new(test_session_indexes:list, X, y, session_lengths, nr_subjects=5, nr_sessions=4):
+def prepare_datasets_new(test_session_indexes, X, y, session_lengths, nr_subjects=5, nr_sessions=4):
 
     X_list = []
     y_list = []
@@ -937,6 +938,43 @@ def plot_comp_val_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft,
     plt.style.use('seaborn-dark-palette') 
     plt.show()
 
+# Plots training and validation history for CNN_1D network with SOFT and HARD data from CSV file
+# Input: None -> CSV from path
+# Output: None -> plot & CSV log
+def plot_N_S_val_comp():
+
+    df_3 = pd.read_csv('/Users/Markus/Prosjekter git/Slovakia 2021/logs/Soft_hard_comparison_3/soft_hard_comparison_acc_data.csv')[['soft_val_acc', 'hard_val_acc']]
+    df_1 = pd.read_csv('/Users/Markus/Prosjekter git/Slovakia 2021/logs/Soft_hard_comparison_single/soft_hard_comparison_acc_data.csv')[['soft_val_acc', 'hard_val_acc']]
+
+    df_3 = df_3.rename(columns={'soft_val_acc': 'natural_val_3', 'hard_val_acc': 'strong_val_3'})
+    df_1 = df_1.rename(columns={'soft_val_acc': 'natural_val_1', 'hard_val_acc': 'strong_val_1'})
+    comp_df = pd.concat([df_3, df_1], axis=1)
+    comp_df.to_csv('logs/Natural_Strong_comp_comb/N_S_val_comp.csv')
+
+    # Plot new N/S val comp:
+    fig, axs = plt.subplots(nrows=1, ncols=2, sharey=True, sharex=True, figsize=(13, 4))
+    plt.ylim(0, 1)
+    plt.subplots_adjust(hspace=1.0, top=0.85, bottom=0.15, right=0.75)
+    fig.text(0.435, 0.03, 'Epochs', ha='center')
+    fig.text(0.07, 0.5, 'Accuracy', va='center', rotation='vertical')
+
+    axs[0].plot(df_3['soft_val_acc'], ':', label='CNN_1D Natural')
+    axs[0].plot(df_3['hard_val_acc'], '--', label='CNN_1D Strong')
+    axs[0].set_title('Validation accuracy (3 session training)')
+    
+    axs[1].plot(df_1['soft_val_acc'], ':', label='CNN_1D Natural')
+    axs[1].plot(df_1['hard_val_acc'], '--', label='CNN_1D Strong')
+    axs[1].set_title('Validation accuracy (1 session training)')
+    
+    #for ax in axs:
+    #    ax.set_xlabel('Epochs')
+    #    ax.set_ylabel('Accuracy')
+    
+    plt.legend(bbox_to_anchor=(1.75, 0.5), title='Typing behavior evaluated\n', loc='center right')
+    plt.ylim(0.50, 1.00)
+    plt.show()
+
+
 # ----- MODELS ------
 
 # Creates a keras.model with focus on LSTM layers
@@ -1006,8 +1044,8 @@ if __name__ == "__main__":
         # X.shape = (2806, 1, 208)
         # y.shape = (2806, nr_subjects)
         # session_lengths.shape = (nr_subjects, nr_sessions)
-    X_soft, y_soft, session_lengths_soft = load_data_from_json(SOFT_DATA_PATH_MFCC, nr_classes=5)
-    X_hard, y_hard, session_lengths_hard = load_data_from_json(HARD_DATA_PATH_MFCC, nr_classes=5)
+    #X_soft, y_soft, session_lengths_soft = load_data_from_json(SOFT_DATA_PATH_MFCC, nr_classes=5)
+    #X_hard, y_hard, session_lengths_hard = load_data_from_json(HARD_DATA_PATH_MFCC, nr_classes=5)
 
     # Parameters:
     NR_SUBJECTS = 5
@@ -1129,10 +1167,7 @@ if __name__ == "__main__":
 
     #plot_comp_spread_single(X, y, session_lengths, NR_SESSIONS, epochs=30)
     #plot_comp_accuracy_single(X_soft, y_soft, session_lengths_soft, NR_SESSIONS, epochs=30)
-    plot_comp_val_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
-
+    #plot_comp_val_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
     #plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
 
-
-
-
+    
