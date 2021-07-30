@@ -1169,5 +1169,5 @@ if __name__ == "__main__":
     #plot_comp_accuracy_single(X_soft, y_soft, session_lengths_soft, NR_SESSIONS, epochs=30)
     #plot_comp_val_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
     #plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
-
+    #plot_N_S_val_comp()
     
