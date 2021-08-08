@@ -2,7 +2,6 @@ import numpy as np
 from pandas.core.frame import DataFrame
 from scipy.fft import fft, fftfreq
 import pywt
-import sys
 from Handle_emg_data import *
 
 

@@ -11,8 +11,9 @@ Scripts to handle CSV files composed by 2 * 8 EMG sensors(left & right) devided 
 * Community libs: Python_speech_features, Pywt
 
 #### Challanges in the module
-* The CSV handlig requires a specific file structure. Se "How to use it"
+* The CSV handlig requires a specific data file structure. Se "How to use it"
 * Preprocessing is still limited in Signal_prep.py
+* NB: `get_samplerate()` is configured for a sampling bug. See comment above function in Handle_emg_data.py
 
 #### Credits for insporational code
 * Kapre: Keunwoochoi
@@ -33,11 +34,11 @@ Scripts to handle CSV files composed by 2 * 8 EMG sensors(left & right) devided 
 
 1. Clone the repo
 2. Place the data files in the working directory 
-3. Place the data files within the `data`-folder 
+3. Place the data files within the `data`-folder as data is shown originally
 (format: `/data/<datatype>/<subject-folder+ID>/<session-folder>/<left/right-CSV-files>`)
 4. Assuming NN analysis:
     1. Create a `CSV_handler` object 
-    2. Load data with `load_data(CSV_handler, <datatype>)`
+    2. Load data with `load_data(CSV_handler, <datatype>, <filename_type>)`
     3. Create `NN_handler` object with `CSV_handler` as input
     4. Load MFCC data into the `NN_handler` with `store_mfcc_samples()`
     5. Run `save_json_mfcc()` to save samples in json
