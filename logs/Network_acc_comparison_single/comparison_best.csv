@@ -1,0 +1,2 @@
+GRU_train_acc,LSTM_train_acc,FFN_train_acc,CNN_1D_train_acc,GRU_val_acc,LSTM_val_acc,FFN_val_acc,CNN_1D_val_acc
+0.99928975,1.0,0.8974405,0.97940964,0.86951125,0.8853457,0.61597997,0.9174364

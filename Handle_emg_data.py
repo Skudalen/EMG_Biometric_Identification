@@ -780,6 +780,7 @@ def make_df_from_xandy(x, y, emg_nr):
     return df
 
 # Help: returns the samplerate of a df
+# REMOVE 60-SECOND-BUG IF FIXED
 def get_samplerate(df:DataFrame):
     min, max = get_min_max_timestamp(df)
     if max > 60 and min < 60:
