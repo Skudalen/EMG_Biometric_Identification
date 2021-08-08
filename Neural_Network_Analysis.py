@@ -139,7 +139,8 @@ def prepare_datasets_sessions(X, y, session_lengths, test_session_index=4, nr_su
 
     return X_train, X_test, y_train, y_test
 
-# NOT FUNCTIONAL
+# NOT FUNCTIONAL, HAVE NOT LOCATED ERROR
+# Should be like func above, but with extended flexibility
 def prepare_datasets_new(test_session_indexes, X, y, session_lengths, nr_subjects=5, nr_sessions=4):
 
     X_list = []
@@ -1044,10 +1045,12 @@ if __name__ == "__main__":
         # X.shape = (2806, 1, 208)
         # y.shape = (2806, nr_subjects)
         # session_lengths.shape = (nr_subjects, nr_sessions)
+    '''
     #X_soft, y_soft, session_lengths_soft = load_data_from_json(SOFT_DATA_PATH_MFCC, nr_classes=5)
     #X_hard, y_hard, session_lengths_hard = load_data_from_json(HARD_DATA_PATH_MFCC, nr_classes=5)
+    '''
 
-    # Parameters:
+    # PARAMS:
     NR_SUBJECTS = 5
     NR_SESSIONS = 4
     BATCH_SIZE = 64
@@ -1063,53 +1066,62 @@ if __name__ == "__main__":
         # X_test.shape = (X_test(from session nr. ?), 1, 208)
         # y_train.shape = (2806-y_test, nr_subjects)
         # y_test.shape = (y_test(from session nr. ?), nr_subjects)
-
-    #X_val, X_train, y_val, y_train = prepare_datasets_sessions(X_soft, y_soft, session_lengths_soft, TEST_SESSION_NR)
-    #X_train, X_val, y_train, y_val = reduce_data_set_sizes(X_train, X_val, y_train, y_val, train_reduction=0.5, test_reduction=0)
-    #print(X_soft.shape, y_soft.shape)
-    #X_train, X_val, y_train, y_val = prepare_datasets_new([0, 1], X_soft, y_soft, session_lengths_soft)
-    #print(X_train.shape, X_val.shape, y_train.shape, y_val.shape)
+    '''
+    X_val, X_train, y_val, y_train = prepare_datasets_sessions(X_soft, y_soft, session_lengths_soft, TEST_SESSION_NR)
+    X_train, X_val, y_train, y_val = reduce_data_set_sizes(X_train, X_val, y_train, y_val, train_reduction=0.5, test_reduction=0)
+    print(X_soft.shape, y_soft.shape)
+    X_train, X_val, y_train, y_val = prepare_datasets_new([0, 1], X_soft, y_soft, session_lengths_soft)
+    print(X_train.shape, X_val.shape, y_train.shape, y_val.shape)
+    '''
 
 
     # ----- Make model ------
-    #model_GRU = GRU(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
-    #model_LSTM = LSTM(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
-    #model_CNN_1D = CNN_1D(input_shape=(208, 1)) # (timestep, 13*16 MFCC coefficients)
+    '''
+    model_GRU = GRU(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
+    model_LSTM = LSTM(input_shape=(1, 208)) # (timestep, 13*16 MFCC coefficients)
+    model_CNN_1D = CNN_1D(input_shape=(208, 1)) # (timestep, 13*16 MFCC coefficients)
     
-    #model_GRU.summary()
-    #model_LSTM.summary()
-    #model_CNN_1D.summary()
+    model_GRU.summary()
+    model_LSTM.summary()
+    model_CNN_1D.summary()
+    '''
 
     # ----- Train network ------
-    #history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
-    #history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
-    #history_CNN_1D = train( model_CNN_1D, np.reshape(X_train, (X_train.shape[0], 208, 1)), 
-    #                        y_train, X_validation=np.reshape(X_val, (X_val.shape[0], 208, 1)), y_validation=y_val, verbose=VERBOSE, 
-    #                        batch_size=BATCH_SIZE, epochs=EPOCHS)
-    
+    '''
+    history_GRU = train(model_GRU, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
+    history_LSTM = train(model_LSTM, X_train, y_train, verbose=VERBOSE, batch_size=BATCH_SIZE, epochs=EPOCHS)
+    history_CNN_1D = train( model_CNN_1D, np.reshape(X_train, (X_train.shape[0], 208, 1)), 
+                            y_train, X_validation=np.reshape(X_val, (X_val.shape[0], 208, 1)), y_validation=y_val, verbose=VERBOSE, 
+                            batch_size=BATCH_SIZE, epochs=EPOCHS)
+    '''
 
     # ----- Plot train accuracy/error -----
-    #plot_train_history(history_CNN_1D, val_data=True)
+    '''
+    plot_train_history(history_CNN_1D, val_data=True)
+    '''
 
 
     # ----- Evaluate model on test set ------
-
-    #test_loss, test_acc = model_GRU.evaluate(X_test, y_test, verbose=VERBOSE)
-    #print('\nTest accuracy GRU:', test_acc, '\n')
-    #test_loss, test_acc = model_LSTM.evaluate(X_test, y_test, verbose=VERBOSE)
-    #print('\nTest accuracy LSTM:', test_acc, '\n')
-    #test_loss, test_acc = model_CNN_1D.evaluate(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, verbose=0)
-    #print('\nTest accuracy CNN_1D:', test_acc, '\n')
-    
+    '''
+    test_loss, test_acc = model_GRU.evaluate(X_test, y_test, verbose=VERBOSE)
+    print('\nTest accuracy GRU:', test_acc, '\n')
+    test_loss, test_acc = model_LSTM.evaluate(X_test, y_test, verbose=VERBOSE)
+    print('\nTest accuracy LSTM:', test_acc, '\n')
+    test_loss, test_acc = model_CNN_1D.evaluate(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, verbose=0)
+    print('\nTest accuracy CNN_1D:', test_acc, '\n')
+    '''
 
     # ----- Store test predictions in CSV ------
-    #prediction_csv_logger(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, MODEL_NAME, model_CNN_1D, TEST_SESSION_NR)
-    
+    '''
+    prediction_csv_logger(np.reshape(X_test, (X_test.shape[0], 208, 1)), y_test, MODEL_NAME, model_CNN_1D, TEST_SESSION_NR)
+    '''
 
+
+    
+    # ----- Cross validation ------
+        # Trained on three sessions, tested on one
 
     '''
-    # ----- Cross validation ------
-    # Trained on three sessions, tested on one
     average_GRU = session_cross_validation('GRU', X, y, session_lengths, nr_sessions=NR_SESSIONS, 
                                                                         log_to_csv=LOG,
                                                                         batch_size=BATCH_SIZE, 
@@ -1135,9 +1147,11 @@ if __name__ == "__main__":
     print('\n')
     '''
 
-    '''
+    
     # ----- Inverse cross-validation ------
-    # Trained on one session, tested on three
+        # Trained on one session, tested on three
+
+    '''
     average_GRU = inverse_session_cross_validation('GRU', X, y, session_lengths, nr_sessions=NR_SESSIONS,
                                                                         log_to_csv=LOG, 
                                                                         batch_size=BATCH_SIZE, 
@@ -1164,10 +1178,11 @@ if __name__ == "__main__":
     '''
 
     # ----- PLOTTING ------
-
-    #plot_comp_spread_single(X, y, session_lengths, NR_SESSIONS, epochs=30)
-    #plot_comp_accuracy_single(X_soft, y_soft, session_lengths_soft, NR_SESSIONS, epochs=30)
-    #plot_comp_val_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
-    #plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
-    #plot_N_S_val_comp()
+    '''
+    plot_comp_spread_single(X, y, session_lengths, NR_SESSIONS, epochs=30)
+    plot_comp_accuracy_single(X_soft, y_soft, session_lengths_soft, NR_SESSIONS, epochs=30)
+    plot_comp_val_SoftHard(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
+    plot_comp_SoftHard_3(X_soft, y_soft, X_hard, y_hard, session_lengths_soft, session_lengths_hard, NR_SESSIONS, epochs=30)
+    plot_N_S_val_comp()
+    '''
     
