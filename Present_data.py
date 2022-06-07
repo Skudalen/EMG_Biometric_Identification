@@ -1,11 +1,10 @@
 from logging import error
-
 from matplotlib.cbook import get_sample_data
 from Handle_emg_data import *
-from Signal_prep import *
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.ticker as ticker
+#from Signal_prep import *
 
 # Global variables for MFCC
 MFCC_STEPSIZE = 0.5     # Seconds
@@ -121,6 +120,15 @@ def pretty(dict):
         print('\t\t EX sample nr 1:') 
         print('\t\t\t Type:', type(value[0][0]), type(value[0][1]))
         print('\t\t\t Sample:', value[0][0], value[0][1])
+
+def pretty_EMG_sample(dict, subject_ID, session, arm, emg):
+    container = dict.get(subject_ID)
+    print('Subject', container.subject_nr, '. Test data:')
+    print('\t\t Name:', container.subject_name)
+    print('\t\t EX EMG:')
+    dict_list = container.dict_list 
+    print('\t\t\t Type:', type(dict_list[session].get(arm)[emg]))
+    print('\t\t\t Sample:', dict_list[session].get(arm)[emg])
 
 
 # DATA FUNCTIONS: --------------------------------------------------------------: 
@@ -332,17 +340,17 @@ def log_emg_characteristics(csv_handler:CSV_handler):
 
 if __name__ == "__main__":
 
-    NR_SUBJECTS = 5
+    NR_SUBJECTS = 56
     NR_SESSIONS = 4
 
-    dir_name = 'Data_2022'
+    dir_name = '/data_2022'
     JSON_FILE_2022 = 'mfcc_data_2022.json'
 
     csv_handler = CSV_handler(NR_SUBJECTS, NR_SESSIONS)
-    dict = csv_handler.load_data('soft', dir_name)
+    dict = csv_handler.load_data('2022-data', dir_name)
     
+    pretty_EMG_sample(dict, subject_ID=10, session=0, arm='right', emg=7)
 
-    
     
 
     #nn_handler = NN_handler(csv_handler)

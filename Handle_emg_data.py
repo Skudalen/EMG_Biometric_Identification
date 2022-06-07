@@ -89,6 +89,7 @@ class CSV_handler:
         df = container.dict_list[session - 1].get(which_arm)[emg_nr - 1]
         return df
 
+    
 
     # Loads data the to the CSV_handler(general load func). Choose data_type: hard, hardPP, soft og softPP as str. 
     # Input: String(datatype you want), direction name of that type
@@ -97,10 +98,11 @@ class CSV_handler:
 
         data_path = self.working_dir + dir_name
         subject_id = 100
-        subject_name = 'bruh'
+        subject_name = 'OlaNordmann'
         nr_sessions = 101
         container = None
         session_count = 0
+        subject_modifier = 0
 
         for i, (path, subject_dir, session_dir) in enumerate(os.walk(data_path)):
             
@@ -108,10 +110,11 @@ class CSV_handler:
                 
                 if subject_dir:
                     session_count = 0
-                    subject_id = int(path[-1])
-                    subject_name = subject_dir[0].split('_')[0]
+                    subject_id = i - subject_modifier # Subject equal to enumeration of folders (not first root folder)
+                    subject_name = path.split('/')[-1]
                     nr_sessions = len(subject_dir)
                     container = Data_container(subject_id, subject_name, nr_sessions)
+                    subject_modifier += nr_sessions
                     continue
                 else:
                     session_count += 1
@@ -230,6 +233,43 @@ class CSV_handler:
         self.data_type = 'softPP'
         return self.data_container_dict
 
+    # OBSOLETE. Loads data the to the CSV_handler(general load func). Choose data_type: hard, hardPP, soft og softPP as str. 
+    # Input: String(datatype you want), direction name of that type
+    # Output: None -> load and stores data
+    def load_data_2021(self, type:str, type_dir_name:str):
+
+        data_path = self.working_dir + '/data/' + type_dir_name
+        subject_id = 100
+        subject_name = 'bruh'
+        nr_sessions = 101
+        container = None
+        session_count = 0
+
+        for i, (path, subject_dir, session_dir) in enumerate(os.walk(data_path)):
+            
+            if path is not data_path:
+                
+                if subject_dir:
+                    session_count = 0
+                    subject_id = int(path[-1])
+                    subject_name = subject_dir[0].split('_')[0]
+                    nr_sessions = len(subject_dir)
+                    container = Data_container(subject_id, subject_name, nr_sessions)
+                    continue
+                else:
+                    session_count += 1
+
+                for f in session_dir:
+                    spes_path = os.path.join(path, f)
+                    if f == 'myoLeftEmg.csv':
+                        for emg_nr in range(8):
+                            self.store_df_in_container(spes_path, emg_nr, 'left', container, session_count)
+                    elif f == 'myoRightEmg.csv':
+                        for emg_nr in range(8):
+                            self.store_df_in_container(spes_path, emg_nr, 'right', container, session_count)
+                self.link_container_to_handler(container)
+        self.data_type = type
+        return self.data_container_dict
 
 class NN_handler:
 
