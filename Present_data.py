@@ -335,13 +335,11 @@ if __name__ == "__main__":
     NR_SUBJECTS = 5
     NR_SESSIONS = 4
 
-    soft_dir_name = 'Exp20201205_2myo_softType'
-    hard_dir_name = 'Exp20201205_2myo_hardType'
-    JSON_FILE_SOFT = 'mfcc_data_soft.json'
-    JSON_FILE_HARD = 'mfcc_data_hard.json'
+    dir_name = 'Data_2022'
+    JSON_FILE_2022 = 'mfcc_data_2022.json'
 
     csv_handler = CSV_handler(NR_SUBJECTS, NR_SESSIONS)
-    dict = csv_handler.load_data('soft', soft_dir_name)
+    dict = csv_handler.load_data('soft', dir_name)
     
 
     

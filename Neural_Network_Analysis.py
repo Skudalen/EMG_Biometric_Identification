@@ -186,8 +186,8 @@ def prepare_datasets_new(test_session_indexes, X, y, session_lengths, nr_subject
 # Trains the model 
 # Input: Keras.model, batch_size, nr epochs, training, and validation data
 # Ouput: History
-def train( model, X_train, y_train, verbose, batch_size=64, epochs=30, 
-            X_validation=None, y_validation=None):
+def train(model, X_train, y_train, verbose, batch_size=64, epochs=30,
+          X_validation=None, y_validation=None):
 
     optimiser = keras.optimizers.Adam(learning_rate=0.0001)
     model.compile(optimizer=optimiser,
