@@ -356,9 +356,9 @@ if __name__ == "__main__":
     
     #'''
     mfcc_dict = nn_handler.get_mfcc_samples_dict()
-    print(dict.get(4).subject_name)
-    print(type(mfcc_dict.get(4)))
-    print(mfcc_dict.get(4))
+    print(dict.get(31).subject_name)
+    print(type(mfcc_dict.get(31)))
+    print(mfcc_dict.get(31))
     #'''
     
     #nn_handler.save_json_mfcc(JSON_FILE_2022)
