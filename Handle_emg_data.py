@@ -89,12 +89,10 @@ class CSV_handler:
         df = container.dict_list[session - 1].get(which_arm)[emg_nr - 1]
         return df
 
-    
-
     # Loads data the to the CSV_handler(general load func). Choose data_type: hard, hardPP, soft og softPP as str. 
     # Input: String(datatype you want), direction name of that type
     # Output: None -> load and stores data
-    def load_data(self, type:str, dir_name:str):
+    def load_data(self, type:str, dir_name:str, test_stop=False):
 
         data_path = self.working_dir + dir_name
         subject_id = 100
@@ -105,7 +103,8 @@ class CSV_handler:
         subject_modifier = 0
 
         for i, (path, subject_dir, session_dir) in enumerate(os.walk(data_path)):
-            
+            if test_stop:
+                    if subject_id == 5: break
             if path is not data_path:
                 
                 if subject_dir:
@@ -279,8 +278,10 @@ class NN_handler:
     # Class to manipulate data from the CSV_handler and store it for further analysis
     def __init__(self, csv_handler:CSV_handler) -> None:
         self.csv_handler = csv_handler
+        self.nr_subjects = csv_handler.nr_subjects
+        self.nr_sessions = csv_handler.nr_sessions
         # Should med 4 sessions * (~150, 208) of mfcc samples per person. One [DataFrame, session_length_list] per subject
-        self.mfcc_samples_per_subject = {k+1:[] for k in range(csv_handler.nr_subjects)}
+        self.mfcc_samples_per_subject = {k+1:[] for k in range(self.nr_subjects)}
 
     # GET method for mfcc_samples_dict  
     def get_mfcc_samples_dict(self) -> dict:
@@ -364,10 +365,10 @@ class NN_handler:
     # Input: None(NN_handler)
     # Output: None -> stores in NN_handler [samples, session_length_list] for each subject
     def store_mfcc_samples(self) -> None:
-        for subject_nr in range(5):
+        for subject_nr in range(self.nr_subjects):
             subj_samples = []
             session_length_list = []
-            for session_nr in range(4):
+            for session_nr in range(self.nr_sessions):
                 list_of_emg = self.get_emg_list(subject_nr+1, session_nr+1)
                 tot_session_df = self.make_subj_sample(list_of_emg)
             
@@ -420,6 +421,8 @@ class NN_handler:
             with open(json_path, "w") as fp:
                 json.dump(data, fp, indent=4)
 
+
+# -------------------------------------------------------------------------------
 
 
     # OBSOLETE

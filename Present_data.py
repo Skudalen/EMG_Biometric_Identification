@@ -118,8 +118,8 @@ def pretty(dict):
         print('Subject', key, 'samples:')
         print('\t\t Number av samples:', len(value)) 
         print('\t\t EX sample nr 1:') 
-        print('\t\t\t Type:', type(value[0][0]), type(value[0][1]))
-        print('\t\t\t Sample:', value[0][0], value[0][1])
+        print('\t\t\t Type:', type(value[0]), type(value[1]))
+        print('\t\t\t Sample:', value[0], value[1])
 
 def pretty_EMG_sample(dict, subject_ID, session, arm, emg):
     container = dict.get(subject_ID)
@@ -349,13 +349,19 @@ if __name__ == "__main__":
     csv_handler = CSV_handler(NR_SUBJECTS, NR_SESSIONS)
     dict = csv_handler.load_data('2022-data', dir_name)
     
-    pretty_EMG_sample(dict, subject_ID=10, session=0, arm='right', emg=7)
+    #pretty_EMG_sample(dict, subject_ID=10, session=0, arm='right', emg=7)
 
+    nn_handler = NN_handler(csv_handler)
+    nn_handler.store_mfcc_samples()
     
-
-    #nn_handler = NN_handler(csv_handler)
-    #nn_handler.store_mfcc_samples()
-    #nn_handler.save_json_mfcc(JSON_FILE_SOFT)
+    #'''
+    mfcc_dict = nn_handler.get_mfcc_samples_dict()
+    print(dict.get(4).subject_name)
+    print(type(mfcc_dict.get(4)))
+    print(mfcc_dict.get(4))
+    #'''
+    
+    #nn_handler.save_json_mfcc(JSON_FILE_2022)
 
 
 
